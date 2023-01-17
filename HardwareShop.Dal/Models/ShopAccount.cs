@@ -27,7 +27,6 @@ namespace HardwareShop.Dal.Models
 
         public ShopAccountRole Role { get; set; } = ShopAccountRole.Staff;
 
-        public int AccountId { get; set; }
         private Account? account;
         public Account? Account
         {
