@@ -15,8 +15,8 @@ namespace HardwareShop.Business.Implementations
 {
     public class AccountService : IAccountService
     {
-        private readonly IRepository<Account, int> accountRepository;
-        public AccountService(IRepository<Account, int> accountRepository)
+        private readonly IRepository<Account> accountRepository;
+        public AccountService(IRepository<Account> accountRepository)
         {
             this.accountRepository = accountRepository;
         }
@@ -28,7 +28,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<List<AccountDto>> GetAccountDtosAsync()
         {
-            PageData<Account, int> accountPageData = await accountRepository.GetPageDataByQueryAsync(new PagingModel { PageIndex = 0, PageSize = 5 }, e => true, new List<QueryOrder<Account, int>>() { new QueryOrder<Account, int>(e => e.Username, true), new QueryOrder<Account, int>(e => e.HashedPassword, false) });
+            PageData<Account> accountPageData = await accountRepository.GetPageDataByQueryAsync(new PagingModel { PageIndex = 0, PageSize = 5 }, e => true, new List<QueryOrder<Account>>() { new QueryOrder<Account>(e => e.Username, true), new QueryOrder<Account>(e => e.HashedPassword, false) });
             return accountPageData.Items.Select(e => new AccountDto() { Id = e.Id }).ToList();
         }
     }

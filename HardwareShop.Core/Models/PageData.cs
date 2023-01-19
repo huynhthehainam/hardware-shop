@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Models
 {
-    public class PageData<T, T1> where T : EntityBase<T1> where T1 : struct
+    public class PageData<T> where T : EntityBase
     {
-        public List<T>? Items { get; set; }
+        public List<T> Items { get; set; } = new List<T>(); 
         public int TotalRecords { get; set; } = 0;
 
     }

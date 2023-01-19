@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Implementations
 {
-    public class RepositoryBase<T, T1> : IRepository<T, T1> where T : EntityBase<T1> where T1 : struct
+    public class RepositoryBase<T> : IRepository<T> where T : EntityBase 
     {
         private readonly DbContext db;
         public RepositoryBase(DbContext db)
@@ -44,7 +44,7 @@ namespace HardwareShop.Core.Implementations
             return await dbSet.Where(expression).ToListAsync();
         }
 
-        public async Task<PageData<T, T1>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, List<QueryOrder<T, T1>>? orders)
+        public async Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, List<QueryOrder<T>>? orders)
         {
             var pageIndex = pagingModel.PageIndex;
             var pageSize = pagingModel.PageSize;
@@ -83,12 +83,12 @@ namespace HardwareShop.Core.Implementations
                         }
                     }
                     var finalData = orderedData!.ToList();
-                    return new PageData<T, T1> { Items = finalData, TotalRecords = count };
+                    return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
                     var finalData = data.ToList();
-                    return new PageData<T, T1> { Items = finalData, TotalRecords = count };
+                    return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
             }
             else
@@ -123,12 +123,12 @@ namespace HardwareShop.Core.Implementations
                         }
                     }
                     var finalData = orderedData!.ToList();
-                    return new PageData<T, T1> { Items = finalData, TotalRecords = count };
+                    return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
                     var finalData = data.ToList();
-                    return new PageData<T, T1> { Items = finalData, TotalRecords = count };
+                    return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
             }
         }

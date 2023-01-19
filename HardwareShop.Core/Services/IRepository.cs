@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace HardwareShop.Core.Services
 {
 
-    public class QueryOrder<T, T1> where T : EntityBase<T1> where T1 : struct
+    public class QueryOrder<T> where T : EntityBase
     {
         public Func<T, Object?> Order { get; set; }
         public bool IsAscending { get; set; }
@@ -20,9 +20,9 @@ namespace HardwareShop.Core.Services
             IsAscending = isAscending;
         }
     }
-    public interface IRepository<T, T1> where T : EntityBase<T1> where T1 : struct
+    public interface IRepository<T> where T : EntityBase
     {
-        Task<PageData<T, T1>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, Boolean>> expression, List<QueryOrder<T, T1>>? orders);
+        Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, Boolean>> expression, List<QueryOrder<T>>? orders);
         Task<List<T>> GetDataByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<T> CreateAsync(T entity);
         Task<T> UpdateAsync(T entity);

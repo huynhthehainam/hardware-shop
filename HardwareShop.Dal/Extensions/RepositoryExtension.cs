@@ -16,7 +16,7 @@ namespace HardwareShop.Dal.Extensions
         public static void ConfigureRepository(this IServiceCollection services)
         {
             services.AddScoped<DbContext, MainDatabaseContext>();
-            services.AddScoped<IRepository<Account, int>, RepositoryBase<Account, int>>();
+            services.AddScoped<IRepository<Account>, RepositoryBase<Account>>();
         }
     }
 }

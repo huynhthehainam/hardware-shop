@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    public class Customer : EntityBase<int>
+    public sealed class Customer : EntityBase
     {
         public Customer()
         {
@@ -17,6 +17,7 @@ namespace HardwareShop.Dal.Models
         public Customer(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
+        public int Id { get; set; }
         public string? Name { get; set; }
         public string? Phone { get; set; }
         public string? Address { get; set; }
@@ -26,6 +27,19 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
             set => shop = value;
+        }
+
+        private CustomerDept? dept;
+        public CustomerDept? Dept
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref dept) : dept;
+            set => dept = value;
+        }
+        private ICollection<Invoice>? invoices;
+        public ICollection<Invoice>? Invoices
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
+            set => invoices = value;
         }
     }
 }

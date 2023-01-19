@@ -15,18 +15,18 @@ namespace HardwareShop.Dal.Models
         Admin,
         Staff,
     }
-    public class ShopAccount : EntityBase<int>
+    public sealed class AccountShop : EntityBase
     {
-        public ShopAccount()
+        public AccountShop()
         {
         }
 
-        public ShopAccount(ILazyLoader lazyLoader) : base(lazyLoader)
+        public AccountShop(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
 
         public ShopAccountRole Role { get; set; } = ShopAccountRole.Staff;
-
+        public int AccountId { get; set; }
         private Account? account;
         public Account? Account
         {

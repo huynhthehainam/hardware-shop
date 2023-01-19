@@ -15,9 +15,9 @@ namespace HardwareShop.Dal.Models
         Admin,
         Staff,
     }
-    public class Account : EntityBase<int>
+    public sealed class Account : EntityBase
     {
-
+        public int Id { get; set; }
         public String? Username { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
@@ -27,11 +27,14 @@ namespace HardwareShop.Dal.Models
         {
 
         }
-        public Account(ILazyLoader lazyLoader) : base(lazyLoader) { }
+        public Account(ILazyLoader lazyLoader) : base(lazyLoader)
+        {
+            
+        }
 
 
-        private ShopAccount? shopAccount;
-        public ShopAccount? ShopAccount
+        private AccountShop? shopAccount;
+        public AccountShop? ShopAccount
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shopAccount) : shopAccount;
             set => shopAccount = value;

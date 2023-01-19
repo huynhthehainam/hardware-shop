@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Bases
 {
-    public class EntityBase<T> where T : struct
+    public abstract class EntityBase
     {
-        public T Id { get; set; } = default(T);
         protected ILazyLoader? lazyLoader;
         public EntityBase(ILazyLoader lazyLoader)
         {

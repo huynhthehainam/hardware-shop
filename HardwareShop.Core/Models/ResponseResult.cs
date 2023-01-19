@@ -69,9 +69,8 @@ namespace HardwareShop.Core.Models
         {
             SetMessage(ResponseMessages.DeletedMessage);
         }
-        public void SetCreatedObject<T>(EntityBase<T> entity) where T : struct
+        public void SetCreatedObject<T>(EntityBase entity) where T : struct
         {
-            Data = new { Id = entity.Id };
             StatusCode = 201;
         }
         public string fileName = "data.txt";
