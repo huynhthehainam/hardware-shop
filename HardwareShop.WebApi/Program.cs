@@ -103,7 +103,7 @@ public class Program
         #endregion
 
         builder.Services.AddSingleton<IResponseResultFactory, ResponseResultFactory>();
-        builder.Services.AddSingleton<IHashsingPasswordService, HashingPasswordService>();
+        builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
         builder.Services.ConfigureRepository();
         builder.Services.AddScoped<IAccountService, AccountService>();
 

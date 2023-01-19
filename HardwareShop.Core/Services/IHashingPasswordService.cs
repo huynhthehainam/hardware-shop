@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Services
 {
-    public interface IHashsingPasswordService
+    public interface IHashingPasswordService
     {
         String Hash(String text, Int32 iterations);
         string Hash(String text);

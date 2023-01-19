@@ -21,7 +21,7 @@ namespace HardwareShop.Core.Implementations
             PrivateKey = privateKey;
         }
     }
-    public class HashingPasswordService : IHashsingPasswordService
+    public class HashingPasswordService : IHashingPasswordService
     {
         private readonly HashingConfiguration hashingConfiguration;
         public HashingPasswordService(IOptions<HashingConfiguration> options)

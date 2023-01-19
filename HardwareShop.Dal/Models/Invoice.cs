@@ -35,5 +35,10 @@ namespace HardwareShop.Dal.Models
             set => shop = value;
         }
 
+        public double ChangeOfDebt { get; set; }
+
+        public double CurrentDebt { get; set; }
+
+        public double Deposit { get; set; }
     }
 }

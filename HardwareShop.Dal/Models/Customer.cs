@@ -29,11 +29,11 @@ namespace HardwareShop.Dal.Models
             set => shop = value;
         }
 
-        private CustomerDept? dept;
-        public CustomerDept? Dept
+        private CustomerDebt? debt;
+        public CustomerDebt? Debt
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref dept) : dept;
-            set => dept = value;
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref debt) : debt;
+            set => debt = value;
         }
         private ICollection<Invoice>? invoices;
         public ICollection<Invoice>? Invoices

@@ -12,7 +12,7 @@ namespace HardwareShop.Core.Services
 
     public class QueryOrder<T> where T : EntityBase
     {
-        public Func<T, Object?> Order { get; set; }
+        public Func<T, object?> Order { get; set; }
         public bool IsAscending { get; set; }
         public QueryOrder(Func<T, object?> order, bool isAscending)
         {

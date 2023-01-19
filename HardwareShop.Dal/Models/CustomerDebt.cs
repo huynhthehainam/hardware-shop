@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    public sealed class CustomerDept : EntityBase
+    public sealed class CustomerDebt : EntityBase
     {
-        public CustomerDept()
+        public CustomerDebt()
         {
         }
 
-        public CustomerDept(ILazyLoader lazyLoader) : base(lazyLoader)
+        public CustomerDebt(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
         public int CustomerId { get; set; }
@@ -24,10 +24,10 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref customer) : customer;
             set => customer = value;
         }
-        public double AmountOfDept { get; set; }
+        public double AmountOfDebt { get; set; }
 
-        private ICollection<CustomerDeptHistory>? histories;
-        public ICollection<CustomerDeptHistory>? Histories
+        private ICollection<CustomerDebtHistory>? histories;
+        public ICollection<CustomerDebtHistory>? Histories
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref histories) : histories;
             set => histories = value;

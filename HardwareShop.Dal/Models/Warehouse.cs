@@ -30,5 +30,8 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
             set => shop = value;
         }
+
+
+
     }
 }

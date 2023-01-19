@@ -16,8 +16,10 @@ namespace HardwareShop.Dal
         public DbSet<UnitCategory> UnitCategories => Set<UnitCategory>();
         public DbSet<Unit> Units => Set<Unit>();
         public DbSet<Product> Products => Set<Product>();
-        public DbSet<CustomerDept> customerDepts => Set<CustomerDept>();
-        public DbSet<CustomerDeptHistory> customerDeptHistories => Set<CustomerDeptHistory>();
+        public DbSet<CustomerDebt> CustomerDebts => Set<CustomerDebt>();
+        public DbSet<CustomerDebtHistory> CustomerDebtHistories => Set<CustomerDebtHistory>();
+        public DbSet<Invoice> Invoices => Set<Invoice>();
+        public DbSet<InvoiceDetail> InvoiceDetails => Set<InvoiceDetail>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -66,15 +68,15 @@ namespace HardwareShop.Dal
                 e.HasOne(e => e.Shop).WithMany(e => e.Products).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
 
-            modelBuilder.Entity<CustomerDept>(e =>
+            modelBuilder.Entity<CustomerDebt>(e =>
             {
                 e.HasKey(e => e.CustomerId);
-                e.HasOne(e => e.Customer).WithOne(e => e.Dept).HasForeignKey<CustomerDept>(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(e => e.Customer).WithOne(e => e.Debt).HasForeignKey<CustomerDebt>(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
             });
-            modelBuilder.Entity<CustomerDeptHistory>(h =>
+            modelBuilder.Entity<CustomerDebtHistory>(h =>
             {
                 h.HasKey(e => e.Id);
-                h.HasOne(e => e.CustomerDept).WithMany(e => e.Histories).HasForeignKey(e => e.CustomerDeptId).OnDelete(DeleteBehavior.Cascade);
+                h.HasOne(e => e.CustomerDebt).WithMany(e => e.Histories).HasForeignKey(e => e.CustomerDebtId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

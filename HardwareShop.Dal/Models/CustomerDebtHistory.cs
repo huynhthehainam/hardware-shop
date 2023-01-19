@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    public sealed class CustomerDeptHistory : EntityBase
+    public sealed class CustomerDebtHistory : EntityBase
     {
-        public CustomerDeptHistory()
+        public CustomerDebtHistory()
         {
         }
 
-        public CustomerDeptHistory(ILazyLoader lazyLoader) : base(lazyLoader)
+        public CustomerDebtHistory(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
 
@@ -22,12 +22,12 @@ namespace HardwareShop.Dal.Models
         public double AmountOfChange { get; set; }
         public string? Reason { get; set; }
 
-        public int CustomerDeptId { get; set; }
-        private CustomerDept? customerDept;
-        public CustomerDept? CustomerDept
+        public int CustomerDebtId { get; set; }
+        private CustomerDebt? customerDebt;
+        public CustomerDebt? CustomerDebt
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref customerDept) : customerDept;
-            set => customerDept = value;
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref customerDebt) : customerDebt;
+            set => customerDebt = value;
         }
     }
 }
