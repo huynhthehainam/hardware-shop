@@ -26,24 +26,58 @@ namespace HardwareShop.Core.Implementations
             return entity;
         }
 
-        public async Task DeleteAsync(T entity)
+        public async Task<bool> DeleteAsync(T entity)
         {
             dbSet.Remove(entity);
             await db.SaveChangesAsync();
+            return true;
+
         }
-        public async Task DeleteSoftly<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable
+        public async Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable
         {
+
+            //var properties = entity.GetType().GetProperties();
+            //foreach (var property in properties)
+            //{
+            //    if (property.Name == "Warehouses")
+            //    {
+            //        var type = property.GetType();
+            //        if (type != null)
+            //        {
+            //            if ((type.FullName ?? "").StartsWith("System.Collections.Generic.ICollection"))
+            //            {
+            //                var value = property.GetValue(entity);
+            //                if (value != null)
+            //                {
+            //                    ICollection<object>? collections = value as ICollection<object>;
+            //                    if (collections != null)
+            //                    {
+            //                        foreach (var item in collections)
+            //                        {
+            //                            if (typeof(ISoftDeletable).IsAssignableFrom(type.GetType()))
+            //                            {
+            //                                var deletableItem = (ISoftDeletable)item;
+            //                                deletableItem.IsDeleted = true;
+            //                            }
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
             entity.IsDeleted = true;
             db.Entry(entity).State = EntityState.Modified;
             await db.SaveChangesAsync();
-
+            return true;
         }
 
-        public async Task DeleteByQueryAsync(Expression<Func<T, bool>> expression)
+        public async Task<bool> DeleteByQueryAsync(Expression<Func<T, bool>> expression)
         {
             var entities = dbSet.Where(expression);
             db.RemoveRange(entities);
             await db.SaveChangesAsync();
+            return true;
         }
 
         public async Task<List<T>> GetDataByQueryAsync(Expression<Func<T, bool>> expression)
@@ -156,6 +190,48 @@ namespace HardwareShop.Core.Implementations
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
         {
             return await dbSet.AnyAsync(expression);
+        }
+
+        public async Task<T?> CreateIfNotExists(T entity, Expression<Func<T, object>> selector)
+        {
+            var returnType = selector.ReturnType;
+            var properties = selector.Body.Type.GetProperties();
+            var entityProperties = typeof(T).GetProperties();
+
+            ParameterExpression parameterExpression = selector.Parameters[0];
+            Expression expression = (Expression)parameterExpression;
+
+            Expression? body = null;
+            foreach (var property in properties)
+            {
+                var existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
+                if (existedProperty != null)
+                {
+                    ConstantExpression valueExpression = Expression.Constant(existedProperty.GetValue(entity));
+                    if (body == null)
+                    {
+
+                        body = Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression);
+                    }
+                    else
+                    {
+                        body = Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
+                    }
+                }
+            }
+            if (body == null)
+            {
+                return await CreateAsync(entity);
+            }
+
+            Expression<Func<T, bool>> existQuery = Expression.Lambda<Func<T, bool>>(body, parameterExpression);
+            var exist = dbSet.Where(existQuery).Any();
+            if (!exist)
+            {
+                return await CreateAsync(entity);
+            }
+
+            return null;
         }
     }
 }

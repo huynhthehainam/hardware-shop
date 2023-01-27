@@ -11,8 +11,8 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-  
-    public sealed class Account : EntityBase
+
+    public sealed class Account : EntityBase, ISoftDeletable
     {
         public int Id { get; set; }
         public String? Username { get; set; }
@@ -36,15 +36,16 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shopAccount) : shopAccount;
             set => shopAccount = value;
         }
+        public bool IsDeleted { get; set; }
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Account>(s =>
             {
                 s.HasKey(a => a.Id);
-                s.HasIndex(e=>e.Username).IsUnique();
+                s.HasIndex(e => e.Username).IsUnique();
             });
-            
+
         }
 
     }

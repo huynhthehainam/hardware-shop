@@ -26,10 +26,11 @@ namespace HardwareShop.Core.Services
         Task<List<T>> GetDataByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression);
         Task<T> CreateAsync(T entity);
-        Task DeleteSoftly<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable;
+        Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable;
         Task<T> UpdateAsync(T entity);
-        Task DeleteAsync(T entity);
-        Task DeleteByQueryAsync(Expression<Func<T, Boolean>> expression);
+        Task<bool> DeleteAsync(T entity);
+        Task<bool> DeleteByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
+        Task<T?> CreateIfNotExists(T entity, Expression<Func<T, object>> selector);
     }
 }

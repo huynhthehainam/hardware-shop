@@ -22,6 +22,9 @@ namespace HardwareShop.Core.Services
         void SetFile(byte[] bytes, string contentType, string fileName);
         void SetCreatedObject<T>(T entity) where T : EntityBase;
         void AddInvalidFieldError(string fieldName);
+        void AddExistedEntityError(string entityName);
+        void AddNotFoundEntityError(string entityName);
+        void AddNotPermittedError();
     }
 
 }

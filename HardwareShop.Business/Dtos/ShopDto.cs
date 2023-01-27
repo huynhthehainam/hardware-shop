@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HardwareShop.Core.Bases
+namespace HardwareShop.Business.Dtos
 {
-    public interface ISoftDeletable
+    public class ShopDto
     {
-        bool IsDeleted { get; set; }
+        public int Id { get; set; }
     }
 }

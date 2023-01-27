@@ -9,5 +9,6 @@ namespace HardwareShop.Core.Services
     public interface ICurrentAccountService
     {
         bool IsSystemAdmin();
+        int GetAccountId();
     }
 }

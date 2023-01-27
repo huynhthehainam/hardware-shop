@@ -42,5 +42,10 @@ namespace HardwareShop.Core.Implementations
             CacheAccount account = GetCacheAccountAsync().Result;
             return account.Role == AccountRole.Admin;
         }
+        public int GetAccountId()
+        {
+            CacheAccount account = GetCacheAccountAsync().Result;
+            return account.Id;
+        }
     }
 }

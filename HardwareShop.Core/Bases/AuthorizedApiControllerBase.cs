@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 namespace HardwareShop.Core.Bases
 {
 
-    public abstract class AuthorizedApiController : ApiControllerBase
+    public abstract class AuthorizedApiControllerBase : ApiControllerBase
     {
         protected readonly ICurrentAccountService currentAccountService;
-        public AuthorizedApiController(IResponseResultBuilder responseResultBuilder, ICurrentAccountService currentAccountService) : base(responseResultBuilder)
+        public AuthorizedApiControllerBase(IResponseResultBuilder responseResultBuilder, ICurrentAccountService currentAccountService) : base(responseResultBuilder)
         {
             this.currentAccountService = currentAccountService;
         }

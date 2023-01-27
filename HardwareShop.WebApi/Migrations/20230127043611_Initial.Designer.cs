@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230121171545_Initial")]
+    [Migration("20230127043611_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -37,6 +37,9 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Property<string>("HashedPassword")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Phone")
                         .HasColumnType("text");
@@ -269,6 +272,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -294,6 +300,15 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -307,8 +322,12 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<int>("ShopId")
                         .HasColumnType("integer");
 
-                    b.Property<byte[]>("Logo")
+                    b.Property<byte[]>("Bytes")
                         .HasColumnType("bytea");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("ShopId");
 

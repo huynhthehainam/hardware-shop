@@ -147,7 +147,26 @@ namespace HardwareShop.Core.Implementations
 
             AddError(fieldName, invalidMessage);
             statusCode = 400;
-
+        }
+        public void AddExistedEntityError(string entityName)
+        {
+            var invalidMessage = new Dictionary<ResponseResultLanguage, string>()
+            {
+                [ResponseResultLanguage.Vietnamese] = $"{entityName} đã tồn tại",
+                [ResponseResultLanguage.English] = $"{entityName} entity is already exists"
+            };
+            AddError(entityName, invalidMessage);
+            statusCode = 400;
+        }
+        public void AddNotFoundEntityError(string entityName)
+        {
+            var invalidMessage = new Dictionary<ResponseResultLanguage, string>()
+            {
+                [ResponseResultLanguage.Vietnamese] = $"{entityName} không tìm thấy",
+                [ResponseResultLanguage.English] = $"{entityName} is not found"
+            };
+            AddError(entityName, invalidMessage);
+            statusCode = 404;
         }
 
         public void SetData(object data)
@@ -155,6 +174,11 @@ namespace HardwareShop.Core.Implementations
             this.data = data;
             statusCode = 200;
             type = ResponseResultType.Json;
+        }
+
+        public void AddNotPermittedError()
+        {
+            statusCode = 403;
         }
     }
 }

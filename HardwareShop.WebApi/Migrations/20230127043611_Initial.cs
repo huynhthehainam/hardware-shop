@@ -20,7 +20,8 @@ namespace HardwareShop.WebApi.Migrations
                     Email = table.Column<string>(type: "text", nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: true),
                     HashedPassword = table.Column<string>(type: "text", nullable: true),
-                    Role = table.Column<int>(type: "integer", nullable: false)
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,7 +35,10 @@ namespace HardwareShop.WebApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    Address = table.Column<string>(type: "text", nullable: true)
+                    Address = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -109,7 +113,8 @@ namespace HardwareShop.WebApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
-                    ShopId = table.Column<int>(type: "integer", nullable: false)
+                    ShopId = table.Column<int>(type: "integer", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,7 +132,8 @@ namespace HardwareShop.WebApi.Migrations
                 columns: table => new
                 {
                     ShopId = table.Column<int>(type: "integer", nullable: false),
-                    Logo = table.Column<byte[]>(type: "bytea", nullable: true)
+                    Bytes = table.Column<byte[]>(type: "bytea", nullable: true),
+                    Filename = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {

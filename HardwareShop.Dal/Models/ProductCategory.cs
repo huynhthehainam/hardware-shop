@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    public sealed class ProductCategory : EntityBase
+    public sealed class ProductCategory : EntityBase, ISoftDeletable
     {
         public ProductCategory()
         {
@@ -28,6 +28,8 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
             set => shop = value;
         }
+        public bool IsDeleted { get; set; }
+
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProductCategory>(e =>
@@ -36,8 +38,5 @@ namespace HardwareShop.Dal.Models
                 e.HasOne(e => e.Shop).WithMany(e => e.ProductCategories).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
         }
-
-
-
     }
 }
