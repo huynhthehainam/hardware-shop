@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -44,5 +45,14 @@ namespace HardwareShop.Dal.Models
         public double OriginalPrice { get; set; }
         public double Profit { get; set; }
         public double TotalCost { get; set; }
+        public static void BuildModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<InvoiceDetail>(m =>
+            {
+                m.HasKey(e => e.Id);
+                m.HasOne(e => e.Invoice).WithMany(e => e.Details).HasForeignKey(e => e.InvoiceId).OnDelete(DeleteBehavior.Cascade);
+                m.HasOne(e => e.Product).WithMany(e => e.InvoiceDetails).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
+            });
+        }
     }
 }

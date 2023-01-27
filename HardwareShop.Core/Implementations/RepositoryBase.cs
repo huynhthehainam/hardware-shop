@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Implementations
 {
-    public class RepositoryBase<T> : IRepository<T> where T : EntityBase 
+    public class RepositoryBase<T> : IRepository<T> where T : EntityBase
     {
         private readonly DbContext db;
         public RepositoryBase(DbContext db)
@@ -30,6 +30,13 @@ namespace HardwareShop.Core.Implementations
         {
             dbSet.Remove(entity);
             await db.SaveChangesAsync();
+        }
+        public async Task DeleteSoftly<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable
+        {
+            entity.IsDeleted = true;
+            db.Entry(entity).State = EntityState.Modified;
+            await db.SaveChangesAsync();
+
         }
 
         public async Task DeleteByQueryAsync(Expression<Func<T, bool>> expression)
@@ -55,7 +62,7 @@ namespace HardwareShop.Core.Implementations
                 data = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value);
                 if (orders is not null && orders.Count > 0)
                 {
-                    IOrderedEnumerable<T> orderedData = null;
+                    IOrderedEnumerable<T>? orderedData = null;
                     for (var i = 0; i < orders.Count; i++)
                     {
                         var order = orders[i];
@@ -95,7 +102,7 @@ namespace HardwareShop.Core.Implementations
             {
                 if (orders is not null && orders.Count > 0)
                 {
-                    IOrderedEnumerable<T> orderedData = null;
+                    IOrderedEnumerable<T>? orderedData = null;
                     for (var i = 0; i < orders.Count; i++)
                     {
                         var order = orders[i];
@@ -139,6 +146,16 @@ namespace HardwareShop.Core.Implementations
             db.Entry(entity).State = EntityState.Modified;
             await db.SaveChangesAsync();
             return entity;
+        }
+
+        public async Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression)
+        {
+            return await dbSet.FirstOrDefaultAsync(expression);
+        }
+
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
+        {
+            return await dbSet.AnyAsync(expression);
         }
     }
 }

@@ -17,6 +17,7 @@ namespace HardwareShop.Dal.Extensions
         {
             services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IRepository<Account>, RepositoryBase<Account>>();
+            services.AddScoped<IRepository<Shop>, RepositoryBase<Shop>>();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -31,6 +32,14 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref histories) : histories;
             set => histories = value;
+        }
+        public static void BuildModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CustomerDebt>(e =>
+            {
+                e.HasKey(e => e.CustomerId);
+                e.HasOne(e => e.Customer).WithOne(e => e.Debt).HasForeignKey<CustomerDebt>(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            });
         }
     }
 }

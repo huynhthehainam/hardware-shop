@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Models
 {
-    public class CacheAccountViewModel
+    public class LoginResponse
     {
-        public int Id { get; set; }
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
 }

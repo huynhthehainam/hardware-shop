@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Services
 {
-    public interface IResponseResultFactory
+    public interface IJwtService
     {
-        ResponseResult Create();
+        Task<CacheAccount?> GetAccountFromTokenAsync(string token);
+        LoginResponse? GenerateTokens(CacheAccount cacheAccount);
     }
 }

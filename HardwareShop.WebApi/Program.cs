@@ -1,9 +1,11 @@
+using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
 using HardwareShop.Dal.Extensions;
+using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +19,23 @@ using System.Text;
 namespace HardwareSop.WebApi;
 public class Program
 {
-    private static void Main(string[] args)
+    private static void seedData(IServiceProvider services)
+    {
+        using (var scope = services.CreateScope())
+        {
+            IHashingPasswordService hashingPasswordService = scope.ServiceProvider.GetRequiredService<IHashingPasswordService>();
+            using (var db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>())
+            {
+                if (!db.Accounts.Any())
+                {
+                    var account = new Account { Email = "huynhthehainam@gmail.com", HashedPassword = hashingPasswordService.Hash("123"), Phone = "+84967044037", Role = HardwareShop.Core.Models.AccountRole.Admin, Username = "admin" };
+                    db.Accounts.Add(account);
+                    db.SaveChanges();
+                }
+            }
+        }
+    }
+    public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +46,11 @@ public class Program
         {
             b.MigrationsAssembly("HardwareShop.WebApi");
         }).UseInternalServiceProvider(sp));
+        builder.Services.AddDistributedRedisCache(option =>
+        {
+            option.Configuration = builder.Configuration["RedisSettings:Host"] + ":" + builder.Configuration["RedisSettings:Port"] + ",connectTimeout=10000,syncTimeout=10000";
+        });
+
         builder.Services.AddMvc().AddJsonOptions(options =>
         {
             options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
@@ -99,14 +122,17 @@ public class Program
 
         #region Configuration
         builder.Services.Configure<HashingConfiguration>(builder.Configuration.GetSection("HashingConfiguration"));
+        builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("JwtConfiguration"));
+        builder.Services.Configure<ResponseResultConfiguration>(builder.Configuration.GetSection("ResponseResultConfiguration"));
 
         #endregion
-
-        builder.Services.AddSingleton<IResponseResultFactory, ResponseResultFactory>();
+        builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
+        builder.Services.AddScoped<IJwtService, JwtService>();
+        builder.Services.AddScoped<ICurrentAccountService, CurrentAccountService>();
         builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
         builder.Services.ConfigureRepository();
-        builder.Services.AddScoped<IAccountService, AccountService>();
-
+        builder.Services.ConfigureBusiness();
 
 
         var app = builder.Build();
@@ -125,7 +151,7 @@ public class Program
         app.MapControllers();
         app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
 
-
+        seedData(app.Services);
         app.Run();
     }
 }

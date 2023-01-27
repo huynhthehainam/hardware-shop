@@ -12,10 +12,10 @@ namespace HardwareShop.Core.Bases
     [ApiController]
     public abstract class ApiControllerBase : ControllerBase
     {
-        protected IResponseResultFactory responseResultFactory;
-        protected ApiControllerBase(IResponseResultFactory responseResultFactory)
+        protected IResponseResultBuilder responseResultBuilder;
+        protected ApiControllerBase(IResponseResultBuilder responseResultBuilder)
         {
-            this.responseResultFactory = responseResultFactory;
+            this.responseResultBuilder = responseResultBuilder;
         }
     }
 }

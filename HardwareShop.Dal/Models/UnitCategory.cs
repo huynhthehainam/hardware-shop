@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,13 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref units) : units;
             set => units = value;
+        }
+        public static void BuildModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<UnitCategory>(entity =>
+            {
+                entity.HasKey(entity => entity.Id);
+            });
         }
     }
 }

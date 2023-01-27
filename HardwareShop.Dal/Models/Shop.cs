@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    public sealed class Shop : EntityBase
+    public sealed class Shop : EntityBase, ISoftDeletable, ITrackingDate
     {
         public Shop()
         {
@@ -61,6 +62,26 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
             set => invoices = value;
+        }
+        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
+        public DateTime? LastModifiedDate { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
+        public static void BuildModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Shop>(s =>
+            {
+                s.HasKey(x => x.Id);
+            });
+        }
+
+        public void DeleteSoftly()
+        {
+            this.IsDeleted = true;
+            foreach (var product in Products ?? new List<Product>())
+            {
+
+            }
         }
     }
 }

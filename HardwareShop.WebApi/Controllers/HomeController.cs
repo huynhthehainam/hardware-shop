@@ -6,17 +6,17 @@ namespace HardwareShop.WebApi.Controllers
 {
     public class HomeController : ControllerBase
     {
-        private readonly IResponseResultFactory responseResultFactory;
-        public HomeController(IResponseResultFactory responseResultFactory)
+        private readonly IResponseResultBuilder responseResultBuilder;
+        public HomeController(IResponseResultBuilder responseResultBuilder)
         {
-            this.responseResultFactory = responseResultFactory;
+            this.responseResultBuilder = responseResultBuilder;
         }
         public async Task<IActionResult> Index()
         {
-            var response = responseResultFactory.Create();
 
 
-            return response.ToResult();
+
+            return responseResultBuilder.Build();
         }
     }
 }

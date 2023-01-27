@@ -11,15 +11,10 @@ namespace HardwareShop.Core.Implementations
 {
     public class HashingConfiguration
     {
-        public int SaltSize { get; set; }
-        public int HashSize { get; set; }
-        public string PrivateKey { get; set; }
-        public HashingConfiguration(int saltSize, int hashSize, string privateKey)
-        {
-            SaltSize = saltSize;
-            HashSize = hashSize;
-            PrivateKey = privateKey;
-        }
+        public int SaltSize { get; set; } = 0;
+        public int HashSize { get; set; } = 0;
+        public string PrivateKey { get; set; } = string.Empty;
+
     }
     public class HashingPasswordService : IHashingPasswordService
     {

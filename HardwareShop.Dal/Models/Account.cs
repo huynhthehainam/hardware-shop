@@ -1,4 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -9,12 +11,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum AccountRole
-    {
-        Admin,
-        Staff,
-    }
+  
     public sealed class Account : EntityBase
     {
         public int Id { get; set; }
@@ -29,7 +26,7 @@ namespace HardwareShop.Dal.Models
         }
         public Account(ILazyLoader lazyLoader) : base(lazyLoader)
         {
-            
+
         }
 
 
@@ -38,6 +35,16 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shopAccount) : shopAccount;
             set => shopAccount = value;
+        }
+
+        public static void BuildModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Account>(s =>
+            {
+                s.HasKey(a => a.Id);
+                s.HasIndex(e=>e.Username).IsUnique();
+            });
+            
         }
 
     }

@@ -10,18 +10,13 @@ using System.Threading.Tasks;
 namespace HardwareShop.Core.Bases
 {
 
-    public class AuthorizedApiController : ApiControllerBase
+    public abstract class AuthorizedApiController : ApiControllerBase
     {
-        public AuthorizedApiController(IResponseResultFactory responseResultFactory) : base(responseResultFactory)
+        protected readonly ICurrentAccountService currentAccountService;
+        public AuthorizedApiController(IResponseResultBuilder responseResultBuilder, ICurrentAccountService currentAccountService) : base(responseResultBuilder)
         {
+            this.currentAccountService = currentAccountService;
         }
-        protected CacheAccountViewModel currentAccount
-        {
-            get
-            {
-                var accountClaims = HttpContext.User.Claims;
-                return new CacheAccountViewModel { Id = 0 };
-            }
-        }
+
     }
 }

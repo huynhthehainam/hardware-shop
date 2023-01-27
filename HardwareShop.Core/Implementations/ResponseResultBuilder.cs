@@ -1,5 +1,7 @@
 ﻿using HardwareShop.Core.Bases;
+using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +10,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace HardwareShop.Core.Models
+namespace HardwareShop.Core.Implementations
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ResponseResultType
@@ -24,11 +26,7 @@ namespace HardwareShop.Core.Models
     }
     public class ResponseResultConfiguration
     {
-        public ResponseResultLanguage Language { get; set; }
-        public ResponseResultConfiguration(ResponseResultLanguage language)
-        {
-            Language = language;
-        }
+        public ResponseResultLanguage Language { get; set; } = ResponseResultLanguage.English;
     }
     public static class ResponseMessages
     {
@@ -43,23 +41,23 @@ namespace HardwareShop.Core.Models
             {ResponseResultLanguage.Vietnamese, "Đã xoá" }
         };
     }
-    public class ResponseResult
+    public class ResponseResultBuilder : IResponseResultBuilder
     {
         private readonly ResponseResultConfiguration configuration;
 
-        public ResponseResult(ResponseResultConfiguration configuration)
+        public ResponseResultBuilder(IOptions<ResponseResultConfiguration> options)
         {
-            this.configuration = configuration;
+            this.configuration = options.Value;
         }
-        public IDictionary<string, string>? Errors { get; set; }
-        public string? Message { get; internal set; }
+        private IDictionary<string, List<string>>? errors { get; set; }
+        private string? message;
         private ResponseResultType type = ResponseResultType.Json;
-        public int StatusCode { get; set; } = 200;
-        public Object? Data { get; set; }
-        public int? TotalItems { get; set; }
+        private int statusCode { get; set; } = 200;
+        private Object? data { get; set; }
+        private int? totalItems { get; set; }
         public void SetMessage(IDictionary<ResponseResultLanguage, string> message)
         {
-            this.Message = message[configuration.Language];
+            this.message = message[configuration.Language];
         }
         public void SetUpdatedMessage()
         {
@@ -69,17 +67,17 @@ namespace HardwareShop.Core.Models
         {
             SetMessage(ResponseMessages.DeletedMessage);
         }
-        public void SetCreatedObject<T>(EntityBase entity) where T : struct
+        public void SetCreatedObject<T>(T entity) where T : EntityBase
         {
-            StatusCode = 201;
+            statusCode = 201;
         }
-        public string fileName = "data.txt";
-        public byte[]? bytes;
-        public string? contentType;
+        private string fileName = "data.txt";
+        private byte[]? bytes;
+        private string? contentType;
         public void SetNoContent()
         {
-            StatusCode = 200;
-            Data = null;
+            statusCode = 200;
+            data = null;
             type = ResponseResultType.Json;
         }
 
@@ -91,20 +89,20 @@ namespace HardwareShop.Core.Models
             type = ResponseResultType.File;
         }
 
-        public IActionResult ToResult()
+        public IActionResult Build()
         {
             switch (type)
             {
                 case ResponseResultType.Json:
                     return new ObjectResult(new
                     {
-                        TotalItems = TotalItems,
+                        TotalItems = totalItems,
                         Type = type,
-                        Data = Data,
-                        Errors = Errors,
-                        Message = Message
+                        Data = data,
+                        Errors = errors,
+                        Message = message,
                     })
-                    { StatusCode = this.StatusCode };
+                    { StatusCode = this.statusCode };
 
                 case ResponseResultType.File:
                     var result = new FileContentResult(bytes ?? new Byte[0], contentType ?? "text/plain");
@@ -113,15 +111,50 @@ namespace HardwareShop.Core.Models
                 default:
                     return new ObjectResult(new
                     {
-                        TotalItems = TotalItems,
+                        TotalItems = totalItems,
                         Type = type,
-                        Data = Data,
-                        Errors = Errors,
-                        Message = Message
+                        Data = data,
+                        Errors = errors,
+                        Message = message
                     })
-                    { StatusCode = this.StatusCode };
+                    { StatusCode = this.statusCode };
             }
         }
 
+        public void AddError(string fieldName, IDictionary<ResponseResultLanguage, string> message)
+        {
+            if (errors is null)
+            {
+                errors = new Dictionary<string, List<string>>();
+            }
+
+            if (!errors.ContainsKey(fieldName))
+            {
+                errors.Add(fieldName, new List<string>());
+            }
+
+            errors[fieldName].Add(message[configuration.Language]);
+
+        }
+        public void AddInvalidFieldError(string fieldName)
+        {
+
+            var invalidMessage = new Dictionary<ResponseResultLanguage, string>()
+            {
+                [ResponseResultLanguage.Vietnamese] = $"Trường {fieldName} không hợp lệ",
+                [ResponseResultLanguage.English] = $"{fileName} field is invalid"
+            };
+
+            AddError(fieldName, invalidMessage);
+            statusCode = 400;
+
+        }
+
+        public void SetData(object data)
+        {
+            this.data = data;
+            statusCode = 200;
+            type = ResponseResultType.Json;
+        }
     }
 }
