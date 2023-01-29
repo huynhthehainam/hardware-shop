@@ -22,18 +22,18 @@ namespace HardwareShop.Dal.Models
         public string? Name { get; set; }
         public string? Address { get; set; }
 
-        private ShopAsset? shopAsset;
-        public ShopAsset? ShopAsset
+        private ICollection<ShopAsset>? assets;
+        public ICollection<ShopAsset>? Assets
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shopAsset) : shopAsset;
-            set => shopAsset = value;
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref assets) : assets;
+            set => assets = value;
         }
 
-        private ICollection<AccountShop>? shopAccounts;
-        public ICollection<AccountShop>? ShopAccounts
+        private ICollection<UserShop>? userShops;
+        public ICollection<UserShop>? UserShops
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shopAccounts) : shopAccounts;
-            set => shopAccounts = value;
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref userShops) : userShops;
+            set => userShops = value;
         }
 
         private ICollection<ProductCategory>? productCategories;
@@ -48,13 +48,6 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouses) : warehouses;
             set => warehouses = value;
-        }
-
-        private ICollection<Product>? products;
-        public ICollection<Product>? Products
-        {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref products) : products;
-            set => products = value;
         }
 
         private ICollection<Invoice>? invoices;
@@ -75,13 +68,6 @@ namespace HardwareShop.Dal.Models
             });
         }
 
-        public void DeleteSoftly()
-        {
-            this.IsDeleted = true;
-            foreach (var product in Products ?? new List<Product>())
-            {
 
-            }
-        }
     }
 }

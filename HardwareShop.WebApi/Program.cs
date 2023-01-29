@@ -1,6 +1,7 @@
-using HardwareShop.Business.Extensions;
+﻿using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
@@ -8,6 +9,7 @@ using HardwareShop.Dal.Extensions;
 using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Configurations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,15 +23,125 @@ public class Program
 {
     private static void seedData(IServiceProvider services)
     {
+        const string assetFolder = "SampleImages";
+        const string productAssetFile = "ProductAsset.jpg";
+        const string shopAssetFile = "ShopAsset.jpg";
+        const string userAssetFile = "UserAsset.jpg";
         using (var scope = services.CreateScope())
         {
+            IWebHostEnvironment env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
+            if (!env.IsDevelopment())
+            {
+                return;
+            }
             IHashingPasswordService hashingPasswordService = scope.ServiceProvider.GetRequiredService<IHashingPasswordService>();
             using (var db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>())
             {
-                if (!db.Accounts.Any())
+                if (!db.Users.Any())
                 {
-                    var account = new Account { Email = "huynhthehainam@gmail.com", HashedPassword = hashingPasswordService.Hash("123"), Phone = "+84967044037", Role = HardwareShop.Core.Models.AccountRole.Admin, Username = "admin" };
-                    db.Accounts.Add(account);
+                    UnitCategory unitCategory = new UnitCategory()
+                    {
+                        Name = "Mass",
+
+                    };
+                    db.UnitCategories.Add(unitCategory);
+                    db.SaveChanges();
+
+                    Unit unit = new Unit { Name = "Kg", UnitCategory = unitCategory };
+                    db.Units.Add(unit);
+                    db.SaveChanges();
+
+                    var productAssetPath = Path.Join(assetFolder, productAssetFile);
+                    var productAssetBytes = File.ReadAllBytes(productAssetPath);
+
+                    var shopAssetPath = Path.Join(assetFolder, shopAssetFile);
+                    var shopAssetBytes = File.ReadAllBytes(shopAssetPath);
+
+                    var userAssetPath = Path.Join(assetFolder, userAssetFile);
+                    var userAssetBytes = File.ReadAllBytes(userAssetPath);
+
+                    var user = new User
+                    {
+                        Email = "huynhthehainam@gmail.com",
+                        HashedPassword = hashingPasswordService.Hash("123"),
+                        Phone = "+84967044037",
+                        FirstName = "Nam",
+                        LastName = "Huỳnh",
+                        Role = HardwareShop.Core.Models.SystemUserRole.Admin,
+                        Username = "admin",
+                        Assets = new UserAsset[]
+                        {
+                            new UserAsset
+                            {
+                                AssetType = UserAssetConstants.AvatarAssetType,
+                                Filename = userAssetFile,
+                                Bytes =  userAssetBytes,
+                                ContentType = ContentTypeConstants.JpegContentType
+                }
+            }
+                    };
+                    db.Users.Add(user);
+                    db.SaveChanges();
+
+
+
+                    var shop = new Shop
+                    {
+                        Name = "Admin shop",
+                        Address = "123",
+                        Assets = new ShopAsset[]
+                        {
+                            new ShopAsset
+                            {
+                                AssetType = ShopAssetConstants.LogoAssetType,
+                                Bytes = shopAssetBytes,
+                                Filename = productAssetFile,
+                                ContentType = ContentTypeConstants.JpegContentType
+                            }
+                        },
+                        UserShops = new UserShop[]
+                        {
+                            new UserShop
+                            {
+                                UserId =  user.Id,
+                                Role  = UserShopRole.Admin,
+
+                            }
+                        },
+                        ProductCategories = new ProductCategory[]
+                        {
+                            new ProductCategory
+                            {
+                                Name = "Hoa Sen",
+                                Description = "Hoa Sen",
+                                Products = new Product[]
+                                {
+                                    new Product
+                                    {
+                                        Name = "H13x26",
+                                        Mass =  2.5,
+                                        Unit = unit,
+                                        PercentForCustomer = 8,
+                                        PriceForCustomer = 12000,
+                                        PercentForFamiliarCustomer = 6,
+                                        PriceForFamiliarCustomer = 11000,
+                                        PricePerMass = 600,
+                                        ProductAssets = new ProductAsset[]{
+                                            new ProductAsset
+                                            {
+                                                Bytes = productAssetBytes,
+                                                AssetType =  ProductAssetConstants.ThumbnailAssetType,
+                                                Filename = productAssetFile,
+                                                ContentType= ContentTypeConstants.JpegContentType
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    };
+                    db.Shops.Add(shop);
                     db.SaveChanges();
                 }
             }
@@ -40,6 +152,20 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+
+        var mainAllowSpecificOrigins = "mainAllowSpecificOrigins";
+        var customCorsUrls = new List<string>() { "http://localhost:3000" };
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(name: mainAllowSpecificOrigins, builder =>
+            {
+                builder.WithOrigins(
+                customCorsUrls.ToArray()
+                ).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+            });
+        });
+
+
 
         builder.Services.AddControllers();
         builder.Services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) => opt.UseNpgsql(builder.Configuration.GetConnectionString("AppConn"), b =>
@@ -80,8 +206,11 @@ public class Program
                 },
                 new string[] { }
             }
-  });
+    });
         });
+
+
+
         var authConfigurationSection = builder.Configuration.GetSection("AuthConfiguration");
         builder.Services.Configure<AuthConfiguration>(authConfigurationSection);
         var appSettings = authConfigurationSection.Get<AuthConfiguration>();
@@ -129,7 +258,7 @@ public class Program
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
         builder.Services.AddScoped<IJwtService, JwtService>();
-        builder.Services.AddScoped<ICurrentAccountService, CurrentAccountService>();
+        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
         builder.Services.ConfigureRepository();
         builder.Services.ConfigureBusiness();
@@ -144,8 +273,10 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseHttpsRedirection();
 
+        app.UseCors(mainAllowSpecificOrigins);
+
+        app.UseAuthentication();
         app.UseAuthorization();
 
         app.MapControllers();

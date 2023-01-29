@@ -30,6 +30,13 @@ namespace HardwareShop.Dal.Models
         }
         public bool IsDeleted { get; set; }
 
+        private ICollection<Product>? products;
+        public ICollection<Product>? Products
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref products) : products;
+            set => products = value;
+        }
+
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<ProductCategory>(e =>

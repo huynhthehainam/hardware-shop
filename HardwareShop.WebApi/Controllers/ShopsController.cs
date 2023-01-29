@@ -1,7 +1,7 @@
 ﻿using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Services;
-using HardwareShop.WebApi.Models;
+using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -9,7 +9,7 @@ namespace HardwareShop.WebApi.Controllers
     public class ShopsController : AuthorizedApiControllerBase
     {
         private readonly IShopService shopService;
-        public ShopsController(IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentAccountService currentAccountService) : base(responseResultBuilder, currentAccountService)
+        public ShopsController(IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
             this.shopService = shopService;
         }
@@ -17,7 +17,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateShop([FromBody] CreateShopCommand command)
         {
-            if (!currentAccountService.IsSystemAdmin())
+            if (!currentUserService.IsSystemAdmin())
             {
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
@@ -36,7 +36,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("{id:int}/DeleteSoftly")]
         public async Task<IActionResult> DeleteShopSoftly([FromRoute] int id)
         {
-            if (!currentAccountService.IsSystemAdmin())
+            if (!currentUserService.IsSystemAdmin())
             {
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
@@ -47,18 +47,18 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
 
-        [HttpPost("{id:int}/CreateAdminAccount")]
-        public async Task<IActionResult> CreateAdminAccount([FromRoute] int id, CreateShopAdminAccountCommand command)
+        [HttpPost("{id:int}/CreateAdminUser")]
+        public async Task<IActionResult> CreateAdminUser([FromRoute] int id, CreateShopAdminUserCommand command)
         {
-            if (!currentAccountService.IsSystemAdmin())
+            if (!currentUserService.IsSystemAdmin())
             {
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
 
-            var account = await shopService.CreateAdminAccountAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
+            var user = await shopService.CreateAdminUserAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
 
-            responseResultBuilder.SetData(account);
+            responseResultBuilder.SetData(user);
             return responseResultBuilder.Build();
         }
 

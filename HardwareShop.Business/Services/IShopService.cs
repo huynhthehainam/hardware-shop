@@ -11,11 +11,11 @@ namespace HardwareShop.Business.Services
 {
     public interface IShopService
     {
-        Task<ShopDto?> GetShopByAccountIdAsync(int accountId, ShopAccountRole role = ShopAccountRole.Staff);
-        Task<ShopDto?> GetShopByCurrentAccountIdAsync(ShopAccountRole role = ShopAccountRole.Staff);
+        Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff);
+        Task<ShopDto?> GetShopByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
         Task<CreatedShopDto?> CreateShopAsync(string name, string? address);
-        Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentAccountShopAsync(string name, string? address);
+        Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address);
         Task<bool> DeleteShopSoftlyAsync(int shopId);
-        Task<CreatedAccountDto?> CreateAdminAccountAsync(int id, string v1, string v2, string? email);
+        Task<CreatedUserDto?> CreateAdminUserAsync(int id, string v1, string v2, string? email);
     }
 }

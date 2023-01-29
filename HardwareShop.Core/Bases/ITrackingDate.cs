@@ -8,7 +8,7 @@ namespace HardwareShop.Core.Bases
 {
     public interface ITrackingDate
     {
-        DateTime CreatedDate { get; set; }
+        DateTime CreatedDate { get; set; } 
         DateTime? LastModifiedDate { get; set; }
     }
 }

@@ -13,7 +13,7 @@ namespace HardwareShop.Business.Extensions
     {
         public static void ConfigureBusiness(this IServiceCollection services)
         {
-            services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();
 
         }

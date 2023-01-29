@@ -11,12 +11,13 @@ namespace HardwareShop.WebApi.Controllers
         {
             this.responseResultBuilder = responseResultBuilder;
         }
-        public async Task<IActionResult> Index()
+        public Task<IActionResult> Index()
         {
-
-
-
-            return responseResultBuilder.Build();
+            responseResultBuilder.SetData(new
+            {
+                Title = "My workshop"
+            });
+            return Task.FromResult(responseResultBuilder.Build());
         }
     }
 }

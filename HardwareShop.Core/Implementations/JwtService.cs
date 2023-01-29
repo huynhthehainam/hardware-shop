@@ -12,7 +12,7 @@ using System.Text.Json;
 namespace HardwareShop.Core.Implementations
 {
     public class JwtConfiguration
-    { 
+    {
         public string SecretKey { get; set; } = string.Empty;
         public int ExpiredDuration { get; set; } = 120;
     }
@@ -34,7 +34,7 @@ namespace HardwareShop.Core.Implementations
         {
             return $"{appName}-{id}-{sessionId}"; ;
         }
-        public async Task<CacheAccount?> GetAccountFromTokenAsync(string token)
+        public async Task<CacheUser?> GetUserFromTokenAsync(string token)
         {
 
             var handler = new JwtSecurityTokenHandler();
@@ -49,8 +49,8 @@ namespace HardwareShop.Core.Implementations
                 return null;
             }
             var issuer = jwtToken.Issuer;
-            var accountId = Convert.ToInt32(subClaim.Value);
-            var cacheKey = GetCacheKey(issuer, accountId);
+            var userId = Convert.ToInt32(subClaim.Value);
+            var cacheKey = GetCacheKey(issuer, userId);
 
             var cacheContent = await distributedCache.GetStringAsync(cacheKey);
             if (cacheContent == null)
@@ -58,21 +58,21 @@ namespace HardwareShop.Core.Implementations
                 return null;
             }
 
-            var cacheAccount = JsonSerializer.Deserialize<CacheAccount>(cacheContent);
-            return cacheAccount;
+            var cacheUser = JsonSerializer.Deserialize<CacheUser>(cacheContent);
+            return cacheUser;
         }
-        public LoginResponse? GenerateTokens(CacheAccount cacheAccount)
+        public LoginResponse? GenerateTokens(CacheUser cacheUser)
         {
             var sessionId = RandomStringHelper.RandomString(10);
 
-            var cacheKey = GetCacheKey(sessionId, cacheAccount.Id);
+            var cacheKey = GetCacheKey(sessionId, cacheUser.Id);
 
-            distributedCache.SetString(cacheKey, JsonSerializer.Serialize(cacheAccount));
+            distributedCache.SetString(cacheKey, JsonSerializer.Serialize(cacheUser));
             var claims = new Claim[]
             {
-                new Claim(jwtSubKey, cacheAccount.Id.ToString()),
-                new Claim(jwtUsernameKey, cacheAccount.Username),
-                new Claim(jwtRoleKey, cacheAccount.Role.ToString()),
+                new Claim(jwtSubKey, cacheUser.Id.ToString()),
+                new Claim(jwtUsernameKey, cacheUser.Username),
+                new Claim(jwtRoleKey, cacheUser.Role.ToString()),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -84,7 +84,7 @@ namespace HardwareShop.Core.Implementations
 
             var refreshToken = handler.WriteToken(jwtRefreshToken);
 
-            return new LoginResponse { AccessToken = accessToken, RefreshToken = refreshToken };
+            return new LoginResponse(cacheUser, accessToken, refreshToken);
 
         }
 

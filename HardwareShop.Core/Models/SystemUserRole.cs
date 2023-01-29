@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace HardwareShop.Core.Models
 {
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum AccountRole
+    public enum SystemUserRole
     {
         Admin,
         Staff,

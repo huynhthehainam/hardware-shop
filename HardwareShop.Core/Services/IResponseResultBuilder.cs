@@ -13,13 +13,15 @@ namespace HardwareShop.Core.Services
 {
     public interface IResponseResultBuilder
     {
+        ResponseResultConfiguration GetConfiguration();
         IActionResult Build();
         void SetUpdatedMessage();
-        void SetData(object data);
+        void SetData(object? data);
         void SetDeletedMessage();
         void SetMessage(IDictionary<ResponseResultLanguage, string> message);
         void SetNoContent();
         void SetFile(byte[] bytes, string contentType, string fileName);
+        void SetAsset(IAssetTable asset);
         void SetCreatedObject<T>(T entity) where T : EntityBase;
         void AddInvalidFieldError(string fieldName);
         void AddExistedEntityError(string entityName);

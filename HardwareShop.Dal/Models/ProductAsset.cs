@@ -9,26 +9,28 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
-    public static class ShopAssetConstants
+    public static class ProductAssetConstants
     {
-        public const string LogoAssetType = "logo";
+        public const string ThumbnailAssetType = "thumbnail";
+
     }
-    public sealed class ShopAsset : EntityBase, IAssetTable
+
+    public class ProductAsset : EntityBase, IAssetTable
     {
-        public ShopAsset()
+        public ProductAsset()
         {
         }
 
-        public ShopAsset(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ProductAsset(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-
-        public int ShopId { get; set; }
-        private Shop? shop;
-        public Shop? Shop
+        public int Id { get; set; }
+        public int ProductId { get; set; }
+        private Product? product;
+        public Product? Product
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
-            set => shop = value;
+            get => lazyLoader != null ? lazyLoader.Load(this, ref product) : product;
+            set => product = value;
         }
         public byte[] Bytes { get; set; } = new byte[0];
         public string Filename { get; set; } = string.Empty;
@@ -39,10 +41,10 @@ namespace HardwareShop.Dal.Models
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ShopAsset>(s =>
+            modelBuilder.Entity<ProductAsset>(p =>
             {
-                s.HasKey(s => s.ShopId);
-                s.HasOne(e => e.Shop).WithMany(e => e.Assets).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+                p.HasKey(p => p.Id);
+                p.HasOne(e => e.Product).WithMany(e => e.ProductAssets).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -16,10 +16,11 @@ namespace HardwareShop.Dal.Extensions
         public static void ConfigureRepository(this IServiceCollection services)
         {
             services.AddScoped<DbContext, MainDatabaseContext>();
-            services.AddScoped<IRepository<Account>, RepositoryBase<Account>>();
+            services.AddScoped<IRepository<User>, RepositoryBase<User>>();
             services.AddScoped<IRepository<Shop>, RepositoryBase<Shop>>();
             services.AddScoped<IRepository<Warehouse>, RepositoryBase<Warehouse>>();
-            services.AddScoped<IRepository<AccountShop>, RepositoryBase<AccountShop>>();
+            services.AddScoped<IRepository<UserShop>, RepositoryBase<UserShop>>();
+            services.AddScoped<IRepository<UserAsset>, RepositoryBase<UserAsset>>();
         }
     }
 }

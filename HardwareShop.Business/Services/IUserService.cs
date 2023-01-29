@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Business.Dtos;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -8,11 +9,12 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Services
 {
-    public interface IAccountService
+    public interface IUserService
     {
-        Task<CreatedAccountDto> CreateAccountAsync(string accountName, string password);
-        Task<List<AccountDto>> GetAccountDtosAsync();
+        Task<CreatedUserDto> CreateUserAsync(string username, string password);
+        Task<List<UserDto>> GetUserDtosAsync();
         Task<LoginResponse?> Login(string username, string password);
+        Task<IAssetTable?> GetCurrentUserAvatarAsync();
 
     }
 }

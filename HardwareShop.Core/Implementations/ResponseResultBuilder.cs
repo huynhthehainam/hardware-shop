@@ -44,6 +44,10 @@ namespace HardwareShop.Core.Implementations
     public class ResponseResultBuilder : IResponseResultBuilder
     {
         private readonly ResponseResultConfiguration configuration;
+        public ResponseResultConfiguration GetConfiguration()
+        {
+            return configuration;
+        }
 
         public ResponseResultBuilder(IOptions<ResponseResultConfiguration> options)
         {
@@ -169,7 +173,7 @@ namespace HardwareShop.Core.Implementations
             statusCode = 404;
         }
 
-        public void SetData(object data)
+        public void SetData(object? data)
         {
             this.data = data;
             statusCode = 200;
@@ -179,6 +183,11 @@ namespace HardwareShop.Core.Implementations
         public void AddNotPermittedError()
         {
             statusCode = 403;
+        }
+
+        public void SetAsset(IAssetTable asset)
+        {
+            SetFile(asset.Bytes, asset.ContentType, asset.Filename);
         }
     }
 }

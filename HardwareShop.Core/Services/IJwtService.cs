@@ -9,7 +9,7 @@ namespace HardwareShop.Core.Services
 {
     public interface IJwtService
     {
-        Task<CacheAccount?> GetAccountFromTokenAsync(string token);
-        LoginResponse? GenerateTokens(CacheAccount cacheAccount);
+        Task<CacheUser?> GetUserFromTokenAsync(string token);
+        LoginResponse? GenerateTokens(CacheUser cacheUser);
     }
 }

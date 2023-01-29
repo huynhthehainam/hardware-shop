@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -10,24 +11,6 @@ namespace HardwareShop.WebApi.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Accounts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Username = table.Column<string>(type: "text", nullable: true),
-                    Email = table.Column<string>(type: "text", nullable: true),
-                    Phone = table.Column<string>(type: "text", nullable: true),
-                    HashedPassword = table.Column<string>(type: "text", nullable: true),
-                    Role = table.Column<int>(type: "integer", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Accounts", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Shops",
                 columns: table => new
@@ -59,28 +42,24 @@ namespace HardwareShop.WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AccountShops",
+                name: "Users",
                 columns: table => new
                 {
-                    AccountId = table.Column<int>(type: "integer", nullable: false),
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FirstName = table.Column<string>(type: "text", nullable: false),
+                    LastName = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    Phone = table.Column<string>(type: "text", nullable: true),
+                    HashedPassword = table.Column<string>(type: "text", nullable: true),
                     Role = table.Column<int>(type: "integer", nullable: false),
-                    ShopId = table.Column<int>(type: "integer", nullable: false)
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    InterfaceSettings = table.Column<JsonDocument>(type: "jsonb", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AccountShops", x => x.AccountId);
-                    table.ForeignKey(
-                        name: "FK_AccountShops_Accounts_AccountId",
-                        column: x => x.AccountId,
-                        principalTable: "Accounts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AccountShops_Shops_ShopId",
-                        column: x => x.ShopId,
-                        principalTable: "Shops",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -132,8 +111,12 @@ namespace HardwareShop.WebApi.Migrations
                 columns: table => new
                 {
                     ShopId = table.Column<int>(type: "integer", nullable: false),
-                    Bytes = table.Column<byte[]>(type: "bytea", nullable: true),
-                    Filename = table.Column<string>(type: "text", nullable: false)
+                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
+                    Filename = table.Column<string>(type: "text", nullable: false),
+                    AssetType = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ContentType = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -183,6 +166,56 @@ namespace HardwareShop.WebApi.Migrations
                         name: "FK_Units_UnitCategories_UnitCategoryId",
                         column: x => x.UnitCategoryId,
                         principalTable: "UnitCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserAssets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
+                    Filename = table.Column<string>(type: "text", nullable: false),
+                    AssetType = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ContentType = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserAssets_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserShops",
+                columns: table => new
+                {
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    ShopId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserShops", x => x.UserId);
+                    table.ForeignKey(
+                        name: "FK_UserShops_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserShops_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -248,18 +281,24 @@ namespace HardwareShop.WebApi.Migrations
                     PriceForFamiliarCustomer = table.Column<double>(type: "double precision", nullable: true),
                     PriceForCustomer = table.Column<double>(type: "double precision", nullable: false),
                     UnitId = table.Column<int>(type: "integer", nullable: false),
-                    ShopId = table.Column<int>(type: "integer", nullable: false),
+                    ProductCategoryId = table.Column<int>(type: "integer", nullable: false),
+                    ProductCategoryId1 = table.Column<int>(type: "integer", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_Shops_ShopId",
-                        column: x => x.ShopId,
-                        principalTable: "Shops",
+                        name: "FK_Products_ProductCategories_ProductCategoryId",
+                        column: x => x.ProductCategoryId,
+                        principalTable: "ProductCategories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_ProductCategories_ProductCategoryId1",
+                        column: x => x.ProductCategoryId1,
+                        principalTable: "ProductCategories",
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Products_Units_UnitId",
                         column: x => x.UnitId,
@@ -321,16 +360,30 @@ namespace HardwareShop.WebApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Accounts_Username",
-                table: "Accounts",
-                column: "Username",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AccountShops_ShopId",
-                table: "AccountShops",
-                column: "ShopId");
+            migrationBuilder.CreateTable(
+                name: "ProductAssets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
+                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
+                    Filename = table.Column<string>(type: "text", nullable: false),
+                    AssetType = table.Column<string>(type: "text", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ContentType = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductAssets_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerDebtHistories_CustomerDebtId",
@@ -363,14 +416,24 @@ namespace HardwareShop.WebApi.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProductAssets_ProductId",
+                table: "ProductAssets",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductCategories_ShopId",
                 table: "ProductCategories",
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_ShopId",
+                name: "IX_Products_ProductCategoryId",
                 table: "Products",
-                column: "ShopId");
+                column: "ProductCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_ProductCategoryId1",
+                table: "Products",
+                column: "ProductCategoryId1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_UnitId",
@@ -383,6 +446,22 @@ namespace HardwareShop.WebApi.Migrations
                 column: "UnitCategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserAssets_UserId",
+                table: "UserAssets",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
+                table: "Users",
+                column: "Username",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserShops_ShopId",
+                table: "UserShops",
+                column: "ShopId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Warehouses_ShopId",
                 table: "Warehouses",
                 column: "ShopId");
@@ -391,25 +470,25 @@ namespace HardwareShop.WebApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "AccountShops");
-
-            migrationBuilder.DropTable(
                 name: "CustomerDebtHistories");
 
             migrationBuilder.DropTable(
                 name: "InvoiceDetails");
 
             migrationBuilder.DropTable(
-                name: "ProductCategories");
+                name: "ProductAssets");
 
             migrationBuilder.DropTable(
                 name: "ShopAssets");
 
             migrationBuilder.DropTable(
-                name: "Warehouses");
+                name: "UserAssets");
 
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "UserShops");
+
+            migrationBuilder.DropTable(
+                name: "Warehouses");
 
             migrationBuilder.DropTable(
                 name: "CustomerDebts");
@@ -421,7 +500,13 @@ namespace HardwareShop.WebApi.Migrations
                 name: "Products");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "ProductCategories");
 
             migrationBuilder.DropTable(
                 name: "Units");

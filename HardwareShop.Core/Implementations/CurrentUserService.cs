@@ -9,28 +9,28 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Implementations
 {
-    public class CurrentAccountService : ICurrentAccountService
+    public class CurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private readonly IJwtService jwtService;
         private const string authPrefix = "Bearer";
-        private CacheAccount? currentAccount;
-        public async Task<CacheAccount> GetCacheAccountAsync()
+        private CacheUser? cacheUser;
+        public async Task<CacheUser> GetCacheUserAsync()
         {
-            if (currentAccount == null)
+            if (cacheUser == null)
             {
                 string? authHeader = httpContextAccessor.HttpContext.Request.Headers["Authorization"];
                 authHeader = authHeader.Replace(authPrefix, string.Empty).Trim();
 
-                currentAccount = await jwtService.GetAccountFromTokenAsync(authHeader);
+                cacheUser = await jwtService.GetUserFromTokenAsync(authHeader);
             }
-            if (currentAccount == null)
+            if (cacheUser == null)
             {
                 throw new Exception("Token is invalid");
             }
-            return currentAccount;
+            return cacheUser;
         }
-        public CurrentAccountService(
+        public CurrentUserService(
             IJwtService jwtService,
             IHttpContextAccessor httpContextAccessor)
         {
@@ -39,13 +39,13 @@ namespace HardwareShop.Core.Implementations
         }
         public bool IsSystemAdmin()
         {
-            CacheAccount account = GetCacheAccountAsync().Result;
-            return account.Role == AccountRole.Admin;
+            CacheUser user = GetCacheUserAsync().Result;
+            return user.Role == SystemUserRole.Admin;
         }
-        public int GetAccountId()
+        public int GetUserId()
         {
-            CacheAccount account = GetCacheAccountAsync().Result;
-            return account.Id;
+            CacheUser user = GetCacheUserAsync().Result;
+            return user.Id;
         }
     }
 }

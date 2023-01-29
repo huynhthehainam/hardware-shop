@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HardwareShop.WebApi.Models
+namespace HardwareShop.WebApi.Commands
 {
-    public class CreateShopAdminAccountCommand
+    public class CreateShopAdminUserCommand
     {
         [Required]
         public string? Username { get; set; }

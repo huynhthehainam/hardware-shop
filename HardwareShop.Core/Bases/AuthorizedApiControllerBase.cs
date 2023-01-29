@@ -12,10 +12,10 @@ namespace HardwareShop.Core.Bases
 
     public abstract class AuthorizedApiControllerBase : ApiControllerBase
     {
-        protected readonly ICurrentAccountService currentAccountService;
-        public AuthorizedApiControllerBase(IResponseResultBuilder responseResultBuilder, ICurrentAccountService currentAccountService) : base(responseResultBuilder)
+        protected readonly ICurrentUserService currentUserService;
+        public AuthorizedApiControllerBase(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder)
         {
-            this.currentAccountService = currentAccountService;
+            this.currentUserService = currentUserService;
         }
 
     }

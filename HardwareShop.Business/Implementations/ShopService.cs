@@ -15,24 +15,24 @@ namespace HardwareShop.Business.Implementations
     public sealed class ShopService : IShopService
     {
         private readonly IRepository<Shop> shopRepository;
-        private readonly IRepository<Account> accountRepository;
+        private readonly IRepository<User> userRepository;
         private readonly IRepository<Warehouse> warehouseRepository;
-        private readonly ICurrentAccountService currentAccountService;
+        private readonly ICurrentUserService currentUserService;
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
-        private readonly IRepository<AccountShop> accountShopRepository;
-        public ShopService(IRepository<Shop> shopRepository, IRepository<Warehouse> warehouseRepository, ICurrentAccountService currentAccountService, IResponseResultBuilder responseResultBuilder, IRepository<Account> accountRepository, IHashingPasswordService hashingPasswordService, IRepository<AccountShop> accountShopRepository)
+        private readonly IRepository<UserShop> userShopRepository;
+        public ShopService(IRepository<Shop> shopRepository, IRepository<Warehouse> warehouseRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository)
         {
             this.shopRepository = shopRepository;
-            this.currentAccountService = currentAccountService;
+            this.currentUserService = currentUserService;
             this.warehouseRepository = warehouseRepository;
             this.responseResultBuilder = responseResultBuilder;
-            this.accountRepository = accountRepository;
+            this.userRepository = userRepository;
             this.hashingPasswordService = hashingPasswordService;
-            this.accountShopRepository = accountShopRepository;
+            this.userShopRepository = userShopRepository;
         }
 
-        public async Task<CreatedAccountDto?> CreateAdminAccountAsync(int id, string username, string password, string? email)
+        public async Task<CreatedUserDto?> CreateAdminUserAsync(int id, string username, string password, string? email)
         {
             var shop = await shopRepository.GetItemByQueryAsync(e => e.Id == id);
             if (shop == null)
@@ -40,7 +40,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var account = await accountRepository.CreateIfNotExists(new Account
+            var user = await userRepository.CreateIfNotExists(new User
             {
                 Username = username,
                 HashedPassword = hashingPasswordService.Hash(password),
@@ -49,21 +49,21 @@ namespace HardwareShop.Business.Implementations
             {
                 e.Username
             });
-            if (account == null)
+            if (user == null)
             {
-                responseResultBuilder.AddExistedEntityError("Account");
+                responseResultBuilder.AddExistedEntityError("User");
                 return null;
             }
 
-            AccountShop accountShop = await accountShopRepository.CreateAsync(new AccountShop
+            UserShop userShop = await userShopRepository.CreateAsync(new UserShop
             {
 
-                AccountId = account.Id,
+                UserId = user.Id,
                 ShopId = shop.Id,
-                Role = ShopAccountRole.Admin
+                Role = UserShopRole.Admin
             });
 
-            return new CreatedAccountDto { Id = account.Id };
+            return new CreatedUserDto { Id = user.Id };
 
         }
 
@@ -86,9 +86,9 @@ namespace HardwareShop.Business.Implementations
             return new CreatedShopDto { Id = shop.Id };
         }
 
-        public async Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentAccountShopAsync(string name, string? address)
+        public async Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address)
         {
-            var shop = await GetShopByCurrentAccountIdAsync(ShopAccountRole.Admin);
+            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
                 return null;
@@ -118,22 +118,22 @@ namespace HardwareShop.Business.Implementations
 
 
 
-        public async Task<ShopDto?> GetShopByAccountIdAsync(int accountId, ShopAccountRole role)
+        public async Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role)
         {
-            var acceptedRoles = new List<ShopAccountRole>();
+            var acceptedRoles = new List<UserShopRole>();
             switch (role)
             {
-                case ShopAccountRole.Staff:
-                    acceptedRoles = new List<ShopAccountRole> { ShopAccountRole.Staff, ShopAccountRole.Admin };
+                case UserShopRole.Staff:
+                    acceptedRoles = new List<UserShopRole> { UserShopRole.Staff, UserShopRole.Admin };
                     break;
-                case ShopAccountRole.Admin:
-                    acceptedRoles = new List<ShopAccountRole> { ShopAccountRole.Admin };
+                case UserShopRole.Admin:
+                    acceptedRoles = new List<UserShopRole> { UserShopRole.Admin };
                     break;
                 default:
                     break;
             }
             var shop = await shopRepository.GetItemByQueryAsync(e =>
-         e.ShopAccounts != null ? e.ShopAccounts.Any(s => s.AccountId == accountId && acceptedRoles.Contains(s.Role)) : false);
+         e.UserShops != null ? e.UserShops.Any(s => s.UserId == userId && acceptedRoles.Contains(s.Role)) : false);
 
             if (shop == null)
             {
@@ -146,9 +146,9 @@ namespace HardwareShop.Business.Implementations
             };
         }
 
-        public Task<ShopDto?> GetShopByCurrentAccountIdAsync(ShopAccountRole role)
+        public Task<ShopDto?> GetShopByCurrentUserIdAsync(UserShopRole role)
         {
-            return GetShopByAccountIdAsync(currentAccountService.GetAccountId(), role);
+            return GetShopByUserIdAsync(currentUserService.GetUserId(), role);
         }
     }
 }

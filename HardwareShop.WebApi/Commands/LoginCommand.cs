@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HardwareShop.WebApi.Models
+namespace HardwareShop.WebApi.Commands
 {
     public class LoginCommand
     {

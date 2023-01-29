@@ -4,10 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HardwareShop.Business.Dtos
+namespace HardwareShop.Core.Services
 {
-    public class CreatedAccountDto
+    public interface ICurrentUserService
     {
-        public int Id { get; set; }
+        bool IsSystemAdmin();
+        int GetUserId();
     }
 }
