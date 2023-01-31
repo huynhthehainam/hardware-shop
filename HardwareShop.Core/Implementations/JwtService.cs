@@ -84,7 +84,7 @@ namespace HardwareShop.Core.Implementations
 
             var refreshToken = handler.WriteToken(jwtRefreshToken);
 
-            return new LoginResponse(cacheUser, accessToken, refreshToken);
+            return new LoginResponse( accessToken, refreshToken);
 
         }
 

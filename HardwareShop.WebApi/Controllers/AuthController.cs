@@ -27,10 +27,8 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddInvalidFieldError("Password");
                 return responseResultBuilder.Build();
             }
-            LoginViewModel vm = new LoginViewModel(response.AccessToken, new LoginUserViewModel(
-                response.User.Role, new LoginUserDataViewModel(FullNameHelper.GetFullName(responseResultBuilder.GetConfiguration().Language, response.User.FirstName, response.User.LastName), response.User.Email, response.User.Settings)));
-
-            responseResultBuilder.SetData(vm);
+          
+            responseResultBuilder.SetData(response);
 
             return responseResultBuilder.Build();
         }

@@ -252,10 +252,11 @@ public class Program
         #region Configuration
         builder.Services.Configure<HashingConfiguration>(builder.Configuration.GetSection("HashingConfiguration"));
         builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("JwtConfiguration"));
-        builder.Services.Configure<ResponseResultConfiguration>(builder.Configuration.GetSection("ResponseResultConfiguration"));
+        builder.Services.Configure<LanguageConfiguration>(builder.Configuration.GetSection("LanguageConfiguration"));
 
         #endregion
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        builder.Services.AddSingleton<ILanguageService, LanguageService>();
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

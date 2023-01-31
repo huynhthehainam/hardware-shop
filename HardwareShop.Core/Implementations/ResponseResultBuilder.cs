@@ -18,40 +18,27 @@ namespace HardwareShop.Core.Implementations
         Json,
         File,
     }
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum ResponseResultLanguage
-    {
-        Vietnamese,
-        English
-    }
-    public class ResponseResultConfiguration
-    {
-        public ResponseResultLanguage Language { get; set; } = ResponseResultLanguage.English;
-    }
+
     public static class ResponseMessages
     {
-        public readonly static Dictionary<ResponseResultLanguage, string> UpdatedMessage = new Dictionary<ResponseResultLanguage, string>
+        public readonly static Dictionary<SupportedLanguage, string> UpdatedMessage = new Dictionary<SupportedLanguage, string>
         {
-            {ResponseResultLanguage.English, "Updated"},
-            {ResponseResultLanguage.Vietnamese, "Đã cập nhật" }
+            {SupportedLanguage.English, "Updated"},
+            {SupportedLanguage.Vietnamese, "Đã cập nhật" }
         };
-        public readonly static Dictionary<ResponseResultLanguage, string> DeletedMessage = new Dictionary<ResponseResultLanguage, string>
+        public readonly static Dictionary<SupportedLanguage, string> DeletedMessage = new Dictionary<SupportedLanguage, string>
         {
-            {ResponseResultLanguage.English, "Deleted"},
-            {ResponseResultLanguage.Vietnamese, "Đã xoá" }
+            {SupportedLanguage.English, "Deleted"},
+            {SupportedLanguage.Vietnamese, "Đã xoá" }
         };
     }
     public class ResponseResultBuilder : IResponseResultBuilder
     {
-        private readonly ResponseResultConfiguration configuration;
-        public ResponseResultConfiguration GetConfiguration()
-        {
-            return configuration;
-        }
+        private readonly ILanguageService languageService;
 
-        public ResponseResultBuilder(IOptions<ResponseResultConfiguration> options)
+        public ResponseResultBuilder(ILanguageService languageService)
         {
-            this.configuration = options.Value;
+            this.languageService = languageService;
         }
         private IDictionary<string, List<string>>? errors { get; set; }
         private string? message;
@@ -59,8 +46,9 @@ namespace HardwareShop.Core.Implementations
         private int statusCode { get; set; } = 200;
         private Object? data { get; set; }
         private int? totalItems { get; set; }
-        public void SetMessage(IDictionary<ResponseResultLanguage, string> message)
+        public void SetMessage(IDictionary<SupportedLanguage, string> message)
         {
+            var configuration = languageService.GetConfiguration();
             this.message = message[configuration.Language];
         }
         public void SetUpdatedMessage()
@@ -125,7 +113,7 @@ namespace HardwareShop.Core.Implementations
             }
         }
 
-        public void AddError(string fieldName, IDictionary<ResponseResultLanguage, string> message)
+        public void AddError(string fieldName, IDictionary<SupportedLanguage, string> message)
         {
             if (errors is null)
             {
@@ -136,17 +124,17 @@ namespace HardwareShop.Core.Implementations
             {
                 errors.Add(fieldName, new List<string>());
             }
-
+            var configuration = languageService.GetConfiguration();
             errors[fieldName].Add(message[configuration.Language]);
 
         }
         public void AddInvalidFieldError(string fieldName)
         {
 
-            var invalidMessage = new Dictionary<ResponseResultLanguage, string>()
+            var invalidMessage = new Dictionary<SupportedLanguage, string>()
             {
-                [ResponseResultLanguage.Vietnamese] = $"Trường {fieldName} không hợp lệ",
-                [ResponseResultLanguage.English] = $"{fileName} field is invalid"
+                [SupportedLanguage.Vietnamese] = $"Trường {fieldName} không hợp lệ",
+                [SupportedLanguage.English] = $"{fileName} field is invalid"
             };
 
             AddError(fieldName, invalidMessage);
@@ -154,20 +142,20 @@ namespace HardwareShop.Core.Implementations
         }
         public void AddExistedEntityError(string entityName)
         {
-            var invalidMessage = new Dictionary<ResponseResultLanguage, string>()
+            var invalidMessage = new Dictionary<SupportedLanguage, string>()
             {
-                [ResponseResultLanguage.Vietnamese] = $"{entityName} đã tồn tại",
-                [ResponseResultLanguage.English] = $"{entityName} entity is already exists"
+                [SupportedLanguage.Vietnamese] = $"{entityName} đã tồn tại",
+                [SupportedLanguage.English] = $"{entityName} entity is already exists"
             };
             AddError(entityName, invalidMessage);
             statusCode = 400;
         }
         public void AddNotFoundEntityError(string entityName)
         {
-            var invalidMessage = new Dictionary<ResponseResultLanguage, string>()
+            var invalidMessage = new Dictionary<SupportedLanguage, string>()
             {
-                [ResponseResultLanguage.Vietnamese] = $"{entityName} không tìm thấy",
-                [ResponseResultLanguage.English] = $"{entityName} is not found"
+                [SupportedLanguage.Vietnamese] = $"{entityName} không tìm thấy",
+                [SupportedLanguage.English] = $"{entityName} is not found"
             };
             AddError(entityName, invalidMessage);
             statusCode = 404;

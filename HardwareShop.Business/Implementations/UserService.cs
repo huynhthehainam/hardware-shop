@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
@@ -19,13 +20,17 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<User> userRepository;
         private readonly IRepository<UserAsset> userAssetRepository;
         private readonly IJwtService jwtService;
+        private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ICurrentUserService currentUserService;
-        public UserService(IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository)
+        private readonly ILanguageService languageService;
+        public UserService(IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService)
         {
             this.userRepository = userRepository;
             this.jwtService = jwtService;
             this.currentUserService = currentUserService;
             this.userAssetRepository = userAssetRepository;
+            this.responseResultBuilder = responseResultBuilder;
+            this.languageService = languageService;
         }
 
         public async Task<CreatedUserDto> CreateUserAsync(string username, string password)
@@ -54,7 +59,7 @@ namespace HardwareShop.Business.Implementations
             return userPageData.Items.Select(e => new UserDto() { Id = e.Id }).ToList();
         }
 
-        public async Task<LoginResponse?> Login(string username, string password)
+        public async Task<LoginDto?> Login(string username, string password)
         {
             var user = await userRepository.GetItemByQueryAsync(e => e.Username == username);
             if (user == null) return null;
@@ -66,10 +71,15 @@ namespace HardwareShop.Business.Implementations
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                Settings = user.InterfaceSettings,
             };
-            var response = jwtService.GenerateTokens(cacheUser);
-            return response;
+            var tokens = jwtService.GenerateTokens(cacheUser);
+            if (tokens == null) return null;
+            var userShop = user.UserShop;
+
+
+            return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
+                languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings), userShop == null ? null : new LoginShopDto(
+                    userShop.Shop != null ? (userShop.Shop.Name ?? "") : "", userShop.Role)));
         }
     }
 }
