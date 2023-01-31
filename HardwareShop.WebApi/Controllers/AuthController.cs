@@ -20,14 +20,28 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
-            var response = await userService.Login(command.Username ?? "", command.Password ?? "");
+            var response = await userService.LoginAsync(command.Username ?? "", command.Password ?? "");
             if (response == null)
             {
                 responseResultBuilder.AddInvalidFieldError("Username");
                 responseResultBuilder.AddInvalidFieldError("Password");
                 return responseResultBuilder.Build();
             }
-          
+
+            responseResultBuilder.SetData(response);
+
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("LoginByToken")]
+        public async Task<IActionResult> LoginByToken([FromBody] LoginByTokenCommand command)
+        {
+            var response = await userService.LoginByTokenAsync(command.Token ?? "");
+            if (response == null)
+            {
+                responseResultBuilder.AddInvalidFieldError("Token");
+                return responseResultBuilder.Build();
+            }
+
             responseResultBuilder.SetData(response);
 
             return responseResultBuilder.Build();

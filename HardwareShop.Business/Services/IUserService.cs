@@ -13,7 +13,8 @@ namespace HardwareShop.Business.Services
     {
         Task<CreatedUserDto> CreateUserAsync(string username, string password);
         Task<List<UserDto>> GetUserDtosAsync();
-        Task<LoginDto?> Login(string username, string password);
+        Task<LoginDto?> LoginAsync(string username, string password);
+        Task<LoginDto?> LoginByTokenAsync(string token);
         Task<IAssetTable?> GetCurrentUserAvatarAsync();
 
     }

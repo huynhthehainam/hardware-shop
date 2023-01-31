@@ -50,11 +50,13 @@ namespace HardwareShop.Business.Dtos
     public class LoginDto
     {
         public string AccessToken { get; set; }
+        public string SessionId { get; set; }
         public LoginUserDto User { get; set; }
-        public LoginDto(string accessToken, LoginUserDto user)
+        public LoginDto(string accessToken, LoginUserDto user, string sessionId)
         {
             AccessToken = accessToken;
             User = user;
+            SessionId = sessionId;
         }
     }
 }

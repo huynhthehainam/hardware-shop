@@ -20,9 +20,12 @@ namespace HardwareShop.Core.Implementations
             if (cacheUser == null)
             {
                 string? authHeader = httpContextAccessor.HttpContext.Request.Headers["Authorization"];
-                authHeader = authHeader.Replace(authPrefix, string.Empty).Trim();
+                if (authHeader != null)
+                {
+                    authHeader = authHeader.Replace(authPrefix, string.Empty).Trim();
 
-                cacheUser = await jwtService.GetUserFromTokenAsync(authHeader);
+                    cacheUser = await jwtService.GetUserFromTokenAsync(authHeader);
+                }
             }
             if (cacheUser == null)
             {

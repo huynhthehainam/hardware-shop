@@ -2,8 +2,11 @@
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Dynamic;
 using System.Linq;
 using System.Net.Mime;
 using System.Text;
@@ -40,7 +43,7 @@ namespace HardwareShop.Core.Implementations
         {
             this.languageService = languageService;
         }
-        private IDictionary<string, List<string>>? errors { get; set; }
+        private IDictionary<string, List<string>>? error { get; set; }
         private string? message;
         private ResponseResultType type = ResponseResultType.Json;
         private int statusCode { get; set; } = 200;
@@ -83,6 +86,9 @@ namespace HardwareShop.Core.Implementations
 
         public IActionResult Build()
         {
+
+            var dynamicError = new { };
+
             switch (type)
             {
                 case ResponseResultType.Json:
@@ -91,7 +97,7 @@ namespace HardwareShop.Core.Implementations
                         TotalItems = totalItems,
                         Type = type,
                         Data = data,
-                        Errors = errors,
+                        Error = error,
                         Message = message,
                     })
                     { StatusCode = this.statusCode };
@@ -106,7 +112,7 @@ namespace HardwareShop.Core.Implementations
                         TotalItems = totalItems,
                         Type = type,
                         Data = data,
-                        Errors = errors,
+                        Error = error,
                         Message = message
                     })
                     { StatusCode = this.statusCode };
@@ -115,17 +121,17 @@ namespace HardwareShop.Core.Implementations
 
         public void AddError(string fieldName, IDictionary<SupportedLanguage, string> message)
         {
-            if (errors is null)
+            if (error is null)
             {
-                errors = new Dictionary<string, List<string>>();
+                error = new Dictionary<string, List<string>>();
             }
 
-            if (!errors.ContainsKey(fieldName))
+            if (!error.ContainsKey(fieldName))
             {
-                errors.Add(fieldName, new List<string>());
+                error.Add(fieldName, new List<string>());
             }
             var configuration = languageService.GetConfiguration();
-            errors[fieldName].Add(message[configuration.Language]);
+            error[fieldName].Add(message[configuration.Language]);
 
         }
         public void AddInvalidFieldError(string fieldName)
