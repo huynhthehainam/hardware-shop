@@ -1,5 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
 using System.Collections.Generic;
@@ -57,6 +58,12 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader != null ? lazyLoader.Load(this, ref productAssets) : productAssets;
             set => productAssets = value;
+        }
+        private ICollection<WarehouseProduct>? warehouseProducts;
+        public ICollection<WarehouseProduct>? WarehouseProducts
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouseProducts) : warehouseProducts;
+            set => warehouseProducts = value;
         }
         public static void BuildModel(ModelBuilder modelBuilder)
         {

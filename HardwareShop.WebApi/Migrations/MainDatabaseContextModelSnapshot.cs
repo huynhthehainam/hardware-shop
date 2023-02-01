@@ -509,6 +509,24 @@ namespace HardwareShop.WebApi.Migrations
                     b.ToTable("Warehouses");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.WarehouseProduct", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("WarehouseId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("ProductId", "WarehouseId");
+
+                    b.HasIndex("WarehouseId");
+
+                    b.ToTable("WarehouseProducts");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
@@ -690,6 +708,25 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Shop");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.WarehouseProduct", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Product", "Product")
+                        .WithMany("WarehouseProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.Warehouse", "Warehouse")
+                        .WithMany("WarehouseProducts")
+                        .HasForeignKey("WarehouseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Warehouse");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
                     b.Navigation("Debt");
@@ -712,6 +749,8 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("InvoiceDetails");
 
                     b.Navigation("ProductAssets");
+
+                    b.Navigation("WarehouseProducts");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ProductCategory", b =>
@@ -747,6 +786,11 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Assets");
 
                     b.Navigation("UserShop");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Warehouse", b =>
+                {
+                    b.Navigation("WarehouseProducts");
                 });
 #pragma warning restore 612, 618
         }

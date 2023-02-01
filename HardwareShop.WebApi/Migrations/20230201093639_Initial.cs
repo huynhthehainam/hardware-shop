@@ -385,6 +385,31 @@ namespace HardwareShop.WebApi.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "WarehouseProducts",
+                columns: table => new
+                {
+                    ProductId = table.Column<int>(type: "integer", nullable: false),
+                    WarehouseId = table.Column<int>(type: "integer", nullable: false),
+                    Quantity = table.Column<double>(type: "double precision", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WarehouseProducts", x => new { x.ProductId, x.WarehouseId });
+                    table.ForeignKey(
+                        name: "FK_WarehouseProducts_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_WarehouseProducts_Warehouses_WarehouseId",
+                        column: x => x.WarehouseId,
+                        principalTable: "Warehouses",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerDebtHistories_CustomerDebtId",
                 table: "CustomerDebtHistories",
@@ -462,6 +487,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_WarehouseProducts_WarehouseId",
+                table: "WarehouseProducts",
+                column: "WarehouseId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Warehouses_ShopId",
                 table: "Warehouses",
                 column: "ShopId");
@@ -488,7 +518,7 @@ namespace HardwareShop.WebApi.Migrations
                 name: "UserShops");
 
             migrationBuilder.DropTable(
-                name: "Warehouses");
+                name: "WarehouseProducts");
 
             migrationBuilder.DropTable(
                 name: "CustomerDebts");
@@ -497,10 +527,13 @@ namespace HardwareShop.WebApi.Migrations
                 name: "Invoices");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "Products");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Warehouses");
 
             migrationBuilder.DropTable(
                 name: "Customers");

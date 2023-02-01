@@ -1,10 +1,12 @@
 ﻿using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HardwareShop.WebApi.Controllers
 {
@@ -25,6 +27,17 @@ namespace HardwareShop.WebApi.Controllers
                 return responseResultBuilder.Build();
             }
             responseResultBuilder.SetData(warehouse);
+            return responseResultBuilder.Build();
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWarehouses([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        {
+            var warehousePageData = await shopService.GetWarehousesOfCurrentUserShopAsync(pagingModel, search);
+            if (warehousePageData == null) { return responseResultBuilder.Build(); }
+
+            responseResultBuilder.SetPageData(warehousePageData);
+
             return responseResultBuilder.Build();
         }
     }

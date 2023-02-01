@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -182,6 +183,11 @@ namespace HardwareShop.Core.Implementations
         public void SetAsset(IAssetTable asset)
         {
             SetFile(asset.Bytes, asset.ContentType, asset.Filename);
+        }
+        public void SetPageData<T>(PageData<T> pageData)
+        {
+            SetData(pageData.Items);
+            totalItems = pageData.TotalRecords;
         }
     }
 }

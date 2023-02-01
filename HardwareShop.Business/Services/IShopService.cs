@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Business.Dtos;
+using HardwareShop.Core.Models;
 using HardwareShop.Dal.Models;
 using System;
 using System.Collections.Generic;
@@ -17,5 +18,6 @@ namespace HardwareShop.Business.Services
         Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address);
         Task<bool> DeleteShopSoftlyAsync(int shopId);
         Task<CreatedUserDto?> CreateAdminUserAsync(int id, string v1, string v2, string? email);
+        Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search);
     }
 }

@@ -36,36 +36,6 @@ namespace HardwareShop.Core.Implementations
         public async Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable
         {
 
-            //var properties = entity.GetType().GetProperties();
-            //foreach (var property in properties)
-            //{
-            //    if (property.Name == "Warehouses")
-            //    {
-            //        var type = property.GetType();
-            //        if (type != null)
-            //        {
-            //            if ((type.FullName ?? "").StartsWith("System.Collections.Generic.ICollection"))
-            //            {
-            //                var value = property.GetValue(entity);
-            //                if (value != null)
-            //                {
-            //                    ICollection<object>? collections = value as ICollection<object>;
-            //                    if (collections != null)
-            //                    {
-            //                        foreach (var item in collections)
-            //                        {
-            //                            if (typeof(ISoftDeletable).IsAssignableFrom(type.GetType()))
-            //                            {
-            //                                var deletableItem = (ISoftDeletable)item;
-            //                                deletableItem.IsDeleted = true;
-            //                            }
-            //                        }
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
             entity.IsDeleted = true;
             db.Entry(entity).State = EntityState.Modified;
             await db.SaveChangesAsync();
@@ -85,12 +55,22 @@ namespace HardwareShop.Core.Implementations
             return await dbSet.Where(expression).ToListAsync();
         }
 
-        public async Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, List<QueryOrder<T>>? orders)
+        public async Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, SearchQuery<T>? searchQuery, List<QueryOrder<T>>? orders)
         {
             var pageIndex = pagingModel.PageIndex;
             var pageSize = pagingModel.PageSize;
-            var count = await dbSet.CountAsync(expression);
-            IQueryable<T> data = dbSet.Where(expression);
+
+            var filteredDbSet = dbSet.Where(expression);
+            if (searchQuery != null)
+            {
+                var searchExpression = searchQuery.BuildSearchExpression();
+                filteredDbSet = filteredDbSet.Where(searchExpression);
+            }
+
+            var count = await filteredDbSet.CountAsync();
+
+
+            IQueryable<T> data = filteredDbSet;
             if (pageIndex.HasValue && pageSize.HasValue)
             {
                 data = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value);
@@ -194,7 +174,6 @@ namespace HardwareShop.Core.Implementations
 
         public async Task<T?> CreateIfNotExists(T entity, Expression<Func<T, object>> selector)
         {
-            var returnType = selector.ReturnType;
             var properties = selector.Body.Type.GetProperties();
             var entityProperties = typeof(T).GetProperties();
 

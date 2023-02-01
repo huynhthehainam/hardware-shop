@@ -1,5 +1,7 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Implementations;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using System;
@@ -149,6 +151,20 @@ namespace HardwareShop.Business.Implementations
         public Task<ShopDto?> GetShopByCurrentUserIdAsync(UserShopRole role)
         {
             return GetShopByUserIdAsync(currentUserService.GetUserId(), role);
+        }
+
+        public async Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        {
+            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+
+            var warehousePageData = await warehouseRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, search == null ? null : new SearchQuery<Warehouse>(search, e => new { e.Name, e.Address }));
+
+            return PageData<WarehouseDto>.ConvertFromOtherPageData(warehousePageData, e => new WarehouseDto(e.Id, e.Name, e.Address));
         }
     }
 }

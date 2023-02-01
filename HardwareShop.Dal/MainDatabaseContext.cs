@@ -5,15 +5,14 @@ namespace HardwareShop.Dal
     public class MainDatabaseContext : DbContext
     {
         public MainDatabaseContext(
-            DbContextOptions<MainDatabaseContext> options) : base(options) { }
-
-     
+            DbContextOptions<MainDatabaseContext> options) : base(options)
+        {
+        }
         public DbSet<UserAsset> UserAssets => Set<UserAsset>();
         public DbSet<UserShop> UserShops => Set<UserShop>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Shop> Shops => Set<Shop>();
         public DbSet<ShopAsset> ShopAssets => Set<ShopAsset>();
-
         public DbSet<ProductCategory> ProductCategories => Set<ProductCategory>();
         public DbSet<UnitCategory> UnitCategories => Set<UnitCategory>();
         public DbSet<Unit> Units => Set<Unit>();
@@ -25,10 +24,11 @@ namespace HardwareShop.Dal
         public DbSet<InvoiceDetail> InvoiceDetails => Set<InvoiceDetail>();
         public DbSet<User> Users => Set<User>();
         public DbSet<Warehouse> Warehouses => Set<Warehouse>();
+        public DbSet<WarehouseProduct> WarehouseProducts => Set<WarehouseProduct>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-        
+
             UserAsset.BuildModel(modelBuilder);
             UserShop.BuildModel(modelBuilder);
             Customer.BuildModel(modelBuilder);
@@ -45,6 +45,8 @@ namespace HardwareShop.Dal
             UnitCategory.BuildModel(modelBuilder);
             Warehouse.BuildModel(modelBuilder);
             User.BuildModel(modelBuilder);
+            WarehouseProduct.BuildModel(modelBuilder);
+
         }
     }
 }

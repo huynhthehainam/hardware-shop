@@ -31,6 +31,12 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
             set => shop = value;
         }
+        private ICollection<WarehouseProduct>? warehouseProducts;
+        public ICollection<WarehouseProduct>? WarehouseProducts
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouseProducts) : warehouseProducts;
+            set => warehouseProducts = value;
+        }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Warehouse>(w =>

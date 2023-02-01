@@ -26,6 +26,7 @@ namespace HardwareShop.Core.Services
         void AddExistedEntityError(string entityName);
         void AddNotFoundEntityError(string entityName);
         void AddNotPermittedError();
+        void SetPageData<T>(PageData<T> pageData);
     }
 
 }
