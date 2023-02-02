@@ -87,9 +87,6 @@ namespace HardwareShop.Core.Implementations
 
         public IActionResult Build()
         {
-
-            var dynamicError = new { };
-
             switch (type)
             {
                 case ResponseResultType.Json:
