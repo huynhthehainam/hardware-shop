@@ -1,4 +1,5 @@
-﻿using HardwareShop.Business.Implementations;
+﻿using HardwareShop.Business.Dtos;
+using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
@@ -12,16 +13,16 @@ namespace HardwareShop.WebApi.Controllers
 {
     public class WarehousesController : AuthorizedApiControllerBase
     {
-        private readonly IShopService shopService;
-        public WarehousesController(IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly IWarehouseService warehouseService;
+        public WarehousesController(IWarehouseService warehouseServic, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
-            this.shopService = shopService;
+            this.warehouseService = warehouseServic;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateWarehouse([FromBody] CreateWarehouseOfShopCommand command)
         {
-            var warehouse = await shopService.CreateWarehouseOfCurrentUserShopAsync(command.Name ?? "", command.Address);
+            var warehouse = await warehouseService.CreateWarehouseOfCurrentUserShopAsync(command.Name ?? "", command.Address);
             if (warehouse == null)
             {
                 return responseResultBuilder.Build();
@@ -33,11 +34,32 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWarehouses([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            var warehousePageData = await shopService.GetWarehousesOfCurrentUserShopAsync(pagingModel, search);
+            var warehousePageData = await warehouseService.GetWarehousesOfCurrentUserShopAsync(pagingModel, search);
             if (warehousePageData == null) { return responseResultBuilder.Build(); }
-
             responseResultBuilder.SetPageData(warehousePageData);
-
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("{id:int}/Delete")]
+        public async Task<IActionResult> DeleteWarehouse([FromRoute] int id)
+        {
+            var isSuccess = await warehouseService.DeleteWarehouseOfCurrentUserShopAsync(id);
+            if (!isSuccess)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Warehouse");
+                return responseResultBuilder.Build();
+            }
+            responseResultBuilder.SetDeletedMessage();
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("{id:int}/UpdateQuantityForProduct")]
+        public async Task<IActionResult> UpdateQuantityForProduct([FromRoute] int id, [FromBody] UpdateQuantityForProductCommand command)
+        {
+            WarehouseProductDto? warehouseProduct = await warehouseService.CreateOrUpdateWarehouseProductAsync(id, command.ProductId.GetValueOrDefault(), command.Quantity.GetValueOrDefault());
+            if (warehouseProduct == null)
+            {
+                return responseResultBuilder.Build();
+            }
+            responseResultBuilder.SetData(warehouseProduct);
             return responseResultBuilder.Build();
         }
     }

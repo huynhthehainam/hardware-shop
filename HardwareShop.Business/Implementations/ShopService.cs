@@ -88,24 +88,7 @@ namespace HardwareShop.Business.Implementations
             return new CreatedShopDto { Id = shop.Id };
         }
 
-        public async Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address)
-        {
-            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Admin);
-            if (shop == null)
-            {
-                return null;
-            }
-            Warehouse warehouse = await warehouseRepository.CreateAsync(new Warehouse
-            {
-                Name = name,
-                Address = address,
-                ShopId = shop.Id
-            });
-
-
-            return new CreatedWarehouseDto { Id = warehouse.Id };
-
-        }
+    
 
         public async Task<bool> DeleteShopSoftlyAsync(int shopId)
         {
@@ -153,18 +136,6 @@ namespace HardwareShop.Business.Implementations
             return GetShopByUserIdAsync(currentUserService.GetUserId(), role);
         }
 
-        public async Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
-        {
-            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Admin);
-            if (shop == null)
-            {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
-            }
-
-            var warehousePageData = await warehouseRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, search == null ? null : new SearchQuery<Warehouse>(search, e => new { e.Name, e.Address }));
-
-            return PageData<WarehouseDto>.ConvertFromOtherPageData(warehousePageData, e => new WarehouseDto(e.Id, e.Name, e.Address));
-        }
+     
     }
 }

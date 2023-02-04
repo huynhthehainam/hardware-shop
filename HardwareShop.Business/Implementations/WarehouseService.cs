@@ -1,0 +1,105 @@
+﻿using HardwareShop.Business.Dtos;
+using HardwareShop.Business.Services;
+using HardwareShop.Core.Implementations;
+using HardwareShop.Core.Models;
+using HardwareShop.Core.Services;
+using HardwareShop.Dal.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace HardwareShop.Business.Implementations
+{
+    public class WarehouseService : IWarehouseService
+    {
+        private readonly IShopService shopService;
+        private readonly IRepository<Warehouse> warehouseRepository;
+        private readonly IResponseResultBuilder responseResultBuilder;
+        private readonly IRepository<WarehouseProduct> warehouseProductRepository;
+        private readonly IRepository<Product> productRepository;
+        public WarehouseService(IShopService shopService, IRepository<Warehouse> warehouseRepository, IResponseResultBuilder responseResultBuilder, IRepository<WarehouseProduct> warehouseProductRepository, IRepository<Product> productRepository)
+        {
+            this.shopService = shopService;
+            this.warehouseRepository = warehouseRepository;
+            this.responseResultBuilder = responseResultBuilder;
+            this.warehouseProductRepository = warehouseProductRepository;
+            this.productRepository = productRepository;
+        }
+        public async Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+
+            var warehousePageData = await warehouseRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, search == null ? null : new SearchQuery<Warehouse>(search, e => new { e.Name, e.Address }));
+
+            return PageData<WarehouseDto>.ConvertFromOtherPageData(warehousePageData, e => new WarehouseDto(e.Id, e.Name, e.Address));
+        }
+
+        public async Task<bool> DeleteWarehouseOfCurrentUserShopAsync(int warehouseId)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return false;
+            }
+            return await warehouseRepository.DeleteByQueryAsync(e => e.ShopId == shop.Id && e.Id == warehouseId);
+        }
+        public async Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                return null;
+            }
+            Warehouse warehouse = await warehouseRepository.CreateAsync(new Warehouse
+            {
+                Name = name,
+                Address = address,
+                ShopId = shop.Id
+            });
+
+
+            return new CreatedWarehouseDto { Id = warehouse.Id };
+
+        }
+
+        public async Task<WarehouseProductDto?> CreateOrUpdateWarehouseProductAsync(int warehouseId, int productId, double quantity)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync();
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var warehouse = await warehouseRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == warehouseId);
+            if (warehouse == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Warehouse");
+                return null;
+            }
+
+            var product = await productRepository.GetItemByQueryAsync(e => (e.ProductCategory == null ? true : e.ProductCategory.ShopId == shop.Id) && e.Id == productId);
+            if (product == null)
+            {
+                responseResultBuilder.AddInvalidFieldError("ProductId");
+                return null;
+            }
+            WarehouseProduct item = await warehouseProductRepository.CreateOrUpdate(new WarehouseProduct { ProductId = productId, Quantity = quantity, WarehouseId = warehouseId }, e => new
+            {
+                e.ProductId,
+                e.WarehouseId
+            }, e => new
+            {
+                e.Quantity
+            });
+            return new WarehouseProductDto(item.WarehouseId, item.ProductId, item.Quantity);
+        }
+    }
+}

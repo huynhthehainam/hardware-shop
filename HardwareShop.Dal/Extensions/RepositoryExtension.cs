@@ -21,6 +21,8 @@ namespace HardwareShop.Dal.Extensions
             services.AddScoped<IRepository<Warehouse>, RepositoryBase<Warehouse>>();
             services.AddScoped<IRepository<UserShop>, RepositoryBase<UserShop>>();
             services.AddScoped<IRepository<UserAsset>, RepositoryBase<UserAsset>>();
+            services.AddScoped<IRepository<Product>, RepositoryBase<Product>>();
+            services.AddScoped<IRepository<WarehouseProduct>, RepositoryBase<WarehouseProduct>>();
         }
     }
 }

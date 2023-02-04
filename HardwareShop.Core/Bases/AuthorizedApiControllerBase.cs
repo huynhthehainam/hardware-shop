@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Bases
 {
-
+    [Authorize]
     public abstract class AuthorizedApiControllerBase : ApiControllerBase
     {
         protected readonly ICurrentUserService currentUserService;

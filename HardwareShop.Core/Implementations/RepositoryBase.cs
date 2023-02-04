@@ -42,12 +42,19 @@ namespace HardwareShop.Core.Implementations
             return true;
         }
 
-        public async Task<bool> DeleteByQueryAsync(Expression<Func<T, bool>> expression)
+        public async Task<bool> DeleteRangeByQueryAsync(Expression<Func<T, bool>> expression)
         {
             var entities = dbSet.Where(expression);
             db.RemoveRange(entities);
             await db.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> DeleteByQueryAsync(Expression<Func<T, bool>> expression)
+        {
+            var entity = dbSet.FirstOrDefault(expression);
+            if (entity == null)
+                return false;
+            return await DeleteAsync(entity);
         }
 
         public async Task<List<T>> GetDataByQueryAsync(Expression<Func<T, bool>> expression)
@@ -211,6 +218,66 @@ namespace HardwareShop.Core.Implementations
             }
 
             return null;
+        }
+
+        public async Task<T> CreateOrUpdate(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
+        {
+            var searchProperties = searchSelector.Body.Type.GetProperties();
+            var entityProperties = typeof(T).GetProperties();
+            T? item = null;
+
+            ParameterExpression parameterExpression = searchSelector.Parameters[0];
+            Expression expression = (Expression)parameterExpression;
+
+            Expression? body = null;
+            foreach (var property in searchProperties)
+            {
+                var existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
+                if (existedProperty != null)
+                {
+                    ConstantExpression valueExpression = Expression.Constant(existedProperty.GetValue(entity));
+                    if (body == null)
+                    {
+
+                        body = Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression);
+                    }
+                    else
+                    {
+                        body = Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
+                    }
+                }
+            }
+            if (body == null)
+            {
+                return await CreateAsync(entity);
+            }
+            else
+            {
+                Expression<Func<T, bool>> existQuery = Expression.Lambda<Func<T, bool>>(body, parameterExpression);
+                item = dbSet.Where(existQuery).FirstOrDefault();
+                if (item != null)
+                {
+                    // Parse item
+                    var updateProperties = updateSelector.Body.Type.GetProperties();
+                    foreach (var property in updateProperties)
+                    {
+                        var existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
+                        if (existedProperty != null)
+                        {
+                            var value = existedProperty.GetValue(entity);
+                            existedProperty.SetValue(item, value);
+                        }
+                    }
+                    
+                    return await UpdateAsync(item);
+                }
+                else
+                {
+                    return await CreateAsync(entity);
+                }
+            }
+
+
         }
     }
 }

@@ -15,9 +15,9 @@ namespace HardwareShop.Business.Services
         Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff);
         Task<ShopDto?> GetShopByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
         Task<CreatedShopDto?> CreateShopAsync(string name, string? address);
-        Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address);
+  
         Task<bool> DeleteShopSoftlyAsync(int shopId);
         Task<CreatedUserDto?> CreateAdminUserAsync(int id, string v1, string v2, string? email);
-        Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search);
+
     }
 }

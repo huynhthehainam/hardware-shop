@@ -1,4 +1,5 @@
-﻿using HardwareShop.Business.Extensions;
+﻿
+using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
@@ -212,10 +213,10 @@ public class Program
 
 
 
-        var authConfigurationSection = builder.Configuration.GetSection("AuthConfiguration");
-        builder.Services.Configure<AuthConfiguration>(authConfigurationSection);
-        var appSettings = authConfigurationSection.Get<AuthConfiguration>();
-        var key = Encoding.ASCII.GetBytes(appSettings.AuthSecret ?? "");
+        var jwtConfiguration = builder.Configuration.GetSection("JwtConfiguration");
+        builder.Services.Configure<AuthConfiguration>(jwtConfiguration);
+        var appSettings = jwtConfiguration.Get<JwtConfiguration>();
+        var key = Encoding.ASCII.GetBytes(appSettings.SecretKey ?? "");
         builder.Services.AddAuthentication(x =>
             {
                 x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -244,6 +245,7 @@ public class Program
                    LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken,
                                             TokenValidationParameters validationParameters) =>
                    {
+                       Console.WriteLine("hello world");
                        return notBefore.HasValue ? notBefore.Value <= DateTime.UtcNow : true &&
                                   expires.HasValue ? expires.Value >= DateTime.UtcNow : true;
                    }
