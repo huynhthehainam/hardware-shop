@@ -280,29 +280,5 @@ namespace HardwareShop.Core.Implementations
 
 
         }
-        private T1 convertFromFormFile<T1>(T1 entity, IFormFile file) where T1 : EntityBase, IAssetTable
-        {
-            using (var ms = new MemoryStream())
-            {
-                file.CopyTo(ms);
-                var fileBytes = ms.ToArray();
-                entity.Bytes = fileBytes;
-            }
-            entity.ContentType = file.ContentType;
-            entity.Filename = file.FileName;
-            return entity;
-        }
-        public async Task<T> CreateFromFileAsync<T1>(T1 entity, IFormFile file) where T1 : T, IAssetTable
-        {
-            entity = convertFromFormFile(entity, file);
-            return await CreateAsync(entity);
-
-        }
-
-        public async Task<T> UpdateFromFileAsync<T1>(T1 entity, IFormFile file) where T1 : T, IAssetTable
-        {
-            entity = convertFromFormFile(entity, file);
-            return await UpdateAsync(entity);
-        }
     }
 }

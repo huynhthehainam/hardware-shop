@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Dtos
 {
-    internal class ShopAssetDto
+    public class ShopAssetDto
     {
+        public int Id { get; set; } 
     }
 }
