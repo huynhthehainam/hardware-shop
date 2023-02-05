@@ -25,6 +25,7 @@ namespace HardwareShop.Dal
         public DbSet<User> Users => Set<User>();
         public DbSet<Warehouse> Warehouses => Set<Warehouse>();
         public DbSet<WarehouseProduct> WarehouseProducts => Set<WarehouseProduct>();
+        public DbSet<ProductCategoryProduct> ProductCategoryProducts => Set<ProductCategoryProduct>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +47,7 @@ namespace HardwareShop.Dal
             Warehouse.BuildModel(modelBuilder);
             User.BuildModel(modelBuilder);
             WarehouseProduct.BuildModel(modelBuilder);
+            ProductCategoryProduct.BuildModel(modelBuilder);
 
         }
     }

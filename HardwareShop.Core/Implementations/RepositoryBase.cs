@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace HardwareShop.Core.Implementations
             return true;
 
         }
-        public async Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable
+        public async Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : T, ISoftDeletable
         {
 
             entity.IsDeleted = true;
@@ -268,7 +269,7 @@ namespace HardwareShop.Core.Implementations
                             existedProperty.SetValue(item, value);
                         }
                     }
-                    
+
                     return await UpdateAsync(item);
                 }
                 else
@@ -278,6 +279,30 @@ namespace HardwareShop.Core.Implementations
             }
 
 
+        }
+        private T1 convertFromFormFile<T1>(T1 entity, IFormFile file) where T1 : EntityBase, IAssetTable
+        {
+            using (var ms = new MemoryStream())
+            {
+                file.CopyTo(ms);
+                var fileBytes = ms.ToArray();
+                entity.Bytes = fileBytes;
+            }
+            entity.ContentType = file.ContentType;
+            entity.Filename = file.FileName;
+            return entity;
+        }
+        public async Task<T> CreateFromFileAsync<T1>(T1 entity, IFormFile file) where T1 : T, IAssetTable
+        {
+            entity = convertFromFormFile(entity, file);
+            return await CreateAsync(entity);
+
+        }
+
+        public async Task<T> UpdateFromFileAsync<T1>(T1 entity, IFormFile file) where T1 : T, IAssetTable
+        {
+            entity = convertFromFormFile(entity, file);
+            return await UpdateAsync(entity);
         }
     }
 }

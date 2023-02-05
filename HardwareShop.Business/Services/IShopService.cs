@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Core.Models;
 using HardwareShop.Dal.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +16,7 @@ namespace HardwareShop.Business.Services
         Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff);
         Task<ShopDto?> GetShopByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
         Task<CreatedShopDto?> CreateShopAsync(string name, string? address);
-  
+        Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file);
         Task<bool> DeleteShopSoftlyAsync(int shopId);
         Task<CreatedUserDto?> CreateAdminUserAsync(int id, string v1, string v2, string? email);
 

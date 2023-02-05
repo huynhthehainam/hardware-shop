@@ -30,6 +30,19 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetData(shop);
             return responseResultBuilder.Build();
         }
+        [HttpPost("{id:int}/UpdateLogo")]
+        public async Task<IActionResult> UpdateLogo([FromRoute] int id, [FromForm] UpdateShopLogoCommand command)
+        {
+            if (!currentUserService.IsSystemAdmin())
+            {
+                responseResultBuilder.AddNotPermittedError();
+                return responseResultBuilder.Build();
+            }
+
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+
+        }
 
 
 

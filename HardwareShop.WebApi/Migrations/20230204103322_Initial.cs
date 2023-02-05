@@ -280,25 +280,19 @@ namespace HardwareShop.WebApi.Migrations
                     PercentForCustomer = table.Column<double>(type: "double precision", nullable: true),
                     PriceForFamiliarCustomer = table.Column<double>(type: "double precision", nullable: true),
                     PriceForCustomer = table.Column<double>(type: "double precision", nullable: false),
+                    ShopId = table.Column<int>(type: "integer", nullable: false),
                     UnitId = table.Column<int>(type: "integer", nullable: false),
-                    ProductCategoryId = table.Column<int>(type: "integer", nullable: false),
-                    ProductCategoryId1 = table.Column<int>(type: "integer", nullable: true),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_ProductCategories_ProductCategoryId",
-                        column: x => x.ProductCategoryId,
-                        principalTable: "ProductCategories",
+                        name: "FK_Products_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Products_ProductCategories_ProductCategoryId1",
-                        column: x => x.ProductCategoryId1,
-                        principalTable: "ProductCategories",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Products_Units_UnitId",
                         column: x => x.UnitId,
@@ -386,6 +380,30 @@ namespace HardwareShop.WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductCategoryProducts",
+                columns: table => new
+                {
+                    ProductCategoryId = table.Column<int>(type: "integer", nullable: false),
+                    ProductId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductCategoryProducts", x => new { x.ProductId, x.ProductCategoryId });
+                    table.ForeignKey(
+                        name: "FK_ProductCategoryProducts_ProductCategories_ProductCategoryId",
+                        column: x => x.ProductCategoryId,
+                        principalTable: "ProductCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductCategoryProducts_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WarehouseProducts",
                 columns: table => new
                 {
@@ -451,14 +469,14 @@ namespace HardwareShop.WebApi.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_ProductCategoryId",
-                table: "Products",
+                name: "IX_ProductCategoryProducts_ProductCategoryId",
+                table: "ProductCategoryProducts",
                 column: "ProductCategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_ProductCategoryId1",
+                name: "IX_Products_ShopId",
                 table: "Products",
-                column: "ProductCategoryId1");
+                column: "ShopId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_UnitId",
@@ -509,6 +527,9 @@ namespace HardwareShop.WebApi.Migrations
                 name: "ProductAssets");
 
             migrationBuilder.DropTable(
+                name: "ProductCategoryProducts");
+
+            migrationBuilder.DropTable(
                 name: "ShopAssets");
 
             migrationBuilder.DropTable(
@@ -527,6 +548,9 @@ namespace HardwareShop.WebApi.Migrations
                 name: "Invoices");
 
             migrationBuilder.DropTable(
+                name: "ProductCategories");
+
+            migrationBuilder.DropTable(
                 name: "Users");
 
             migrationBuilder.DropTable(
@@ -537,9 +561,6 @@ namespace HardwareShop.WebApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Customers");
-
-            migrationBuilder.DropTable(
-                name: "ProductCategories");
 
             migrationBuilder.DropTable(
                 name: "Units");

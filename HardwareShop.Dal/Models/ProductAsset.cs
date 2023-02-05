@@ -37,7 +37,7 @@ namespace HardwareShop.Dal.Models
         public string AssetType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
-        public string ContentType { get; set; }
+        public string ContentType { get; set; } = string.Empty;
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {

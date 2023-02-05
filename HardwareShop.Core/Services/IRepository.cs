@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Core.Bases;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -77,7 +78,7 @@ namespace HardwareShop.Core.Services
         Task<bool> DeleteByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression);
         Task<T> CreateAsync(T entity);
-        Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : EntityBase, ISoftDeletable;
+        Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : T, ISoftDeletable;
         Task<T> UpdateAsync(T entity);
         Task<bool> DeleteAsync(T entity);
         Task<bool> DeleteRangeByQueryAsync(Expression<Func<T, Boolean>> expression);

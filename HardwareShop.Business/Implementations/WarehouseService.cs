@@ -85,7 +85,7 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
 
-            var product = await productRepository.GetItemByQueryAsync(e => (e.ProductCategory == null ? true : e.ProductCategory.ShopId == shop.Id) && e.Id == productId);
+            var product = await productRepository.GetItemByQueryAsync(e => (e.ShopId == shop.Id) && e.Id == productId);
             if (product == null)
             {
                 responseResultBuilder.AddInvalidFieldError("ProductId");

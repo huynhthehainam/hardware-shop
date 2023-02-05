@@ -28,6 +28,14 @@ namespace HardwareShop.Dal.Models
         public double? PercentForCustomer { get; set; }
         public double? PriceForFamiliarCustomer { get; set; }
         public double PriceForCustomer { get; set; }
+        public int ShopId { get; set; }
+        private Shop? shop;
+        public Shop? Shop
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            set => shop = value;
+        }
+
         public int UnitId { get; set; }
         private Unit? unit;
         public Unit? Unit
@@ -35,16 +43,6 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref unit) : unit;
             set => unit = value;
         }
-
-        public int ProductCategoryId { get; set; }
-        private ProductCategory? productCategory;
-        public ProductCategory? ProductCategory
-        {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategory) : productCategory;
-            set => productCategory = value;
-        }
-
-
         private ICollection<InvoiceDetail>? invoiceDetails;
         public ICollection<InvoiceDetail>? InvoiceDetails
         {
@@ -65,13 +63,19 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouseProducts) : warehouseProducts;
             set => warehouseProducts = value;
         }
+        private ICollection<ProductCategoryProduct>? productCategoryProducts;
+        public ICollection<ProductCategoryProduct>? ProductCategoryProducts
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategoryProducts) : productCategoryProducts;
+            set => productCategoryProducts = value;
+        }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>(e =>
             {
                 e.HasKey(e => e.Id);
                 e.HasOne(e => e.Unit).WithMany(e => e.Products).HasForeignKey(e => e.UnitId).OnDelete(DeleteBehavior.Cascade);
-                e.HasOne(e => e.productCategory).WithMany(e => e.Products).HasForeignKey(e => e.ProductCategoryId).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(e => e.Shop).WithMany(e => e.Products).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
 
         }

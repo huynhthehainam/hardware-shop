@@ -56,6 +56,12 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
             set => invoices = value;
         }
+        private ICollection<Product>? products;
+        public ICollection<Product>? Products
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref products) : products;
+            set => products = value;
+        }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
         public bool IsDeleted { get; set; } = false;

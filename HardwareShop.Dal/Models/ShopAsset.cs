@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using System;
@@ -35,7 +36,7 @@ namespace HardwareShop.Dal.Models
         public string AssetType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
-        public string ContentType { get; set; }
+        public string ContentType { get; set; } = string.Empty;
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {
@@ -45,5 +46,6 @@ namespace HardwareShop.Dal.Models
                 s.HasOne(e => e.Shop).WithMany(e => e.Assets).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
         }
+
     }
 }

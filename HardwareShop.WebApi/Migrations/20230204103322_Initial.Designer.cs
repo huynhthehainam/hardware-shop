@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230201093639_Initial")]
+    [Migration("20230204103322_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -195,10 +195,7 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<double?>("PricePerMass")
                         .HasColumnType("double precision");
 
-                    b.Property<int>("ProductCategoryId")
-                        .HasColumnType("integer");
-
-                    b.Property<int?>("ProductCategoryId1")
+                    b.Property<int>("ShopId")
                         .HasColumnType("integer");
 
                     b.Property<int>("UnitId")
@@ -206,9 +203,7 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductCategoryId");
-
-                    b.HasIndex("ProductCategoryId1");
+                    b.HasIndex("ShopId");
 
                     b.HasIndex("UnitId");
 
@@ -281,6 +276,21 @@ namespace HardwareShop.WebApi.Migrations
                     b.HasIndex("ShopId");
 
                     b.ToTable("ProductCategories");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ProductCategoryProduct", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductCategoryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProductId", "ProductCategoryId");
+
+                    b.HasIndex("ProductCategoryId");
+
+                    b.ToTable("ProductCategoryProducts");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Shop", b =>
@@ -602,15 +612,11 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Product", b =>
                 {
-                    b.HasOne("HardwareShop.Dal.Models.ProductCategory", "productCategory")
+                    b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
                         .WithMany("Products")
-                        .HasForeignKey("ProductCategoryId")
+                        .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("HardwareShop.Dal.Models.ProductCategory", "ProductCategory")
-                        .WithMany()
-                        .HasForeignKey("ProductCategoryId1");
 
                     b.HasOne("HardwareShop.Dal.Models.Unit", "Unit")
                         .WithMany("Products")
@@ -618,11 +624,9 @@ namespace HardwareShop.WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("ProductCategory");
+                    b.Navigation("Shop");
 
                     b.Navigation("Unit");
-
-                    b.Navigation("productCategory");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ProductAsset", b =>
@@ -645,6 +649,25 @@ namespace HardwareShop.WebApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ProductCategoryProduct", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.ProductCategory", "ProductCategory")
+                        .WithMany("ProductCategoryProducts")
+                        .HasForeignKey("ProductCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.Product", "Product")
+                        .WithMany("ProductCategoryProducts")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("ProductCategory");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ShopAsset", b =>
@@ -752,12 +775,14 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Navigation("ProductAssets");
 
+                    b.Navigation("ProductCategoryProducts");
+
                     b.Navigation("WarehouseProducts");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ProductCategory", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("ProductCategoryProducts");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Shop", b =>
@@ -767,6 +792,8 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Invoices");
 
                     b.Navigation("ProductCategories");
+
+                    b.Navigation("Products");
 
                     b.Navigation("UserShops");
 

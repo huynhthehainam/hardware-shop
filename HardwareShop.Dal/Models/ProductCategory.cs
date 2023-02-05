@@ -29,12 +29,11 @@ namespace HardwareShop.Dal.Models
             set => shop = value;
         }
         public bool IsDeleted { get; set; }
-
-        private ICollection<Product>? products;
-        public ICollection<Product>? Products
+        private ICollection<ProductCategoryProduct>? productCategoryProducts;
+        public ICollection<ProductCategoryProduct>? ProductCategoryProducts
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref products) : products;
-            set => products = value;
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategoryProducts) : productCategoryProducts;
+            set => productCategoryProducts = value;
         }
 
         public static void BuildModel(ModelBuilder modelBuilder)

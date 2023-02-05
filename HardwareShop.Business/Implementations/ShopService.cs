@@ -4,6 +4,7 @@ using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -23,6 +24,7 @@ namespace HardwareShop.Business.Implementations
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly IRepository<UserShop> userShopRepository;
+
         public ShopService(IRepository<Shop> shopRepository, IRepository<Warehouse> warehouseRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository)
         {
             this.shopRepository = shopRepository;
@@ -88,7 +90,7 @@ namespace HardwareShop.Business.Implementations
             return new CreatedShopDto { Id = shop.Id };
         }
 
-    
+
 
         public async Task<bool> DeleteShopSoftlyAsync(int shopId)
         {
@@ -136,6 +138,14 @@ namespace HardwareShop.Business.Implementations
             return GetShopByUserIdAsync(currentUserService.GetUserId(), role);
         }
 
-     
+        public Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file)
+        {
+            var shop = await shopRepository.GetItemByQueryAsync(e => e.Id == shopId);
+            if (shop == null)
+            {
+                this.responseResultBuilder.AddNotFoundEntityError("Shop");
+                return false;
+            }
+        }
     }
 }

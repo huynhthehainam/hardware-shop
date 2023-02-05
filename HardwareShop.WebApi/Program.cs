@@ -28,9 +28,10 @@ public class Program
         const string productAssetFile = "ProductAsset.jpg";
         const string shopAssetFile = "ShopAsset.jpg";
         const string userAssetFile = "UserAsset.jpg";
-        using (var scope = services.CreateScope())
+        using (IServiceScope scope = services.CreateScope())
         {
-            IWebHostEnvironment env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
+            IWebHostEnvironment? env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
+            if (env == null) return;
             if (!env.IsDevelopment())
             {
                 return;
@@ -109,40 +110,63 @@ public class Program
 
                             }
                         },
-                        ProductCategories = new ProductCategory[]
-                        {
-                            new ProductCategory
-                            {
-                                Name = "Hoa Sen",
-                                Description = "Hoa Sen",
-                                Products = new Product[]
-                                {
-                                    new Product
-                                    {
-                                        Name = "H13x26",
-                                        Mass =  2.5,
-                                        Unit = unit,
-                                        PercentForCustomer = 8,
-                                        PriceForCustomer = 12000,
-                                        PercentForFamiliarCustomer = 6,
-                                        PriceForFamiliarCustomer = 11000,
-                                        PricePerMass = 600,
-                                        ProductAssets = new ProductAsset[]{
-                                            new ProductAsset
-                                            {
-                                                Bytes = productAssetBytes,
-                                                AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                Filename = productAssetFile,
-                                                ContentType= ContentTypeConstants.JpegContentType
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        
 
                     };
+
                     db.Shops.Add(shop);
+                    db.SaveChanges();
+
+                    var product = new Product
+                    {
+                        Name = "H13x26",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        ShopId = shop.Id,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
+                                                new ProductAsset
+                                                {
+                                                    Bytes = productAssetBytes,
+                                                    AssetType =  ProductAssetConstants.ThumbnailAssetType,
+                                                    Filename = productAssetFile,
+                                                    ContentType= ContentTypeConstants.JpegContentType
+                                                }
+                                            }
+                    };
+                    db.Products.Add(product);
+                    db.SaveChanges();
+                    var productCategory =   new ProductCategory
+                    {
+                        Name = "Hoa Sen",
+                        Description = "Hoa Sen",
+                        ShopId = shop.Id,
+                    };
+                    var productCategory2 = new ProductCategory
+                    {
+                        Name = "Tôn",
+                        Description = "Tôn",
+                        ShopId = shop.Id,
+                    };
+                    db.ProductCategories.Add(productCategory);
+                    db.ProductCategories.Add(productCategory2);
+                    db.SaveChanges();
+                    ProductCategoryProduct productCategoryProduct = new ProductCategoryProduct
+                    {
+                        Product =  product,
+                        ProductCategory = productCategory,
+                    };
+                    ProductCategoryProduct productCategoryProduct2 = new ProductCategoryProduct
+                    {
+                        Product = product,
+                        ProductCategory = productCategory2,
+                    };
+                    db.ProductCategoryProducts.Add(productCategoryProduct);
+                    db.ProductCategoryProducts.Add(productCategoryProduct2);
                     db.SaveChanges();
                 }
             }
