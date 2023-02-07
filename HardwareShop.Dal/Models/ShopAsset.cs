@@ -1,12 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -23,7 +17,7 @@ namespace HardwareShop.Dal.Models
         public ShopAsset(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-
+        public int Id { get; set; }
         public int ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
@@ -42,7 +36,7 @@ namespace HardwareShop.Dal.Models
         {
             modelBuilder.Entity<ShopAsset>(s =>
             {
-                s.HasKey(s => s.ShopId);
+                s.HasKey(s => s.Id);
                 s.HasOne(e => e.Shop).WithMany(e => e.Assets).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
         }

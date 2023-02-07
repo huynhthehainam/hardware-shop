@@ -3,11 +3,6 @@ using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Extensions
 {
@@ -24,6 +19,7 @@ namespace HardwareShop.Dal.Extensions
             services.AddScoped<IRepository<Product>, RepositoryBase<Product>>();
             services.AddScoped<IRepository<WarehouseProduct>, RepositoryBase<WarehouseProduct>>();
             services.AddScoped<IRepository<ProductAsset>, RepositoryBase<ProductAsset>>();
+            services.AddScoped<IRepository<ShopAsset>, RepositoryBase<ShopAsset>>();
         }
     }
 }

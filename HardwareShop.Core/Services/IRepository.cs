@@ -1,13 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
-using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Services
 {
@@ -83,7 +76,7 @@ namespace HardwareShop.Core.Services
         Task<bool> DeleteAsync(T entity);
         Task<bool> DeleteRangeByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
-        Task<T?> CreateIfNotExists(T entity, Expression<Func<T, object>> selector);
-        Task<T> CreateOrUpdate(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector);
+        Task<T?> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector);
+        Task<T> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector);
     }
 }

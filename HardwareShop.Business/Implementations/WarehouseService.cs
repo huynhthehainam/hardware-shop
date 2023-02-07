@@ -1,14 +1,8 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -91,7 +85,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddInvalidFieldError("ProductId");
                 return null;
             }
-            WarehouseProduct item = await warehouseProductRepository.CreateOrUpdate(new WarehouseProduct { ProductId = productId, Quantity = quantity, WarehouseId = warehouseId }, e => new
+            WarehouseProduct item = await warehouseProductRepository.CreateOrUpdateAsync(new WarehouseProduct { ProductId = productId, Quantity = quantity, WarehouseId = warehouseId }, e => new
             {
                 e.ProductId,
                 e.WarehouseId

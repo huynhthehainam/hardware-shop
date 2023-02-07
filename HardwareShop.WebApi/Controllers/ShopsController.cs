@@ -38,8 +38,13 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
+            if (command.Logo == null)
+            {
+                return responseResultBuilder.Build();
+            }
 
-    
+            var shopAsset = await shopService.UpdateLogoAsync(id, command.Logo);
+            if (shopAsset == null)  return responseResultBuilder.Build();
 
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();

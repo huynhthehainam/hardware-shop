@@ -1,17 +1,9 @@
 ﻿using HardwareShop.Business.Dtos;
+using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Implementations;
-using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -24,8 +16,9 @@ namespace HardwareShop.Business.Implementations
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly IRepository<UserShop> userShopRepository;
+        private readonly IRepository<ShopAsset> shopAssetRepository;
 
-        public ShopService(IRepository<Shop> shopRepository, IRepository<Warehouse> warehouseRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository)
+        public ShopService(IRepository<Shop> shopRepository, IRepository<Warehouse> warehouseRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository)
         {
             this.shopRepository = shopRepository;
             this.currentUserService = currentUserService;
@@ -34,6 +27,7 @@ namespace HardwareShop.Business.Implementations
             this.userRepository = userRepository;
             this.hashingPasswordService = hashingPasswordService;
             this.userShopRepository = userShopRepository;
+            this.shopAssetRepository = shopAssetRepository;
         }
 
         public async Task<CreatedUserDto?> CreateAdminUserAsync(int id, string username, string password, string? email)
@@ -44,7 +38,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var user = await userRepository.CreateIfNotExists(new User
+            var user = await userRepository.CreateIfNotExistsAsync(new User
             {
                 Username = username,
                 HashedPassword = hashingPasswordService.Hash(password),
@@ -73,7 +67,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CreatedShopDto?> CreateShopAsync(string name, string? address)
         {
-            var shop = await shopRepository.CreateIfNotExists(new Shop
+            var shop = await shopRepository.CreateIfNotExistsAsync(new Shop
             {
                 Name = name,
                 Address = address
@@ -138,14 +132,18 @@ namespace HardwareShop.Business.Implementations
             return GetShopByUserIdAsync(currentUserService.GetUserId(), role);
         }
 
-        public Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file)
+        public async Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file)
         {
             var shop = await shopRepository.GetItemByQueryAsync(e => e.Id == shopId);
             if (shop == null)
             {
                 this.responseResultBuilder.AddNotFoundEntityError("Shop");
-                return false;
+                return null;
             }
+            ShopAsset shopAsset = new ShopAsset() { AssetType = ShopAssetConstants.LogoAssetType, CreatedDate = DateTime.UtcNow, LastModifiedDate = DateTime.UtcNow, ShopId = shop.Id, };
+            shopAsset = file.ConvertToAsset(shopAsset);
+            shopAsset = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
+            return new ShopAssetDto { Id = shopAsset.Id };
         }
     }
 }

@@ -110,6 +110,8 @@ namespace HardwareShop.WebApi.Migrations
                 name: "ShopAssets",
                 columns: table => new
                 {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ShopId = table.Column<int>(type: "integer", nullable: false),
                     Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
                     Filename = table.Column<string>(type: "text", nullable: false),
@@ -120,7 +122,7 @@ namespace HardwareShop.WebApi.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ShopAssets", x => x.ShopId);
+                    table.PrimaryKey("PK_ShopAssets", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ShopAssets_Shops_ShopId",
                         column: x => x.ShopId,
@@ -482,6 +484,11 @@ namespace HardwareShop.WebApi.Migrations
                 name: "IX_Products_UnitId",
                 table: "Products",
                 column: "UnitId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShopAssets_ShopId",
+                table: "ShopAssets",
+                column: "ShopId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Units_UnitCategoryId",

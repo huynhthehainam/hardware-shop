@@ -1,14 +1,8 @@
 ﻿using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Implementations
 {
@@ -172,7 +166,15 @@ namespace HardwareShop.Core.Implementations
 
         public async Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression)
         {
-            return await dbSet.FirstOrDefaultAsync(expression);
+            if (typeof(ITrackingDate).IsAssignableFrom(typeof(T)))
+            {
+                return await dbSet.OrderByDescending(e => ((ITrackingDate)e).CreatedDate).FirstOrDefaultAsync(expression);
+            }
+            else
+            {
+                return await dbSet.FirstOrDefaultAsync(expression);
+            }
+
         }
 
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
@@ -180,7 +182,7 @@ namespace HardwareShop.Core.Implementations
             return await dbSet.AnyAsync(expression);
         }
 
-        public async Task<T?> CreateIfNotExists(T entity, Expression<Func<T, object>> selector)
+        public async Task<T?> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector)
         {
             var properties = selector.Body.Type.GetProperties();
             var entityProperties = typeof(T).GetProperties();
@@ -221,7 +223,7 @@ namespace HardwareShop.Core.Implementations
             return null;
         }
 
-        public async Task<T> CreateOrUpdate(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
+        public async Task<T> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
         {
             var searchProperties = searchSelector.Body.Type.GetProperties();
             var entityProperties = typeof(T).GetProperties();
