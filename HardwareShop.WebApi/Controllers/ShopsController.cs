@@ -44,14 +44,25 @@ namespace HardwareShop.WebApi.Controllers
             }
 
             var shopAsset = await shopService.UpdateLogoAsync(id, command.Logo);
-            if (shopAsset == null)  return responseResultBuilder.Build();
+            if (shopAsset == null) return responseResultBuilder.Build();
 
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
-
         }
 
+        [HttpPost("YourShop/UpdateLogo")]
+        public async Task<IActionResult> UpdateYourShopLogo([FromForm] UpdateShopLogoCommand command)
+        {
+            if (command.Logo == null)
+            {
+                return responseResultBuilder.Build();
+            }
+            var shopAsset = await shopService.UpdateYourShopLogoAsync(command.Logo);
+            if (shopAsset == null) return responseResultBuilder.Build();
 
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
 
         [HttpPost("{id:int}/DeleteSoftly")]
         public async Task<IActionResult> DeleteShopSoftly([FromRoute] int id)

@@ -1,11 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -65,15 +60,27 @@ namespace HardwareShop.Dal.Models
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
         public bool IsDeleted { get; set; } = false;
-
+        private ICollection<Order>? orders;
+        public ICollection<Order>? Orders
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref orders) : orders;
+            set => orders = value;
+        }
+        public int CashUnitId { get; set; }
+        private Unit? cashUnit;
+        public Unit? CashUnit
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref cashUnit) : cashUnit;
+            set => cashUnit = value;
+        }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Shop>(s =>
             {
                 s.HasKey(x => x.Id);
+                s.HasOne(e => e.CashUnit).WithMany(e => e.Shops).HasForeignKey(e => e.CashUnitId).OnDelete(DeleteBehavior.Cascade);
             });
         }
-
 
     }
 }

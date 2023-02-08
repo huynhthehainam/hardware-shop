@@ -1,14 +1,10 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
+
     public sealed class CustomerDebt : EntityBase
     {
         public CustomerDebt()
@@ -25,8 +21,7 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref customer) : customer;
             set => customer = value;
         }
-        public double AmountOfDebt { get; set; }
-
+        public double Amount { get; set; }
         private ICollection<CustomerDebtHistory>? histories;
         public ICollection<CustomerDebtHistory>? Histories
         {
@@ -41,5 +36,6 @@ namespace HardwareShop.Dal.Models
                 e.HasOne(e => e.Customer).WithOne(e => e.Debt).HasForeignKey<CustomerDebt>(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
             });
         }
+        
     }
 }

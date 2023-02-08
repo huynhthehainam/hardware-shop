@@ -1,11 +1,6 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Services
 {
@@ -16,6 +11,7 @@ namespace HardwareShop.Business.Services
         Task<LoginDto?> LoginAsync(string username, string password);
         Task<LoginDto?> LoginByTokenAsync(string token);
         Task<IAssetTable?> GetCurrentUserAvatarAsync();
+        Task<PageData<UserDto>?> GetUsersOfShopAsync(PagingModel pagingModel, string? search);
 
     }
 }

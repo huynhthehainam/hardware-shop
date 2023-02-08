@@ -1,18 +1,9 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
-using HardwareShop.Core.Helpers;
-using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal;
 using HardwareShop.Dal.Models;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -25,7 +16,8 @@ namespace HardwareShop.Business.Implementations
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly ICurrentUserService currentUserService;
         private readonly ILanguageService languageService;
-        public UserService(IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService)
+        private readonly IShopService shopService;
+        public UserService(IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService)
         {
             this.userRepository = userRepository;
             this.jwtService = jwtService;
@@ -34,11 +26,12 @@ namespace HardwareShop.Business.Implementations
             this.responseResultBuilder = responseResultBuilder;
             this.languageService = languageService;
             this.hashingPasswordService = hashingPasswordService;
+            this.shopService = shopService;
         }
 
-        public async Task<CreatedUserDto> CreateUserAsync(string username, string password)
+        public Task<CreatedUserDto> CreateUserAsync(string username, string password)
         {
-            return new CreatedUserDto { Id = 1 };
+            return Task.FromResult(new CreatedUserDto { Id = 1 });
         }
 
         private async Task<IAssetTable?> getUserAvatarByUserId(int userId)
@@ -66,14 +59,14 @@ namespace HardwareShop.Business.Implementations
         {
             var user = await userRepository.GetItemByQueryAsync(e => e.Username == username);
             if (user == null) return null;
-            if (!hashingPasswordService.Verify(password, user.HashedPassword))
+            if (!hashingPasswordService.Verify(password, user.HashedPassword ?? ""))
             {
                 return null;
             }
-            return await generateLoginDtoFromUser(user);
+            return generateLoginDtoFromUser(user);
         }
 
-        private async Task<LoginDto?> generateLoginDtoFromUser(User user)
+        private LoginDto? generateLoginDtoFromUser(User user)
         {
 
             var cacheUser = new CacheUser()
@@ -104,7 +97,33 @@ namespace HardwareShop.Business.Implementations
             }
             var user = await userRepository.GetItemByQueryAsync(e => e.Id == cacheUser.Id);
             if (user == null) return null;
-            return await generateLoginDtoFromUser(user);
+            return generateLoginDtoFromUser(user);
+        }
+
+        public async Task<PageData<UserDto>?> GetUsersOfShopAsync(PagingModel pagingModel, string? search)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            PageData<User> users = await userRepository.GetPageDataByQueryAsync(pagingModel, e => (e.UserShop != null && e.UserShop.ShopId == shop.Id), search == null ? null : new SearchQuery<User>(search, e => new
+            {
+                e.Email,
+                e.Username,
+                e.FirstName,
+                e.LastName,
+                e.Phone,
+            }));
+            return PageData<UserDto>.ConvertFromOtherPageData(users, e => new UserDto
+            {
+                Id = e.Id,
+                Email = e.Email,
+                FullName = languageService.GenerateFullName(e.FirstName, e.LastName),
+                Phone = e.Phone,
+                Username = e.Username,
+            });
         }
     }
 }

@@ -1,11 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -36,7 +31,7 @@ namespace HardwareShop.Dal.Models
         public string AssetType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
-        public string ContentType { get; set; }
+        public string ContentType { get; set; } = string.Empty;
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {

@@ -3,6 +3,7 @@ using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -35,5 +36,16 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetAsset(asset);
             return responseResultBuilder.Build();
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
+        {
+            CreatedProductDto? product = await productService.CreateProductOfShopAsync(command.Name ?? "", command.Mass, command.PricePerMass, command.PercentForFamiliarCustomer, command.PercentForCustomer, command.PriceForFamiliarCustomer, command.PriceForCustomer ?? 0, command.HasAutoCalculatePermission);
+            if (product == null)
+                return responseResultBuilder.Build();
+
+            responseResultBuilder.SetData(product);
+            return responseResultBuilder.Build();
+        }
+
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace HardwareShop.Core.Helpers
 {
@@ -11,7 +7,7 @@ namespace HardwareShop.Core.Helpers
         public static string RandomString(int length)
         {
             var random = new Random();
-            const string pool = "abcdefghijklmnopqrstuvwxyz0123456789";
+            const string pool = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             var builder = new StringBuilder();
 
             for (var i = 0; i < length; i++)

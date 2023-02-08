@@ -1,16 +1,9 @@
-﻿using HardwareShop.Core.Bases;
-using HardwareShop.Core.Implementations;
+﻿using System.Text.Json;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Dal.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -20,8 +13,8 @@ namespace HardwareShop.Dal.Models
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-      
-        public String? Username { get; set; }
+
+        public string Username { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public String? HashedPassword { get; set; }
@@ -61,6 +54,8 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref assets) : assets;
             set => assets = value;
         }
+
+    
 
     }
 }

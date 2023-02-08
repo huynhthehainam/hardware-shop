@@ -1,11 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -41,6 +36,12 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
             set => invoices = value;
+        }
+        private ICollection<Order>? orders;
+        public ICollection<Order>? Orders
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref orders) : orders;
+            set => orders = value;
         }
         public static void BuildModel(ModelBuilder modelBuilder)
         {

@@ -97,9 +97,17 @@ namespace HardwareShop.Business.Implementations
             return await shopRepository.DeleteSoftlyAsync(shop);
         }
 
+        public async Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff)
+        {
+            var userShop = await getUserShopByUserIdAsync(userId, role);
+            if (userShop == null)
+                return null;
+            if (userShop.Shop == null)
+                return null;
+            return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
+        }
 
-
-        public async Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role)
+        private async Task<UserShop?> getUserShopByUserIdAsync(int userId, UserShopRole role)
         {
             var acceptedRoles = new List<UserShopRole>();
             switch (role)
@@ -113,25 +121,37 @@ namespace HardwareShop.Business.Implementations
                 default:
                     break;
             }
-            var shop = await shopRepository.GetItemByQueryAsync(e =>
-         e.UserShops != null ? e.UserShops.Any(s => s.UserId == userId && acceptedRoles.Contains(s.Role)) : false);
+            var userShop = await userShopRepository.GetItemByQueryAsync(e => e.UserId == userId && acceptedRoles.Contains(e.Role));
 
-            if (shop == null)
+            return userShop;
+        }
+        public async Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role)
+        {
+            var userShop = await getUserShopByUserIdAsync(currentUserService.GetUserId(), role);
+            if (userShop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            return new ShopDto
-            {
-                Id = shop.Id
-            };
+            return userShop.Shop;
         }
-
-        public Task<ShopDto?> GetShopByCurrentUserIdAsync(UserShopRole role)
+        public async Task<ShopDto?> GetShopDtoByCurrentUserIdAsync(UserShopRole role)
         {
-            return GetShopByUserIdAsync(currentUserService.GetUserId(), role);
+            var userShop = await getUserShopByUserIdAsync(currentUserService.GetUserId(), role);
+            if (userShop == null)
+            {
+                return null;
+            }
+            if (userShop.Shop == null)
+                return null;
+            return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
         }
-
+        private async Task<ShopAssetDto> updateShopLogo(Shop shop, IFormFile file)
+        {
+            ShopAsset shopAsset = new ShopAsset() { AssetType = ShopAssetConstants.LogoAssetType, CreatedDate = DateTime.UtcNow, LastModifiedDate = DateTime.UtcNow, ShopId = shop.Id, };
+            shopAsset = file.ConvertToAsset(shopAsset);
+            shopAsset = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
+            return new ShopAssetDto { Id = shopAsset.Id };
+        }
         public async Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file)
         {
             var shop = await shopRepository.GetItemByQueryAsync(e => e.Id == shopId);
@@ -140,10 +160,20 @@ namespace HardwareShop.Business.Implementations
                 this.responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            ShopAsset shopAsset = new ShopAsset() { AssetType = ShopAssetConstants.LogoAssetType, CreatedDate = DateTime.UtcNow, LastModifiedDate = DateTime.UtcNow, ShopId = shop.Id, };
-            shopAsset = file.ConvertToAsset(shopAsset);
-            shopAsset = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
-            return new ShopAssetDto { Id = shopAsset.Id };
+            return await updateShopLogo(shop, file);
         }
+
+        public async Task<ShopAssetDto?> UpdateYourShopLogoAsync(IFormFile file)
+        {
+            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                this.responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            return await updateShopLogo(shop, file);
+        }
+
+
     }
 }

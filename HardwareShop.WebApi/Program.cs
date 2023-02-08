@@ -1,4 +1,5 @@
 ﻿
+using System.Text;
 using HardwareShop.Business.Extensions;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Implementations;
@@ -11,7 +12,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using System.Text;
 
 namespace HardwareShop.WebApi;
 public class Program
@@ -179,13 +179,19 @@ public class Program
                     UnitCategory unitCategory = new UnitCategory()
                     {
                         Name = "Mass",
-
+                    };
+                    UnitCategory unitCategory2 = new UnitCategory()
+                    {
+                        Name = "Currency"
                     };
                     db.UnitCategories.Add(unitCategory);
+                    db.UnitCategories.Add(unitCategory2);
                     db.SaveChanges();
 
                     Unit unit = new Unit { Name = "Kg", UnitCategory = unitCategory };
+                    Unit unit1 = new Unit { Name = "VND", UnitCategory = unitCategory2, StepNumber = 500 };
                     db.Units.Add(unit);
+                    db.Units.Add(unit1);
                     db.SaveChanges();
 
                     var productAssetPath = Path.Join(assetFolder, productAssetFile);
@@ -226,6 +232,7 @@ public class Program
                     {
                         Name = "Admin shop",
                         Address = "123",
+                        CashUnit = unit1,
                         Assets = new ShopAsset[]
                         {
                             new ShopAsset
@@ -357,7 +364,7 @@ public class Program
                                                 }
                                             }
                     };
-                     var product6 = new Product
+                    var product6 = new Product
                     {
                         Name = "V3",
                         Mass = 2.5,

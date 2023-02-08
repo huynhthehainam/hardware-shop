@@ -4,11 +4,6 @@ using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -25,6 +20,37 @@ namespace HardwareShop.Business.Implementations
             this.responseResultBuilder = responseResultBuilder;
             this.productAssetRepository = productAssetRepository;
         }
+
+        public async Task<CreatedProductDto?> CreateProductOfShopAsync(string name, double? mass, double? pricePerMass, double? percentForFamiliarCustomer, double? percentForCustomer, double? priceForFamiliarCustomer, double priceForCustomer, bool hasAutoCalculatePermission)
+        {
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var product = await productRepository.CreateIfNotExistsAsync(new Product
+            {
+                Name = name,
+                PricePerMass = pricePerMass,
+                PercentForFamiliarCustomer = percentForFamiliarCustomer,
+                PercentForCustomer = percentForCustomer,
+                PriceForFamiliarCustomer = priceForFamiliarCustomer,
+                PriceForCustomer = priceForCustomer,
+                ShopId = shop.Id,
+                HasAutoCalculatePermission = hasAutoCalculatePermission,
+            }, e => new
+            {
+                e.Name
+            });
+            if (product == null)
+            {
+                responseResultBuilder.AddInvalidFieldError("Name");
+                return null;
+            }
+            return new CreatedProductDto { Id = product.Id };
+        }
+
         public async Task<PageData<ProductDto>?> GetProductPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
@@ -59,13 +85,8 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<IAssetTable?> GetProductThumbnail(int productId)
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
-            if (shop == null)
-            {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
-            }
-            var productAsset = await productAssetRepository.GetItemByQueryAsync(e => e.ProductId == productId && (e.Product != null && e.Product.ShopId == shop.Id) && e.AssetType == ProductAssetConstants.ThumbnailAssetType);
+
+            var productAsset = await productAssetRepository.GetItemByQueryAsync(e => e.ProductId == productId && (e.Product != null) && e.AssetType == ProductAssetConstants.ThumbnailAssetType);
             if (productAsset == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");

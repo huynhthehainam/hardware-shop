@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230207124451_Initial")]
+    [Migration("20230208105910_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -57,7 +57,7 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer");
 
-                    b.Property<double>("AmountOfDebt")
+                    b.Property<double>("Amount")
                         .HasColumnType("double precision");
 
                     b.HasKey("CustomerId");
@@ -73,14 +73,29 @@ namespace HardwareShop.WebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<double>("AmountOfChange")
+                    b.Property<double>("ChangeOfDebt")
                         .HasColumnType("double precision");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("CustomerDebtId")
                         .HasColumnType("integer");
 
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<double>("NewDebt")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("OldDebt")
+                        .HasColumnType("double precision");
+
                     b.Property<string>("Reason")
                         .HasColumnType("text");
+
+                    b.Property<JsonDocument>("ReasonParams")
+                        .HasColumnType("jsonb");
 
                     b.HasKey("Id");
 
@@ -97,11 +112,15 @@ namespace HardwareShop.WebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<double>("ChangeOfDebt")
-                        .HasColumnType("double precision");
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("text");
 
-                    b.Property<double>("CurrentDebt")
-                        .HasColumnType("double precision");
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("CurrentDebtHistoryId")
+                        .HasColumnType("integer");
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer");
@@ -109,12 +128,22 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
 
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int?>("OrderId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ShopId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CurrentDebtHistoryId");
+
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("ShopId");
 
@@ -144,13 +173,7 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
-                    b.Property<double>("Profit")
-                        .HasColumnType("double precision");
-
                     b.Property<double>("Quantity")
-                        .HasColumnType("double precision");
-
-                    b.Property<double>("TotalCost")
                         .HasColumnType("double precision");
 
                     b.HasKey("Id");
@@ -162,6 +185,64 @@ namespace HardwareShop.WebApi.Migrations
                     b.ToTable("InvoiceDetails");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("ShopId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("ShopId");
+
+                    b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.OrderDetail", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Quantity")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("OrderDetails");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Product", b =>
                 {
                     b.Property<int>("Id")
@@ -169,6 +250,9 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("HasAutoCalculatePermission")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -179,6 +263,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double>("OriginalPrice")
+                        .HasColumnType("double precision");
 
                     b.Property<double?>("PercentForCustomer")
                         .HasColumnType("double precision");
@@ -304,6 +391,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
+                    b.Property<int>("CashUnitId")
+                        .HasColumnType("integer");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -317,6 +407,8 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CashUnitId");
 
                     b.ToTable("Shops");
                 });
@@ -372,6 +464,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<double>("StepNumber")
+                        .HasColumnType("double precision");
 
                     b.Property<int>("UnitCategoryId")
                         .HasColumnType("integer");
@@ -436,6 +531,7 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Username")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("Id");
@@ -582,11 +678,21 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Invoice", b =>
                 {
+                    b.HasOne("HardwareShop.Dal.Models.CustomerDebtHistory", "CurrentDebtHistory")
+                        .WithMany("Invoices")
+                        .HasForeignKey("CurrentDebtHistoryId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("HardwareShop.Dal.Models.Customer", "Customer")
                         .WithMany("Invoices")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.Order", "Order")
+                        .WithMany("Invoices")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
                         .WithMany("Invoices")
@@ -594,7 +700,11 @@ namespace HardwareShop.WebApi.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CurrentDebtHistory");
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Order");
 
                     b.Navigation("Shop");
                 });
@@ -614,6 +724,44 @@ namespace HardwareShop.WebApi.Migrations
                         .IsRequired();
 
                     b.Navigation("Invoice");
+
+                    b.Navigation("Product");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Order", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Customer", "Customer")
+                        .WithMany("Orders")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
+                        .WithMany("Orders")
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.OrderDetail", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Order", "Order")
+                        .WithMany("Details")
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.Product", "Product")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
 
                     b.Navigation("Product");
                 });
@@ -676,6 +824,17 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("ProductCategory");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Shop", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Unit", "CashUnit")
+                        .WithMany("Shops")
+                        .HasForeignKey("CashUnitId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CashUnit");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ShopAsset", b =>
@@ -765,6 +924,8 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Debt");
 
                     b.Navigation("Invoices");
+
+                    b.Navigation("Orders");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.CustomerDebt", b =>
@@ -772,14 +933,28 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Histories");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.CustomerDebtHistory", b =>
+                {
+                    b.Navigation("Invoices");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Invoice", b =>
                 {
                     b.Navigation("Details");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.Order", b =>
+                {
+                    b.Navigation("Details");
+
+                    b.Navigation("Invoices");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Product", b =>
                 {
                     b.Navigation("InvoiceDetails");
+
+                    b.Navigation("OrderDetails");
 
                     b.Navigation("ProductAssets");
 
@@ -799,6 +974,8 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Navigation("Invoices");
 
+                    b.Navigation("Orders");
+
                     b.Navigation("ProductCategories");
 
                     b.Navigation("Products");
@@ -811,6 +988,8 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.Unit", b =>
                 {
                     b.Navigation("Products");
+
+                    b.Navigation("Shops");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.UnitCategory", b =>

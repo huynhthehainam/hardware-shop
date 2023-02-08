@@ -1,12 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking.Internal;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -27,7 +21,9 @@ namespace HardwareShop.Dal.Models
         public double? PercentForFamiliarCustomer { get; set; }
         public double? PercentForCustomer { get; set; }
         public double? PriceForFamiliarCustomer { get; set; }
+        public double OriginalPrice { get; set; }
         public double PriceForCustomer { get; set; }
+        public bool HasAutoCalculatePermission { get; set; } = false;
         public int ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
@@ -48,6 +44,12 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref invoiceDetails) : invoiceDetails;
             set => invoiceDetails = value;
+        }
+        private ICollection<OrderDetail>? orderDetails;
+        public ICollection<OrderDetail>? OrderDetails
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref orderDetails) : orderDetails;
+            set => orderDetails = value;
         }
         public bool IsDeleted { get; set; }
 

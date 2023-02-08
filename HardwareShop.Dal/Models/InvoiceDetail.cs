@@ -1,11 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -43,8 +38,6 @@ namespace HardwareShop.Dal.Models
             get; set;
         }
         public double OriginalPrice { get; set; }
-        public double Profit { get; set; }
-        public double TotalCost { get; set; }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<InvoiceDetail>(m =>
