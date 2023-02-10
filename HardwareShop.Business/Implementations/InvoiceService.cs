@@ -83,7 +83,7 @@ namespace HardwareShop.Business.Implementations
             var roundedTotalCost = shop.CashUnit == null ? totalCost : shop.CashUnit.RoundValue(totalCost);
             var roundedDeposit = shop.CashUnit == null ? deposit : shop.CashUnit.RoundValue(deposit);
             var changeOfCash = roundedTotalCost - roundedDeposit;
-            if (changeOfCash > 0)
+            if (changeOfCash != 0)
             {
                 var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenBuying(invoice.Code);
                 CustomerDebtHistory history = await customerDebtService.AddDebtToCustomer(customer, changeOfCash, reason.Item1, reason.Item2);

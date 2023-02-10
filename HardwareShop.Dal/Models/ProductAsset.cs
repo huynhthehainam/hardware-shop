@@ -1,17 +1,13 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
     public static class ProductAssetConstants
     {
         public const string ThumbnailAssetType = "thumbnail";
+        public const string SlideAssetType = "slide";
 
     }
 

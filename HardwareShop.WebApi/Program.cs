@@ -220,10 +220,31 @@ public class Program
                                 Filename = userAssetFile,
                                 Bytes =  userAssetBytes,
                                 ContentType = ContentTypeConstants.JpegContentType
-                }
-            }
+                            }
+                        }
+                    };
+                    var user1 = new User
+                    {
+                        Email = "huynhthehainam.mismart@gmail.com",
+                        HashedPassword = hashingPasswordService.Hash("123"),
+                        Phone = "+84967044037",
+                        FirstName = "Nam",
+                        LastName = "Huỳnh",
+                        Role = HardwareShop.Core.Models.SystemUserRole.Admin,
+                        Username = "admin1",
+                        Assets = new UserAsset[]
+                        {
+                            new UserAsset
+                            {
+                                AssetType = UserAssetConstants.AvatarAssetType,
+                                Filename = userAssetFile,
+                                Bytes =  userAssetBytes,
+                                ContentType = ContentTypeConstants.JpegContentType
+                            }
+                        }
                     };
                     db.Users.Add(user);
+                    db.Users.Add(user1);
                     db.SaveChanges();
 
 
@@ -249,6 +270,12 @@ public class Program
                             {
                                 UserId =  user.Id,
                                 Role  = UserShopRole.Admin,
+
+                            },
+                            new UserShop
+                            {
+                                UserId =  user1.Id,
+                                Role  = UserShopRole.Staff,
 
                             }
                         },
