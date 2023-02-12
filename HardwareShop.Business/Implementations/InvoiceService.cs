@@ -54,7 +54,7 @@ namespace HardwareShop.Business.Implementations
                 var isProductExist = await productRepository.AnyAsync(e => e.ShopId == shop.Id && e.Id == detail.ProductId);
                 if (!isProductExist)
                 {
-                    responseResultBuilder.AddInvalidFieldError($"Products.{i}.ProductId");
+                    responseResultBuilder.AddInvalidFieldError($"Products[{i}].ProductId");
                     return null;
                 }
             }

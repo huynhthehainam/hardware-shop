@@ -33,5 +33,10 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetData(invoice);
             return responseResultBuilder.Build();
         }
+        [HttpGet("{id:int}/Pdf")]
+        public Task<IActionResult> GetPdf([FromRoute] int id)
+        {
+            return Task.FromResult(responseResultBuilder.Build());
+        }
     }
 }

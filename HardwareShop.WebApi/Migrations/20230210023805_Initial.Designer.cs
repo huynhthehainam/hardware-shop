@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230208105910_Initial")]
+    [Migration("20230210023805_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -646,7 +646,7 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
-                        .WithMany()
+                        .WithMany("Customers")
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -971,6 +971,8 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.Shop", b =>
                 {
                     b.Navigation("Assets");
+
+                    b.Navigation("Customers");
 
                     b.Navigation("Invoices");
 

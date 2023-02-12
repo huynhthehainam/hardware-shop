@@ -644,7 +644,7 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
-                        .WithMany()
+                        .WithMany("Customers")
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -969,6 +969,8 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.Shop", b =>
                 {
                     b.Navigation("Assets");
+
+                    b.Navigation("Customers");
 
                     b.Navigation("Invoices");
 

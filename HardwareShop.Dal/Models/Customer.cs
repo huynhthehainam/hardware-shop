@@ -48,6 +48,7 @@ namespace HardwareShop.Dal.Models
             modelBuilder.Entity<Customer>(e =>
             {
                 e.HasKey(e => e.Id);
+                e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

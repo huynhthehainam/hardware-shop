@@ -8,14 +8,14 @@ namespace HardwareShop.WebApi.Commands
     public class CreateInvoiceDetailCommand
     {
         [Required]
-        public double? OriginalPrice { get; internal set; }
+        public double? OriginalPrice { get; set; }
         [Required]
-        public int? ProductId { get; internal set; }
+        public int? ProductId { get; set; }
         [Required]
-        public double? Quantity { get; internal set; }
+        public double? Quantity { get; set; }
         [Required]
-        public double? Price { get; internal set; }
-        public string? Description { get; internal set; }
+        public double? Price { get; set; }
+        public string? Description { get; set; }
     }
     public class CreateInvoiceCommand
     {

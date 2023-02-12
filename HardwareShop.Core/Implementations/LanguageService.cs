@@ -1,11 +1,6 @@
-﻿using HardwareShop.Core.Services;
-using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
+using HardwareShop.Core.Services;
+using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Core.Implementations
 {
@@ -15,21 +10,12 @@ namespace HardwareShop.Core.Implementations
         Vietnamese,
         English
     }
-    public class LanguageConfiguration
-    {
-        public SupportedLanguage Language { get; set; } = SupportedLanguage.English;
-    }
     public class LanguageService : ILanguageService
     {
-        private readonly LanguageConfiguration configuration;
-        public LanguageConfiguration GetConfiguration()
-        {
-            return configuration;
-        }
-
+        private SupportedLanguage supportedLanguage;
         public string GenerateFullName(string firstName, string lastName)
         {
-            var language = configuration.Language;
+            var language = supportedLanguage;
             switch (language)
             {
                 case SupportedLanguage.English:
@@ -40,9 +26,30 @@ namespace HardwareShop.Core.Implementations
                     return $"{firstName} {lastName}";
             }
         }
-        public LanguageService(IOptions<LanguageConfiguration> options)
+
+        public void SetLanguage(SupportedLanguage language)
         {
-            configuration = options.Value;
+            supportedLanguage = language;
+        }
+
+        public SupportedLanguage GetLanguage()
+        {
+            return supportedLanguage;
+        }
+
+        public LanguageService(IHttpContextAccessor httpContextAccessor)
+        {
+            var language = httpContextAccessor.HttpContext?.Request.Query["lang"].ToString();
+
+            var success = Enum.TryParse<SupportedLanguage>(language, true, out SupportedLanguage supportedLanguage);
+            if (success)
+            {
+                this.supportedLanguage = supportedLanguage;
+            }
+            else
+            {
+                this.supportedLanguage = SupportedLanguage.English;
+            }
         }
     }
 }

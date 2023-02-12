@@ -1,18 +1,8 @@
-﻿using HardwareShop.Core.Bases;
+﻿using System.Text.Json.Serialization;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Dynamic;
-using System.Linq;
-using System.Net.Mime;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Implementations
 {
@@ -52,8 +42,8 @@ namespace HardwareShop.Core.Implementations
         private int? totalItems { get; set; }
         public void SetMessage(IDictionary<SupportedLanguage, string> message)
         {
-            var configuration = languageService.GetConfiguration();
-            this.message = message[configuration.Language];
+            var language = languageService.GetLanguage();
+            this.message = message[language];
         }
         public void SetUpdatedMessage()
         {
@@ -128,17 +118,16 @@ namespace HardwareShop.Core.Implementations
             {
                 error.Add(fieldName, new List<string>());
             }
-            var configuration = languageService.GetConfiguration();
-            error[fieldName].Add(message[configuration.Language]);
+            var language = languageService.GetLanguage();
+            error[fieldName].Add(message[language]);
 
         }
         public void AddInvalidFieldError(string fieldName)
         {
-
             var invalidMessage = new Dictionary<SupportedLanguage, string>()
             {
                 [SupportedLanguage.Vietnamese] = $"Trường {fieldName} không hợp lệ",
-                [SupportedLanguage.English] = $"{fileName} field is invalid"
+                [SupportedLanguage.English] = $"{fieldName} field is invalid"
             };
 
             AddError(fieldName, invalidMessage);
