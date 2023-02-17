@@ -173,7 +173,5 @@ namespace HardwareShop.Business.Implementations
             }
             return await updateShopLogo(shop, file);
         }
-
-
     }
 }

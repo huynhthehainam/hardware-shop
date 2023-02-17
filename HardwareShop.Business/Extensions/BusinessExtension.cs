@@ -14,6 +14,7 @@ namespace HardwareShop.Business.Extensions
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IInvoiceService, InvoiceService>();
             services.AddScoped<ICustomerDebtService, CustomerDebtService>();
+            services.AddScoped<IProductCategoryService, ProductCategoryService>();
         }
     }
 }
