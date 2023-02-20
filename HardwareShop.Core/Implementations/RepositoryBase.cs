@@ -1,8 +1,8 @@
-﻿using HardwareShop.Core.Bases;
+﻿using System.Linq.Expressions;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace HardwareShop.Core.Implementations
 {
@@ -57,6 +57,100 @@ namespace HardwareShop.Core.Implementations
             return await dbSet.Where(expression).ToListAsync();
         }
 
+        public async Task<PageData<T1>> GetDtoPageDataByQueryAsync<T1>(PagingModel pagingModel, Expression<Func<T, bool>> expression, Func<T, T1> convertor, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null) where T1 : class
+        {
+            var pageIndex = pagingModel.PageIndex;
+            var pageSize = pagingModel.PageSize;
+            var filteredDbSet = dbSet.Where(expression);
+            if (searchQuery != null)
+            {
+                var searchExpression = searchQuery.BuildSearchExpression();
+                filteredDbSet = filteredDbSet.Where(searchExpression);
+            }
+            var count = await filteredDbSet.CountAsync();
+            IQueryable<T> data = filteredDbSet;
+            if (pageIndex.HasValue && pageSize.HasValue)
+            {
+                data = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value);
+                if (orders is not null && orders.Count > 0)
+                {
+                    IOrderedEnumerable<T>? orderedData = null;
+                    for (var i = 0; i < orders.Count; i++)
+                    {
+                        var order = orders[i];
+                        if (i == 0)
+                        {
+                            if (order.IsAscending)
+                            {
+                                orderedData = data.OrderBy(order.Order);
+                            }
+                            else
+                            {
+                                orderedData = data.OrderByDescending(order.Order);
+                            }
+                        }
+                        else
+                        {
+                            if (order.IsAscending)
+                            {
+                                orderedData = orderedData!.ThenBy(order.Order);
+                            }
+                            else
+                            {
+                                orderedData = orderedData!.ThenByDescending(order.Order);
+                            }
+                        }
+                    }
+                    var finalData = orderedData!.Select(convertor).ToList();
+                    return new PageData<T1> { Items = finalData, TotalRecords = count };
+                }
+                else
+                {
+                    var finalData = data.Select(convertor).ToList();
+                    return new PageData<T1> { Items = finalData, TotalRecords = count };
+                }
+            }
+            else
+            {
+                if (orders is not null && orders.Count > 0)
+                {
+                    IOrderedEnumerable<T>? orderedData = null;
+                    for (var i = 0; i < orders.Count; i++)
+                    {
+                        var order = orders[i];
+                        if (i == 0)
+                        {
+                            if (order.IsAscending)
+                            {
+                                orderedData = data.OrderBy(order.Order);
+                            }
+                            else
+                            {
+                                orderedData = data.OrderByDescending(order.Order);
+                            }
+                        }
+                        else
+                        {
+                            if (order.IsAscending)
+                            {
+                                orderedData = orderedData!.ThenBy(order.Order);
+                            }
+                            else
+                            {
+                                orderedData = orderedData!.ThenByDescending(order.Order);
+                            }
+                        }
+                    }
+                    var finalData = orderedData!.Select(convertor).ToList();
+                    return new PageData<T1> { Items = finalData, TotalRecords = count };
+                }
+                else
+                {
+                    var finalData = data.Select(convertor).ToList();
+                    return new PageData<T1> { Items = finalData, TotalRecords = count };
+                }
+            }
+        }
         public async Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, SearchQuery<T>? searchQuery, List<QueryOrder<T>>? orders)
         {
             var pageIndex = pagingModel.PageIndex;
@@ -282,5 +376,7 @@ namespace HardwareShop.Core.Implementations
 
 
         }
+
+
     }
 }

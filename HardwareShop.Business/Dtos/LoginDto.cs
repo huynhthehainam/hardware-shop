@@ -1,11 +1,6 @@
-﻿using HardwareShop.Core.Models;
+﻿using System.Text.Json;
+using HardwareShop.Core.Models;
 using HardwareShop.Dal.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Business.Dtos
 {
@@ -13,12 +8,15 @@ namespace HardwareShop.Business.Dtos
     {
         public string Name { get; set; }
         public UserShopRole Role { get; set; }
+        public string CashUnitName { get; set; }
+        public int CashUnitId { get; set; }
 
-
-        public LoginShopDto(string name, UserShopRole role)
+        public LoginShopDto(string name, UserShopRole role, string cashUnitName, int cashUnitId)
         {
             Name = name;
             Role = role;
+            CashUnitName = cashUnitName;
+            CashUnitId = cashUnitId;
         }
     }
     public class LoginUserDataDto

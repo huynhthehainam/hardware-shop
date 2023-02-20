@@ -86,8 +86,8 @@ namespace HardwareShop.Business.Implementations
 
 
             return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
-                languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings), userShop == null ? null : new LoginShopDto(
-                    userShop.Shop != null ? (userShop.Shop.Name ?? "") : "", userShop.Role)), tokens.SessionId);
+                languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings), (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(
+                 userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0)), tokens.SessionId);
         }
         public async Task<LoginDto?> LoginByTokenAsync(string token)
         {

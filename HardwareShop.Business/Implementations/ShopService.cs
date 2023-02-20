@@ -147,7 +147,13 @@ namespace HardwareShop.Business.Implementations
         }
         private async Task<ShopAssetDto> updateShopLogo(Shop shop, IFormFile file)
         {
-            ShopAsset shopAsset = new ShopAsset() { AssetType = ShopAssetConstants.LogoAssetType, CreatedDate = DateTime.UtcNow, LastModifiedDate = DateTime.UtcNow, ShopId = shop.Id, };
+            ShopAsset shopAsset = new ShopAsset()
+            {
+                AssetType = ShopAssetConstants.LogoAssetType,
+                CreatedDate = DateTime.UtcNow,
+                LastModifiedDate = DateTime.UtcNow,
+                ShopId = shop.Id,
+            };
             shopAsset = file.ConvertToAsset(shopAsset);
             shopAsset = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
             return new ShopAssetDto { Id = shopAsset.Id };

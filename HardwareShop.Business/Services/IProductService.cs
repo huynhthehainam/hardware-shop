@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Business.Services
 {
@@ -14,8 +15,13 @@ namespace HardwareShop.Business.Services
          double? percentForCustomer,
          double? priceForFamiliarCustomer,
          double priceForCustomer,
-         bool hasAutoCalculatePermission
+         bool hasAutoCalculatePermission,
+         List<int>? categoryIds,
+         List<Tuple<int, double>>? warehouses
          );
-        Task<IAssetTable?> GetProductThumbnail(int productId);
+        Task<IAssetTable?> GetProductThumbnailAsync(int productId);
+        Task<IAssetTable?> GetProductAssetByIdAsync(int productId, int assetId);
+        Task<int?> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file);
+        Task<ProductDto?> GetProductOrCurrentUserShopAsync(int productId);
     }
 }

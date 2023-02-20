@@ -4,6 +4,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HardwareShop.WebApi.Commands
 {
+    public class CreateProductWarehouseQuantityCommand
+    {
+        public int WarehouseId { get; set; }
+        public double Quantity { get; set; }
+    }
     public class CreateProductCommand
     {
         [Required]
@@ -12,7 +17,8 @@ namespace HardwareShop.WebApi.Commands
         public double? PricePerMass { get; set; }
         public double? PercentForFamiliarCustomer { get; set; }
         public double? PercentForCustomer { get; set; }
-
+        [Required]
+        public List<int>? CategoryIds { get; set; }
         public double? PriceForFamiliarCustomer { get; set; }
         [Required]
         public double? PriceForCustomer { get; set; }
@@ -22,6 +28,7 @@ namespace HardwareShop.WebApi.Commands
             get; set;
         }
         public bool HasAutoCalculatePermission { get; set; } = false;
+        public List<CreateProductWarehouseQuantityCommand>? Warehouses { get; set; }
 
     }
 }

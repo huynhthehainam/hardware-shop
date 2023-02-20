@@ -151,7 +151,7 @@ public class Program
         app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
         app.UseAuthentication();
 
-        // app.UseAuthorization();
+        app.UseAuthorization();
 
         app.SeedData();
         app.Run();

@@ -1,6 +1,6 @@
-﻿using HardwareShop.Core.Bases;
+﻿using System.Linq.Expressions;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
-using System.Linq.Expressions;
 
 namespace HardwareShop.Core.Services
 {
@@ -67,6 +67,7 @@ namespace HardwareShop.Core.Services
     public interface IRepository<T> where T : EntityBase
     {
         Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null);
+        Task<PageData<T1>> GetDtoPageDataByQueryAsync<T1>(PagingModel pagingModel, Expression<Func<T, bool>> expression, Func<T, T1> convertor, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null) where T1 : class;
         Task<List<T>> GetDataByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<bool> DeleteByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression);
