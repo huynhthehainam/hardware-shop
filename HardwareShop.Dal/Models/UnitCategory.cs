@@ -1,14 +1,15 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
+    public static class UnitCategoryConstants
+    {
+        public const string CurrencyCategoryName = "Currency";
+        public const string MassCategoryName = "Mass";
+
+    }
     public sealed class UnitCategory : EntityBase
     {
         public UnitCategory()

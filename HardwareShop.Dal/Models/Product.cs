@@ -23,6 +23,8 @@ namespace HardwareShop.Dal.Models
         public double? PriceForFamiliarCustomer { get; set; }
         public double OriginalPrice { get; set; }
         public double PriceForCustomer { get; set; }
+    
+
         public bool HasAutoCalculatePermission { get; set; } = false;
         public int ShopId { get; set; }
         private Shop? shop;

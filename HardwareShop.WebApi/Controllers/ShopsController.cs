@@ -1,5 +1,7 @@
-﻿using HardwareShop.Business.Services;
+﻿using HardwareShop.Business.Dtos;
+using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
@@ -9,8 +11,12 @@ namespace HardwareShop.WebApi.Controllers
     public class ShopsController : AuthorizedApiControllerBase
     {
         private readonly IShopService shopService;
-        public ShopsController(IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly ICustomerService customerService;
+        private readonly IUserService userService;
+        public ShopsController(ICustomerService customerService, IUserService userService, IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
+            this.customerService = customerService;
+            this.userService = userService;
             this.shopService = shopService;
         }
 
@@ -63,6 +69,18 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }
+
+
+        [HttpGet("YourShop/Users")]
+        public async Task<IActionResult> GetUsersOfYourShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        {
+            PageData<UserDto>? users = await userService.GetUserPageDataOfShopAsync(pagingModel, search);
+            if (users == null) return responseResultBuilder.Build();
+
+            responseResultBuilder.SetPageData(users);
+            return responseResultBuilder.Build();
+        }
+
 
         [HttpPost("{id:int}/DeleteSoftly")]
         public async Task<IActionResult> DeleteShopSoftly([FromRoute] int id)

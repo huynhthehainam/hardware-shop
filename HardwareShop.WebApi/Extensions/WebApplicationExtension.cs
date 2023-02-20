@@ -31,11 +31,11 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         UnitCategory unitCategory = new UnitCategory()
                         {
-                            Name = "Mass",
+                            Name = UnitCategoryConstants.MassCategoryName
                         };
                         UnitCategory unitCategory2 = new UnitCategory()
                         {
-                            Name = "Currency"
+                            Name = UnitCategoryConstants.CurrencyCategoryName
                         };
                         db.UnitCategories.Add(unitCategory);
                         db.UnitCategories.Add(unitCategory2);

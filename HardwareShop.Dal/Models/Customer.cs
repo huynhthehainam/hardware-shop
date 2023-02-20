@@ -18,6 +18,7 @@ namespace HardwareShop.Dal.Models
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public int ShopId { get; set; }
+        public bool IsFamiliar { get; set; } = false;
         private Shop? shop;
         public Shop? Shop
         {

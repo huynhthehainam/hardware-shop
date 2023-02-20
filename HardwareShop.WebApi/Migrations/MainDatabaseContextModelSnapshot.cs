@@ -34,6 +34,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
+                    b.Property<bool>("IsFamiliar")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .HasColumnType("text");
 

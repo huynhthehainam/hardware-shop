@@ -124,7 +124,8 @@ namespace HardwareShop.WebApi.Migrations
                     Name = table.Column<string>(type: "text", nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
-                    ShopId = table.Column<int>(type: "integer", nullable: false)
+                    ShopId = table.Column<int>(type: "integer", nullable: false),
+                    IsFamiliar = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -1,6 +1,7 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 
@@ -15,8 +16,10 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<Product> productRepository;
         private readonly ICustomerDebtService customerDebtService;
         private readonly IRepository<Invoice> invoiceRepository;
-        public InvoiceService(IShopService shopService, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
+        private readonly IRepository<Unit> unitRepository;
+        public InvoiceService(IShopService shopService, IRepository<Unit> unitRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
         {
+            this.unitRepository = unitRepository;
             this.responseResultBuilder = responseResultBuilder;
             this.customerDebtService = customerDebtService;
             this.shopService = shopService;
@@ -25,7 +28,7 @@ namespace HardwareShop.Business.Implementations
             this.productRepository = productRepository;
             this.invoiceRepository = invoiceRepository;
         }
-        public async Task<CreatedInvoiceDto?> CreateInvoiceAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details)
+        public async Task<CreatedInvoiceDto?> CreateInvoiceOfCurrentUserShopAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
@@ -57,6 +60,8 @@ namespace HardwareShop.Business.Implementations
                     responseResultBuilder.AddInvalidFieldError($"Products[{i}].ProductId");
                     return null;
                 }
+
+
             }
             Invoice invoice = await invoiceRepository.CreateAsync(new Invoice
             {
@@ -74,7 +79,6 @@ namespace HardwareShop.Business.Implementations
                         Price = e.ProductId,
                         ProductId = e.ProductId,
                         Quantity = e.Quantity,
-
                     };
                 }).ToList(),
             });
@@ -92,6 +96,74 @@ namespace HardwareShop.Business.Implementations
             }
             return new CreatedInvoiceDto { Id = invoice.Id };
 
+        }
+
+        public async Task<InvoiceDto?> GetInvoiceDtoOfCurrentUserShopByIdAsync(int invoiceId)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var invoice = await invoiceRepository.GetItemByQueryAsync(e => e.Id == invoiceId && e.ShopId == shop.Id);
+            if (invoice == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Invoice");
+                return null;
+            }
+
+            return new InvoiceDto
+            {
+                Id = invoice.Id,
+                CustomerName = invoice.Customer?.Name,
+                CustomerPhone = invoice.Customer?.Phone,
+                CustomerAddress = invoice.Customer?.Address,
+                CreatedDate = invoice.CreatedDate,
+                Code = invoice.Code,
+                Deposit = invoice.Deposit,
+                TotalCost = invoice.GetTotalCost(),
+                Debt = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+                Rest = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+                Details = (invoice.Details ?? new List<InvoiceDetail>()).Select(e => new InvoiceDetailDto()
+                {
+                    Id = e.Id,
+                    ProductName = e.Product?.Name,
+                    Description = e.Description,
+                    Quantity = e.Quantity,
+                    Price = e.Price,
+                    UnitName = e.Product?.Unit?.Name,
+                    TotalCost = e.GetTotalCost(),
+                }).ToArray(),
+
+            };
+        }
+
+        public async Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var invoices = await invoiceRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, string.IsNullOrEmpty(search) ? null : new SearchQuery<Invoice>(search, e => new
+            {
+                e.Code,
+            }), new List<QueryOrder<Invoice>>() { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
+            return PageData<InvoiceDto>.ConvertFromOtherPageData(invoices, invoice => new InvoiceDto
+            {
+                Id = invoice.Id,
+                CustomerName = invoice.Customer?.Name,
+                CustomerPhone = invoice.Customer?.Phone,
+                CustomerAddress = invoice.Customer?.Address,
+                CreatedDate = invoice.CreatedDate,
+                Code = invoice.Code,
+                Deposit = invoice.Deposit,
+                TotalCost = invoice.GetTotalCost(),
+                Debt = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+                Rest = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+            });
         }
     }
 }

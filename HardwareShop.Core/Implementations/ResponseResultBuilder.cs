@@ -83,9 +83,9 @@ namespace HardwareShop.Core.Implementations
                     return new ObjectResult(new
                     {
                         TotalItems = totalItems,
-                        Type = type,
                         Data = data,
                         Error = error,
+                        Language = languageService.GetLanguage(),
                         Message = message,
                     })
                     { StatusCode = this.statusCode };
@@ -98,8 +98,8 @@ namespace HardwareShop.Core.Implementations
                     return new ObjectResult(new
                     {
                         TotalItems = totalItems,
-                        Type = type,
                         Data = data,
+                        Language = languageService.GetLanguage(),
                         Error = error,
                         Message = message
                     })

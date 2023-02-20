@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230210023805_Initial")]
+    [Migration("20230217090759_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -35,6 +35,9 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Property<string>("Address")
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsFamiliar")
+                        .HasColumnType("boolean");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");

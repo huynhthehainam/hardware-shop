@@ -7,7 +7,8 @@ namespace HardwareShop.Business.Services
     public interface IProductService
     {
         Task<PageData<ProductDto>?> GetProductPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search);
-        Task<CreatedProductDto?> CreateProductOfShopAsync(string name, double? mass,
+        Task<CreatedProductDto?> CreateProductOfShopAsync(string name, int unitId,
+         double? mass,
          double? pricePerMass,
          double? percentForFamiliarCustomer,
          double? percentForCustomer,

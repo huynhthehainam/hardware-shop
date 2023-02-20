@@ -146,11 +146,12 @@ public class Program
 
         app.UseCors(mainAllowSpecificOrigins);
 
-        app.UseAuthentication();
-        app.UseAuthorization();
 
         app.MapControllers();
         app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+        app.UseAuthentication();
+
+        // app.UseAuthorization();
 
         app.SeedData();
         app.Run();

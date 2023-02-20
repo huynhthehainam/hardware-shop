@@ -3,8 +3,11 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Commands;
+using iText.Html2pdf;
+using iText.Html2pdf.Resolver.Font;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -20,23 +23,59 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateInvoice([FromBody] CreateInvoiceCommand command)
         {
-            CreatedInvoiceDto? invoice = await invoiceService.CreateInvoiceAsync(command.CustomerId.GetValueOrDefault(), command.Deposit.GetValueOrDefault(), command.OrderId,
+            CreatedInvoiceDto? invoice = await invoiceService.CreateInvoiceOfCurrentUserShopAsync(command.CustomerId.GetValueOrDefault(), command.Deposit.GetValueOrDefault(), command.OrderId,
             command.Details.Select(e => new CreateInvoiceDetailDto
             {
                 Description = e.Description,
                 OriginalPrice = e.OriginalPrice.GetValueOrDefault(),
                 ProductId = e.ProductId.GetValueOrDefault(),
                 Quantity = e.Quantity.GetValueOrDefault(),
-                Price = e.Price.GetValueOrDefault()
+                Price = e.Price.GetValueOrDefault(),
             }).ToList());
             if (invoice == null) return responseResultBuilder.Build();
             responseResultBuilder.SetData(invoice);
             return responseResultBuilder.Build();
         }
-        [HttpGet("{id:int}/Pdf")]
-        public Task<IActionResult> GetPdf([FromRoute] int id)
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetInvoiceByIdOfCurrentUserShop([FromRoute] int id)
         {
-            return Task.FromResult(responseResultBuilder.Build());
+            InvoiceDto? invoice = await invoiceService.GetInvoiceDtoOfCurrentUserShopByIdAsync(id);
+            if (invoice == null)
+            {
+                return responseResultBuilder.Build();
+            }
+            responseResultBuilder.SetData(invoice);
+            return responseResultBuilder.Build();
+        }
+        
+
+        [HttpGet]
+        public async Task<IActionResult> GetInvoicesOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        {
+            var invoices = await invoiceService.GetInvoiceDtoPageDataOfCurrentUserShopAsync(pagingModel, search);
+            if (invoices == null) return responseResultBuilder.Build();
+
+            responseResultBuilder.SetPageData(invoices);
+            return responseResultBuilder.Build();
+        }
+
+        [HttpGet("{id:int}/Pdf")]
+        public async Task<IActionResult> GetPdf([FromRoute] int id)
+        {
+            var invoice = await invoiceService.GetInvoiceDtoOfCurrentUserShopByIdAsync(id);
+            if (invoice == null)
+            {
+                return responseResultBuilder.Build();
+            }
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ConverterProperties properties = new ConverterProperties();
+                properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+                HtmlConverter.ConvertToPdf("<div>Helllo</div>", ms);
+                var bytes = ms.ToArray();
+                responseResultBuilder.SetFile(bytes, "application/pdf", "invoice.pdf");
+            }
+            return responseResultBuilder.Build();
         }
     }
 }

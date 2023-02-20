@@ -12,6 +12,7 @@ namespace HardwareShop.WebApi.Commands
         public double? PricePerMass { get; set; }
         public double? PercentForFamiliarCustomer { get; set; }
         public double? PercentForCustomer { get; set; }
+
         public double? PriceForFamiliarCustomer { get; set; }
         [Required]
         public double? PriceForCustomer { get; set; }

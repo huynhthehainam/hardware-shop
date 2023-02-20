@@ -39,7 +39,8 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
         {
-            CreatedProductDto? product = await productService.CreateProductOfShopAsync(command.Name ?? "", command.Mass, command.PricePerMass, command.PercentForFamiliarCustomer, command.PercentForCustomer, command.PriceForFamiliarCustomer, command.PriceForCustomer ?? 0, command.HasAutoCalculatePermission);
+            CreatedProductDto? product = await productService.CreateProductOfShopAsync(command.Name ?? "", command.UnitId ?? 0,
+            command.Mass, command.PricePerMass, command.PercentForFamiliarCustomer, command.PercentForCustomer, command.PriceForFamiliarCustomer, command.PriceForCustomer ?? 0,  command.HasAutoCalculatePermission);
             if (product == null)
                 return responseResultBuilder.Build();
 

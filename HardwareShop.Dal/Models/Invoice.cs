@@ -14,6 +14,7 @@ namespace HardwareShop.Dal.Models
         public Invoice(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
+
         public string Code { get; set; } = RandomStringHelper.RandomString(24);
         public int Id { get; set; }
         public int CustomerId { get; set; }
@@ -67,6 +68,27 @@ namespace HardwareShop.Dal.Models
                     e.HasOne(e => e.Order).WithMany(e => e.Invoices).HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.Cascade);
                     e.HasOne(e => e.CurrentDebtHistory).WithMany(e => e.Invoices).HasForeignKey(e => e.CurrentDebtHistoryId).OnDelete(DeleteBehavior.Cascade);
                 });
+        }
+
+        // Calculate total cost
+
+        public double GetTotalCost()
+        {
+            if (Details == null || Details.Count == 0)
+            {
+                return 0;
+            }
+
+
+            var cost = 0.0;
+            foreach (var detail in Details)
+            {
+                cost += detail.GetTotalCost();
+            }
+            var cashUnit = Shop?.CashUnit;
+            if (cashUnit == null)
+                return 0;
+            return cashUnit.RoundValue(cost);
         }
     }
 }

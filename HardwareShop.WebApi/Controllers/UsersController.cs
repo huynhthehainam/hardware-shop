@@ -1,8 +1,9 @@
-﻿using HardwareShop.Business.Dtos;
+﻿using System.Text.Json;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -30,12 +31,28 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpGet]
-        public async Task<IActionResult> GetUsersOfShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        public async Task<IActionResult> GetUsers([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            PageData<UserDto>? users = await userService.GetUsersOfShopAsync(pagingModel, search);
-            if (users == null) return responseResultBuilder.Build();
+            if (!currentUserService.IsSystemAdmin())
+            {
+                responseResultBuilder.AddNotPermittedError();
+                return responseResultBuilder.Build();
+            }
 
+            var users = await userService.GetUserPageDataAsync(pagingModel, search);
             responseResultBuilder.SetPageData(users);
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("me/UpdateInterfaceSettings")]
+        public async Task<IActionResult> UpdateCurrentUserSettings([FromBody] UpdateInterfaceSettingsCommand command)
+        {
+            var isSuccess = await userService.UpdateCurrentUserInterfaceSettings(command.Settings ?? JsonDocument.Parse("{}"));
+            if (!isSuccess)
+            {
+                return responseResultBuilder.Build();
+            }
+
+            responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }
     }

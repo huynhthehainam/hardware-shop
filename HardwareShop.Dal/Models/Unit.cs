@@ -43,6 +43,9 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shops) : shops;
             set => shops = value;
         }
+
+      
+      
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Unit>(entity =>

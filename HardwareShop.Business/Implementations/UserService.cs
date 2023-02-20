@@ -1,4 +1,5 @@
-﻿using HardwareShop.Business.Dtos;
+﻿using System.Text.Json;
+using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
@@ -100,7 +101,7 @@ namespace HardwareShop.Business.Implementations
             return generateLoginDtoFromUser(user);
         }
 
-        public async Task<PageData<UserDto>?> GetUsersOfShopAsync(PagingModel pagingModel, string? search)
+        public async Task<PageData<UserDto>?> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -124,6 +125,41 @@ namespace HardwareShop.Business.Implementations
                 Phone = e.Phone,
                 Username = e.Username,
             });
+        }
+
+        public async Task<PageData<UserDto>> GetUserPageDataAsync(PagingModel pagingModel, string? search)
+        {
+            var users = await userRepository.GetPageDataByQueryAsync(pagingModel, e => true, string.IsNullOrEmpty(search) ? null : new SearchQuery<User>(search, e => new
+            {
+                e.Email,
+                e.FirstName,
+                e.LastName,
+                e.Username,
+                e.Phone
+            }));
+            return PageData<UserDto>.ConvertFromOtherPageData(users, e => new UserDto
+            {
+                Id = e.Id,
+                Email = e.Email,
+                FullName = languageService.GenerateFullName(e.FirstName, e.LastName),
+                Phone = e.Phone,
+                Username = e.Username,
+            });
+        }
+
+        public async Task<bool> UpdateCurrentUserInterfaceSettings(JsonDocument settings)
+        {
+            var currentUserId = currentUserService.GetUserId();
+            var user = await userRepository.GetItemByQueryAsync(e => e.Id == currentUserId);
+            if (user == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("User");
+                return false;
+            }
+
+            user.InterfaceSettings = settings;
+            await userRepository.UpdateAsync(user);
+            return true;
         }
     }
 }

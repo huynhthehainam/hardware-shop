@@ -13,15 +13,17 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<Product> productRepository;
         private readonly IRepository<ProductAsset> productAssetRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
-        public ProductService(IShopService shopService, IRepository<Product> productRepository, IResponseResultBuilder responseResultBuilder, IRepository<ProductAsset> productAssetRepository)
+        private readonly IRepository<Unit> unitRepository;
+        public ProductService(IRepository<Unit> unitRepository, IShopService shopService, IRepository<Product> productRepository, IResponseResultBuilder responseResultBuilder, IRepository<ProductAsset> productAssetRepository)
         {
+            this.unitRepository = unitRepository;
             this.shopService = shopService;
             this.productRepository = productRepository;
             this.responseResultBuilder = responseResultBuilder;
             this.productAssetRepository = productAssetRepository;
         }
 
-        public async Task<CreatedProductDto?> CreateProductOfShopAsync(string name, double? mass, double? pricePerMass, double? percentForFamiliarCustomer, double? percentForCustomer, double? priceForFamiliarCustomer, double priceForCustomer, bool hasAutoCalculatePermission)
+        public async Task<CreatedProductDto?> CreateProductOfShopAsync(string name, int unitId, double? mass, double? pricePerMass, double? percentForFamiliarCustomer, double? percentForCustomer, double? priceForFamiliarCustomer, double priceForCustomer, bool hasAutoCalculatePermission)
         {
             var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -29,6 +31,13 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
+            var unit = await unitRepository.GetItemByQueryAsync(e => e.Id == unitId);
+            if (unit == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Unit");
+                return null;
+            }
+          
             var product = await productRepository.CreateIfNotExistsAsync(new Product
             {
                 Name = name,
@@ -38,6 +47,7 @@ namespace HardwareShop.Business.Implementations
                 PriceForFamiliarCustomer = priceForFamiliarCustomer,
                 PriceForCustomer = priceForCustomer,
                 ShopId = shop.Id,
+                UnitId = unit.Id,
                 HasAutoCalculatePermission = hasAutoCalculatePermission,
             }, e => new
             {
@@ -49,6 +59,11 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
             return new CreatedProductDto { Id = product.Id };
+        }
+
+        public Task<CreatedProductDto?> CreateProductOfShopAsync(string name, int unitId, double? mass, double? pricePerMass, double? percentForFamiliarCustomer, double? percentForCustomer, double? priceForFamiliarCustomer, double priceForCustomer, int priceUnitId, bool hasAutoCalculatePermission)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<PageData<ProductDto>?> GetProductPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
