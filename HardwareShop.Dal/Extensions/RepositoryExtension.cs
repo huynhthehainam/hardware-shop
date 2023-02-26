@@ -28,6 +28,7 @@ namespace HardwareShop.Dal.Extensions
             services.AddScoped<IRepository<Unit>, RepositoryBase<Unit>>();
             services.AddScoped<IRepository<UnitCategory>, RepositoryBase<UnitCategory>>();
             services.AddScoped<IRepository<ProductCategory>, RepositoryBase<ProductCategory>>();
+            services.AddScoped<IRepository<ProductCategoryProduct>, RepositoryBase<ProductCategoryProduct>>();
         }
     }
 }

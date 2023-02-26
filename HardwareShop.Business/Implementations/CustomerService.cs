@@ -38,7 +38,12 @@ namespace HardwareShop.Business.Implementations
             }), new List<QueryOrder<Customer>> { new QueryOrder<Customer>(e => e.Name, true) });
             return PageData<CustomerDto>.ConvertFromOtherPageData(customers, e => new CustomerDto
             {
-                Id = e.Id
+                Id = e.Id,
+                Name = e.Name,
+                Address = e.Address,
+                IsFamiliar = e.IsFamiliar,
+                Phone = e.Phone,
+                Debt =  e.Debt?.Amount ??  0,
             });
         }
         public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)

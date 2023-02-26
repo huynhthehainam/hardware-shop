@@ -61,17 +61,21 @@ namespace HardwareShop.Core.Implementations
         {
             var pageIndex = pagingModel.PageIndex;
             var pageSize = pagingModel.PageSize;
+
             var filteredDbSet = dbSet.Where(expression);
             if (searchQuery != null)
             {
                 var searchExpression = searchQuery.BuildSearchExpression();
                 filteredDbSet = filteredDbSet.Where(searchExpression);
             }
+
             var count = await filteredDbSet.CountAsync();
+
+
             IQueryable<T> data = filteredDbSet;
             if (pageIndex.HasValue && pageSize.HasValue)
             {
-                data = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value);
+
                 if (orders is not null && orders.Count > 0)
                 {
                     IOrderedEnumerable<T>? orderedData = null;
@@ -101,12 +105,12 @@ namespace HardwareShop.Core.Implementations
                             }
                         }
                     }
-                    var finalData = orderedData!.Select(convertor).ToList();
+                    var finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
                     return new PageData<T1> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
-                    var finalData = data.Select(convertor).ToList();
+                    var finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
                     return new PageData<T1> { Items = finalData, TotalRecords = count };
                 }
             }
@@ -169,7 +173,7 @@ namespace HardwareShop.Core.Implementations
             IQueryable<T> data = filteredDbSet;
             if (pageIndex.HasValue && pageSize.HasValue)
             {
-                data = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value);
+
                 if (orders is not null && orders.Count > 0)
                 {
                     IOrderedEnumerable<T>? orderedData = null;
@@ -199,12 +203,12 @@ namespace HardwareShop.Core.Implementations
                             }
                         }
                     }
-                    var finalData = orderedData!.ToList();
+                    var finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).ToList();
                     return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
-                    var finalData = data.ToList();
+                    var finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).ToList();
                     return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
             }

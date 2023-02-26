@@ -20,6 +20,7 @@
         public int UnitId { get; set; }
         public string? UnitName { get; set; }
         public int[] ProductCategoryIds { get; set; } = new int[0];
+        public List<CategoryDto> Categories { get; set; } =  new List<CategoryDto>();
         public string?[] ProductCategoryNames { get; set; } = new string?[0];
         public List<ProductWarehouseDto>? Warehouses { get; set; }
         public List<SimpleAssetDto>? Assets { get; set; }

@@ -17,9 +17,10 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetProducts([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        public async Task<IActionResult> GetProducts([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] SortingModel sortingModel)
         {
-            PageData<ProductDto>? productPageData = await productService.GetProductPageDataOfCurrentUserShopAsync(pagingModel, search);
+            PageData<ProductDto>? productPageData = await productService.GetProductPageDataOfCurrentUserShopAsync(pagingModel, search, sortingModel);
+
             if (productPageData == null)
             {
                 return responseResultBuilder.Build();
@@ -44,12 +45,28 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetAsset(asset);
             return responseResultBuilder.Build();
         }
+        [HttpPost("{id:int}/SelectThumbnail")]
+        public async Task<IActionResult> SelectThumbnail([FromRoute] int id, [FromBody] SelectProductThumbnailCommand command)
+        {
+            var isSuccess = await productService.SetProductThumbnailAsync(id, command.AssetId.GetValueOrDefault());
+            if (!isSuccess) return responseResultBuilder.Build();
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
         [HttpGet("{id:int}/Assets/{assetId:int}")]
         public async Task<IActionResult> GetProductAssetById([FromRoute] int id, [FromRoute] int assetId)
         {
             var asset = await productService.GetProductAssetByIdAsync(id, assetId);
             if (asset == null) return responseResultBuilder.Build();
             responseResultBuilder.SetAsset(asset);
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("{id:int}/Assets/{assetId:int}/Delete")]
+        public async Task<IActionResult> RemoveProductAsset([FromRoute] int id, [FromRoute] int assetId)
+        {
+            var isSuccess = await productService.RemoveProductAssetByIdAsync(id, assetId);
+            if (!isSuccess) return responseResultBuilder.Build();
+            responseResultBuilder.SetDeletedMessage();
             return responseResultBuilder.Build();
         }
         [HttpPost]
@@ -74,6 +91,26 @@ namespace HardwareShop.WebApi.Controllers
 
             if (product == null) return responseResultBuilder.Build();
             responseResultBuilder.SetData(new { Id = product });
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("{id:int}/Update")]
+        public async Task<IActionResult> UpdateProduct([FromRoute] int id, [FromBody] UpdateProductCommand command)
+        {
+            var isSuccess = await productService.UpdateProductOfCurrentUserShopAsync(id, command.Name,
+            command.UnitId,
+            command.Mass,
+            command.PricePerMass,
+            command.PercentForFamiliarCustomer,
+            command.PercentForCustomer,
+            command.PriceForFamiliarCustomer,
+            command.PriceForCustomer,
+            command.HasAutoCalculatePermission,
+            command.CategoryIds,
+            command.Warehouses?.Select(e => new Tuple<int, double>(e.WarehouseId, e.Quantity)).ToList()
+            );
+            if (!isSuccess) return responseResultBuilder.Build();
+
+            responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }
 
