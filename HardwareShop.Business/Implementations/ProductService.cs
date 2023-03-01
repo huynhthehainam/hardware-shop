@@ -384,5 +384,63 @@ namespace HardwareShop.Business.Implementations
             await productRepository.UpdateAsync(product);
             return true;
         }
+
+        public async Task<bool> AddPricePerMassOfCurrentUserShopAsync(List<int> productIds, double amountOfCash)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync();
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return false;
+            }
+            var cashUnit = shop.CashUnit;
+            if (cashUnit == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return false;
+            }
+            var products = new List<Product>();
+            foreach (var (productId, index) in productIds.Select((item, index) => (item, index)))
+            {
+                var product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == productId && e.Mass != null && e.Mass > 0 && e.PricePerMass != null && e.PricePerMass > 0);
+                if (product == null)
+                {
+                    responseResultBuilder.AddInvalidFieldError($"ProductIds[{index}]");
+                    return false;
+                }
+                products.Add(product);
+            }
+            foreach (var product in products)
+            {
+                if (product.HasAutoCalculatePermission)
+                {
+                    if (product.Mass != null && product.PricePerMass != null)
+                    {
+                        product.PricePerMass += amountOfCash;
+                        if (product.PercentForFamiliarCustomer != null)
+                        {
+                            var price = product.Mass.Value * product.PricePerMass.Value * (100 + product.PercentForFamiliarCustomer.Value) / 100;
+                            price = cashUnit.RoundValue(price);
+                            product.PriceForFamiliarCustomer = price;
+                        }
+                        if (product.PercentForCustomer != null)
+                        {
+                            var price = product.Mass.Value * product.PricePerMass.Value * (100 + product.PercentForCustomer.Value) / 100;
+                            price = cashUnit.RoundValue(price);
+                            product.PercentForCustomer = price;
+                        }
+                    }
+                }
+                else
+                {
+                    if (product.PricePerMass != null)
+                    {
+                        product.PricePerMass += amountOfCash;
+                    }
+                }
+                await productRepository.UpdateAsync(product);
+            }
+            return true;
+        }
     }
 }

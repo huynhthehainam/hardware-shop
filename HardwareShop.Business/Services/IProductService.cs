@@ -39,5 +39,6 @@ namespace HardwareShop.Business.Services
             List<int>? categoryIds,
             List<Tuple<int, double>>? warehouses
         );
+        Task<bool> AddPricePerMassOfCurrentUserShopAsync(List<int> productIds, double amountOfCash);
     }
 }

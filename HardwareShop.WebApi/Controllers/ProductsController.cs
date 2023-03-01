@@ -113,6 +113,14 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }
+        [HttpPost("AddPricePerMass")]
+        public async Task<IActionResult> AddPricePerMass([FromBody] AddPricePerMassCommand command)
+        {
+            var isSuccess = await productService.AddPricePerMassOfCurrentUserShopAsync(command.ProductIds ?? new List<int> { }, command.AmountOfCash.Value);
+            if (!isSuccess) return responseResultBuilder.Build();
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
 
     }
 }

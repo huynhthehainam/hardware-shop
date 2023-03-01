@@ -7,6 +7,6 @@ namespace HardwareShop.Business.Services
 {
     public interface ICustomerDebtService
     {
-        Task<CustomerDebtHistory> AddDebtToCustomer(Customer customer, double changeOfDebt, string reason, JsonDocument? reasonParams);
+        Task<CustomerDebtHistory> AddDebtToCustomerAsync(Customer customer, double changeOfDebt, string reason, JsonDocument? reasonParams);
     }
 }

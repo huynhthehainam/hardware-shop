@@ -9,5 +9,6 @@ namespace HardwareShop.Business.Services
         Task<CreatedInvoiceDto?> CreateInvoiceOfCurrentUserShopAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details);
         Task<InvoiceDto?> GetInvoiceDtoOfCurrentUserShopByIdAsync(int invoiceId);
         Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search);
+        Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id);
     }
 }

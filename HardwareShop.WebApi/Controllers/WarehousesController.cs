@@ -1,22 +1,19 @@
 ﻿using HardwareShop.Business.Dtos;
-using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace HardwareShop.WebApi.Controllers
 {
     public class WarehousesController : AuthorizedApiControllerBase
     {
         private readonly IWarehouseService warehouseService;
-        public WarehousesController(IWarehouseService warehouseServic, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        public WarehousesController(IWarehouseService warehouseService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
-            this.warehouseService = warehouseServic;
+            this.warehouseService = warehouseService;
         }
 
         [HttpPost]

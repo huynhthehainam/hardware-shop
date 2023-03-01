@@ -47,7 +47,17 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetData(invoice);
             return responseResultBuilder.Build();
         }
-        
+
+        [HttpPost("{id:int}/Restore")]
+        public async Task<IActionResult> RestoreInvoice([FromRoute] int id)
+        {
+            bool isSuccess = await invoiceService.RestoreInvoiceOfCurrentUserSHopAsync(id);
+            if (!isSuccess)
+                return responseResultBuilder.Build();
+            responseResultBuilder.SetDeletedMessage();
+            return responseResultBuilder.Build();
+        }
+
 
         [HttpGet]
         public async Task<IActionResult> GetInvoicesOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)

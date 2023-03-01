@@ -17,15 +17,19 @@ namespace HardwareShop.Business.Implementations
         private readonly ICustomerDebtService customerDebtService;
         private readonly IRepository<Invoice> invoiceRepository;
         private readonly IRepository<Unit> unitRepository;
-        public InvoiceService(IShopService shopService, IRepository<Unit> unitRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
+        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
+        private readonly IRepository<CustomerDebt> customerDebtRepository;
+        public InvoiceService(IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<CustomerDebt> customerDebtRepository, IShopService shopService, IRepository<Unit> unitRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
         {
             this.unitRepository = unitRepository;
             this.responseResultBuilder = responseResultBuilder;
             this.customerDebtService = customerDebtService;
+            this.customerDebtRepository = customerDebtRepository;
             this.shopService = shopService;
             this.customerRepository = customerRepository;
             this.orderRepository = orderRepository;
             this.productRepository = productRepository;
+            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.invoiceRepository = invoiceRepository;
         }
         public async Task<CreatedInvoiceDto?> CreateInvoiceOfCurrentUserShopAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details)
@@ -90,7 +94,7 @@ namespace HardwareShop.Business.Implementations
             if (changeOfCash != 0)
             {
                 var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenBuying(invoice.Code);
-                CustomerDebtHistory history = await customerDebtService.AddDebtToCustomer(customer, changeOfCash, reason.Item1, reason.Item2);
+                CustomerDebtHistory history = await customerDebtService.AddDebtToCustomerAsync(customer, changeOfCash, reason.Item1, reason.Item2);
                 invoice.CurrentDebtHistory = history;
                 invoice = await invoiceRepository.UpdateAsync(invoice);
             }
@@ -135,8 +139,8 @@ namespace HardwareShop.Business.Implementations
                     UnitName = e.Product?.Unit?.Name,
                     TotalCost = e.GetTotalCost(),
                 }).ToArray(),
-
             };
+
         }
 
         public async Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
@@ -164,6 +168,43 @@ namespace HardwareShop.Business.Implementations
                 Debt = invoice.CurrentDebtHistory?.NewDebt ?? 0,
                 Rest = invoice.CurrentDebtHistory?.NewDebt ?? 0,
             });
+        }
+
+        private async Task<Invoice?> getInvoiceOfCurrentUserShop(int invoiceId)
+        {
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var invoice = await invoiceRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == invoiceId);
+            if (invoice == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Invoice");
+                return null;
+            }
+            return invoice;
+        }
+
+        public async Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id)
+        {
+            var invoice = await getInvoiceOfCurrentUserShop(id);
+            if (invoice == null) return false;
+            var customer = invoice.Customer;
+            if (customer == null) return false;
+            var debtHistory = invoice.CurrentDebtHistory;
+            if (debtHistory != null)
+            {
+                var debt = debtHistory.CustomerDebt;
+                if (debt != null)
+                {
+                    var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenRestoringInvoice(invoice.Code);
+                    await customerDebtService.AddDebtToCustomerAsync(customer, -debtHistory.ChangeOfDebt, reason.Item1, reason.Item2);
+                    return await invoiceRepository.DeleteAsync(invoice);
+                }
+            }
+            return await invoiceRepository.DeleteAsync(invoice);
         }
     }
 }
