@@ -16,8 +16,6 @@ namespace HardwareShop.WebApi.Commands
         [Required]
         public double? Price { get; set; }
         public string? Description { get; set; }
-        [Required]
-        public int? PriceUnitId { get; internal set; }
     }
     public class CreateInvoiceCommand
     {

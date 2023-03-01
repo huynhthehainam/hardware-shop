@@ -398,6 +398,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string[]>("Emails")
+                        .HasColumnType("text[]");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -406,6 +409,12 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
+
+                    b.Property<string[]>("PhoneOwners")
+                        .HasColumnType("text[]");
+
+                    b.Property<string[]>("Phones")
+                        .HasColumnType("text[]");
 
                     b.HasKey("Id");
 

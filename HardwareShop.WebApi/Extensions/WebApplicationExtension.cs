@@ -105,8 +105,11 @@ namespace HardwareShop.WebApi.Extensions
                         var shop = new Shop
                         {
                             Name = "Admin shop",
-                            Address = "123",
+                            Address = "850 Xa lộ Hà Nội, Thủ Đức, HCM",
                             CashUnit = unit1,
+                            Phones = new string[]{"+84909933033", "+84933933033"},
+                            PhoneOwners = new string[]{"C. Hải", "A. Cường"},
+
                             Assets = new ShopAsset[]
                             {
                             new ShopAsset
@@ -154,6 +157,7 @@ namespace HardwareShop.WebApi.Extensions
                             PercentForCustomer = 8,
                             PriceForCustomer = 12000,
                             ShopId = shop.Id,
+                            OriginalPrice = 10000,
                             PercentForFamiliarCustomer = 6,
                             PriceForFamiliarCustomer = 11000,
                             PricePerMass = 600,
@@ -175,6 +179,7 @@ namespace HardwareShop.WebApi.Extensions
                             PercentForCustomer = 8,
                             PriceForCustomer = 12000,
                             ShopId = shop.Id,
+                            OriginalPrice = 10000,
                             PercentForFamiliarCustomer = 6,
                             PriceForFamiliarCustomer = 11000,
                             PricePerMass = 600,
@@ -196,6 +201,7 @@ namespace HardwareShop.WebApi.Extensions
                             PercentForCustomer = 8,
                             PriceForCustomer = 12000,
                             ShopId = shop.Id,
+                            OriginalPrice = 10000,
                             PercentForFamiliarCustomer = 6,
                             PriceForFamiliarCustomer = 11000,
                             PricePerMass = 600,
@@ -217,6 +223,7 @@ namespace HardwareShop.WebApi.Extensions
                             PercentForCustomer = 8,
                             PriceForCustomer = 12000,
                             ShopId = shop.Id,
+                            OriginalPrice = 10000,
                             PercentForFamiliarCustomer = 6,
                             PriceForFamiliarCustomer = 11000,
                             PricePerMass = 600,
@@ -237,6 +244,7 @@ namespace HardwareShop.WebApi.Extensions
                             Unit = unit,
                             PercentForCustomer = 8,
                             PriceForCustomer = 12000,
+                            OriginalPrice = 10000,
                             ShopId = shop.Id,
                             PercentForFamiliarCustomer = 6,
                             PriceForFamiliarCustomer = 11000,
@@ -258,6 +266,7 @@ namespace HardwareShop.WebApi.Extensions
                             Unit = unit,
                             PercentForCustomer = 8,
                             PriceForCustomer = 12000,
+                            OriginalPrice = 10000,
                             ShopId = shop.Id,
                             PercentForFamiliarCustomer = 6,
                             PriceForFamiliarCustomer = 11000,

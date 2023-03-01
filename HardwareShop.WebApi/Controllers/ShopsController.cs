@@ -70,6 +70,15 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
 
+        [HttpGet("YourShop/Logo")]
+        public async Task<IActionResult> GetYourShopLogo()
+        {
+            var asset = await shopService.GetCurrentUserShopLogo();
+            if (asset == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetAsset(asset);
+            return responseResultBuilder.Build();
+        }
+
 
         [HttpGet("YourShop/Users")]
         public async Task<IActionResult> GetUsersOfYourShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)

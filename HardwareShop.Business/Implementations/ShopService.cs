@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Bases;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using Microsoft.AspNetCore.Http;
@@ -178,6 +179,23 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
             return await updateShopLogo(shop, file);
+        }
+
+        public async Task<IAssetTable?> GetCurrentUserShopLogo()
+        {
+            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Staff);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var logo = await shopAssetRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.AssetType == ShopAssetConstants.LogoAssetType);
+            if (logo == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Logo");
+                return null;
+            }
+            return logo;
         }
     }
 }

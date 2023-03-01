@@ -17,6 +17,7 @@
         public bool HasAutoCalculatePermission { get; set; } = false;
         public double? PriceForFamiliarCustomer { get; set; }
         public double PriceForCustomer { get; set; }
+        public double OriginalPrice {get;set;}
         public int UnitId { get; set; }
         public string? UnitName { get; set; }
         public int[] ProductCategoryIds { get; set; } = new int[0];

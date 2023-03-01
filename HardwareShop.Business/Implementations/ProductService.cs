@@ -161,6 +161,7 @@ namespace HardwareShop.Business.Implementations
                 ProductCategoryNames = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => e.ProductCategory?.Name).ToArray() : new string[0],
                 UnitId = product.UnitId,
                 UnitName = product.Unit?.Name,
+                OriginalPrice = product.OriginalPrice,
                 Categories = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => new CategoryDto()
                 {
                     Id = e.ProductCategory?.Id ?? 0,

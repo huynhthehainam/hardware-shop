@@ -6,17 +6,28 @@ namespace HardwareShop.Business.Dtos
 {
     public class LoginShopDto
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public UserShopRole Role { get; set; }
         public string CashUnitName { get; set; }
         public int CashUnitId { get; set; }
+        public string[]? Phones { get; set; }
+        public string[]? PhoneOwners { get; set; }
+        public string[]? Emails { get; set; }
+        public string? Address { get; set; }
 
-        public LoginShopDto(string name, UserShopRole role, string cashUnitName, int cashUnitId)
+        public LoginShopDto(int id, string name, UserShopRole role, string cashUnitName, int cashUnitId,
+        string[]? phones, string[]? phoneOwners, string[]? emails, string? address)
         {
+            Id = id;
             Name = name;
             Role = role;
             CashUnitName = cashUnitName;
             CashUnitId = cashUnitId;
+            Phones = phones;
+            PhoneOwners = phoneOwners;
+            Emails = emails;
+            Address = address;
         }
     }
     public class LoginUserDataDto
