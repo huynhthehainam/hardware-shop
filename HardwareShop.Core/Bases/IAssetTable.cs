@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HardwareShop.Core.Bases
+﻿namespace HardwareShop.Core.Bases
 {
     public static class ContentTypeConstants
     {
@@ -18,5 +11,13 @@ namespace HardwareShop.Core.Bases
         string Filename { get; set; }
         string AssetType { get; set; }
         string ContentType { get; set; }
+    }
+
+    public static class AssetTableExtensions
+    {
+        public static string ConvertToImgSrc(this IAssetTable asset)
+        {
+            return $"data:{asset.ContentType};base64,{Convert.ToBase64String(asset.Bytes)}";
+        }
     }
 }

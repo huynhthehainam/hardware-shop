@@ -116,7 +116,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("AddPricePerMass")]
         public async Task<IActionResult> AddPricePerMass([FromBody] AddPricePerMassCommand command)
         {
-            var isSuccess = await productService.AddPricePerMassOfCurrentUserShopAsync(command.ProductIds ?? new List<int> { }, command.AmountOfCash.Value);
+            var isSuccess = await productService.AddPricePerMassOfCurrentUserShopAsync(command.ProductIds ?? new List<int> { }, command.AmountOfCash ?? 0);
             if (!isSuccess) return responseResultBuilder.Build();
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();

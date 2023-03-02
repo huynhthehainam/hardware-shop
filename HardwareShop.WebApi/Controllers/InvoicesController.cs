@@ -6,8 +6,6 @@ using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Commands;
-using iText.Html2pdf;
-using iText.Html2pdf.Resolver.Font;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -72,19 +70,9 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}/Pdf")]
         public async Task<IActionResult> GetPdf([FromRoute] int id)
         {
-            var invoice = await invoiceService.GetInvoiceDtoOfCurrentUserShopByIdAsync(id);
-            if (invoice == null)
-            {
-                return responseResultBuilder.Build();
-            }
-            using (MemoryStream ms = new MemoryStream())
-            {
-                ConverterProperties properties = new ConverterProperties();
-                properties.SetFontProvider(new DefaultFontProvider(true, true, true));
-                HtmlConverter.ConvertToPdf("<div>Helllo</div>", ms);
-                var bytes = ms.ToArray();
-                responseResultBuilder.SetFile(bytes, "application/pdf", "invoice.pdf");
-            }
+            var bytes = await invoiceService.GetPdfBytesOfInvoiceOfCurrentUserShopAsync(id);
+            if (bytes == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetFile(bytes, "application/pdf", "invoice.pdf");
             return responseResultBuilder.Build();
         }
     }

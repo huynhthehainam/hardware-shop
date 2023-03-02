@@ -8,5 +8,6 @@ namespace HardwareShop.Core.Services
         SupportedLanguage GetLanguage();
         string GenerateFullName(string firstName, string lastName);
         void SetLanguage(SupportedLanguage language);
+        string Translate(string html, Dictionary<string, Dictionary<SupportedLanguage, string>> translation);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Http;
 
@@ -35,6 +36,19 @@ namespace HardwareShop.Core.Implementations
         public SupportedLanguage GetLanguage()
         {
             return supportedLanguage;
+        }
+
+        public string Translate(string html, Dictionary<string, Dictionary<SupportedLanguage, string>> translations)
+        {
+            Dictionary<string, string> values = new Dictionary<string, string>();
+            foreach (var key in translations.Keys)
+            {
+                var translationKey = $"TRANSLATE_{key}";
+                var translation = translations[key][supportedLanguage];
+                values.Add(translationKey, translation);
+            }
+
+            return HtmlHelper.ReplaceKeyWithValue(html, values);
         }
 
         public LanguageService(IHttpContextAccessor httpContextAccessor)

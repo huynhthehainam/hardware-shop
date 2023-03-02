@@ -10,5 +10,6 @@ namespace HardwareShop.Business.Services
         Task<InvoiceDto?> GetInvoiceDtoOfCurrentUserShopByIdAsync(int invoiceId);
         Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search);
         Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id);
+        Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId);
     }
 }

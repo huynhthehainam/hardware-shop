@@ -24,6 +24,15 @@ namespace HardwareShop.Dal.Models
             value = value * StepNumber;
             return value;
         }
+        public string ConvertValueToString(double value)
+        {
+            var roundNumber = 0;
+            while (StepNumber < Math.Pow(10, -roundNumber))
+            {
+                roundNumber++;
+            }
+            return value.ToString($"N{roundNumber}");
+        }
         private UnitCategory? unitCategory;
         public UnitCategory? UnitCategory
         {
@@ -44,8 +53,8 @@ namespace HardwareShop.Dal.Models
             set => shops = value;
         }
 
-      
-      
+
+
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Unit>(entity =>

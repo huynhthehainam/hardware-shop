@@ -1,9 +1,17 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Bases;
+using HardwareShop.Core.Helpers;
+using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using iText.Html2pdf;
+using iText.Html2pdf.Resolver.Font;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
+using iText.Layout;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -19,7 +27,8 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<Unit> unitRepository;
         private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
         private readonly IRepository<CustomerDebt> customerDebtRepository;
-        public InvoiceService(IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<CustomerDebt> customerDebtRepository, IShopService shopService, IRepository<Unit> unitRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
+        private readonly ILanguageService languageService;
+        public InvoiceService(ILanguageService languageService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<CustomerDebt> customerDebtRepository, IShopService shopService, IRepository<Unit> unitRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
         {
             this.unitRepository = unitRepository;
             this.responseResultBuilder = responseResultBuilder;
@@ -31,6 +40,8 @@ namespace HardwareShop.Business.Implementations
             this.productRepository = productRepository;
             this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.invoiceRepository = invoiceRepository;
+            this.languageService = languageService;
+
         }
         public async Task<CreatedInvoiceDto?> CreateInvoiceOfCurrentUserShopAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details)
         {
@@ -80,7 +91,7 @@ namespace HardwareShop.Business.Implementations
                     {
                         Description = e.Description,
                         OriginalPrice = e.OriginalPrice,
-                        Price = e.ProductId,
+                        Price = e.Price,
                         ProductId = e.ProductId,
                         Quantity = e.Quantity,
                     };
@@ -170,7 +181,7 @@ namespace HardwareShop.Business.Implementations
             });
         }
 
-        private async Task<Invoice?> getInvoiceOfCurrentUserShop(int invoiceId)
+        private async Task<Invoice?> getInvoiceOfCurrentUserShopAsync(int invoiceId)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
@@ -189,7 +200,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id)
         {
-            var invoice = await getInvoiceOfCurrentUserShop(id);
+            var invoice = await getInvoiceOfCurrentUserShopAsync(id);
             if (invoice == null) return false;
             var customer = invoice.Customer;
             if (customer == null) return false;
@@ -205,6 +216,118 @@ namespace HardwareShop.Business.Implementations
                 }
             }
             return await invoiceRepository.DeleteAsync(invoice);
+        }
+        public async Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId)
+        {
+            var invoice = await getInvoiceOfCurrentUserShopAsync(invoiceId);
+            if (invoice == null)
+            {
+                return null;
+            }
+            var invoiceHtmlFileName = "HtmlTemplates/Invoice.html";
+            var htmlStr = System.IO.File.ReadAllText(invoiceHtmlFileName);
+            if (invoice.CurrentDebtHistory != null)
+            {
+                var oldDebtHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/_OldDebt.html");
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>{
+                    {"VALUE_DEBT_STRING", oldDebtHtmlStr}
+                });
+            }
+
+            htmlStr = languageService.Translate(htmlStr,
+            new Dictionary<string, Dictionary<SupportedLanguage, string>>()
+            {
+                {"INVOICE_LABEL" , new Dictionary<SupportedLanguage, string>()
+                {
+                   { SupportedLanguage.English, "Invoice"},
+                   {SupportedLanguage.Vietnamese, "Hoá đơn"}
+                }
+                },
+                 {
+                    "OLD_DEBT_LABEL", new Dictionary<SupportedLanguage, string>{
+                        { SupportedLanguage.English, "Old debt"},
+                   {SupportedLanguage.Vietnamese, "Nợ trước"}
+                    }
+                },
+                 {"TOTAL_COST_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Total"},
+                   {SupportedLanguage.Vietnamese,  "Thành tiền"}
+                }},
+                  {"DEPOSIT_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Deposit"},
+                   {SupportedLanguage.Vietnamese,  "Trả trước"}
+                }},
+                {"REST_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Rest"},
+                   {SupportedLanguage.Vietnamese,  "Còn lại"}
+                }},
+                 {"PRODUCT_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Product"},
+                   {SupportedLanguage.Vietnamese,  "Sản phẩm"}
+                }},
+                  {"PRICE_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Price"},
+                   {SupportedLanguage.Vietnamese,  "Đơn giá"}
+                }},
+                 {"QUANTITY_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Quantity"},
+                   {SupportedLanguage.Vietnamese,  "Số lượng"}
+                }},
+            });
+
+            var shop = invoice.Shop;
+            if (shop == null) return null;
+            var logo = (shop.Assets ?? new List<ShopAsset>()).FirstOrDefault(e => e.AssetType == ShopAssetConstants.LogoAssetType);
+            if (logo == null) return null;
+
+            var imgSrc = logo.ConvertToImgSrc();
+            htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>() {
+                { "VALUE_SHOP_LOGO", imgSrc }
+            });
+            var rowHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/_InvoiceRow.html");
+            var rows = new List<string>();
+            var cashUnit = invoice.Shop?.CashUnit;
+            if (cashUnit == null) return null;
+            foreach (var detail in invoice.Details ?? new List<InvoiceDetail>())
+            {
+                var unit = detail.Product?.Unit;
+                if (unit == null) return null;
+                var row = HtmlHelper.ReplaceKeyWithValue(rowHtmlStr, new Dictionary<string, string>(){
+                    {"VALUE_PRODUCT", detail.Product?.Name ?? ""},
+                    {"VALUE_DESCRIPTION", detail.Description ?? ""},
+                    {"VALUE_PRICE",cashUnit.ConvertValueToString(detail.Price)},
+                    {"VALUE_UNIT", detail.Product?.Unit?.Name??""},
+                    {"VALUE_CASH_UNIT", cashUnit.Name},
+                    {"VALUE_QUANTITY",unit.ConvertValueToString(detail.Quantity)},
+                    {"VALUE_TOTAL_COST",cashUnit.ConvertValueToString(detail.GetTotalCost())},
+
+                });
+                rows.Add(row);
+            }
+            var rowsStr = string.Join("", rows);
+
+            htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                {"VALUE_ROWS", rowsStr},
+                {"VALUE_CUSTOMER_PHONE", invoice.Customer?.Name ?? ""},
+                {"VALUE_CUSTOMER_ADDRESS", invoice.Customer?.Address ?? ""},
+                {"VALUE_TOTAL_COST", cashUnit.ConvertValueToString(invoice.GetTotalCost())},
+                {"VALUE_CASH_UNIT", cashUnit.Name},
+                {"VALUE_DEPOSIT", cashUnit.ConvertValueToString(invoice.Deposit)},
+                {"VALUE_REST", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},       
+                {"VALUE_OLD_DEBT", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
+                {"VALUE_INVOICE_CODE",invoice.Code}
+            });
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ConverterProperties properties = new ConverterProperties();
+                properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+                PdfDocument pdf = new PdfDocument(new PdfWriter(ms));
+                Document document = new Document(pdf, PageSize.A4);
+                HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
+
+                var bytes = ms.ToArray();
+                return bytes;
+            }
         }
     }
 }

@@ -40,6 +40,5 @@ namespace HardwareShop.Dal.Models
                 s.HasOne(e => e.Shop).WithMany(e => e.Assets).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
         }
-
     }
 }
