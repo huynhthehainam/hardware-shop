@@ -54,8 +54,11 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref assets) : assets;
             set => assets = value;
         }
-
-    
-
+        private ICollection<Notification>? notifications;
+        public ICollection<Notification>? Notifications
+        {
+            get => lazyLoader.Load(this, ref notifications);
+            set => notifications = value;
+        }
     }
 }

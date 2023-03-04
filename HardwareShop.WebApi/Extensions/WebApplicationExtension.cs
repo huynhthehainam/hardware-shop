@@ -1,5 +1,3 @@
-
-
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
@@ -107,8 +105,8 @@ namespace HardwareShop.WebApi.Extensions
                             Name = "Admin shop",
                             Address = "850 Xa lộ Hà Nội, Thủ Đức, HCM",
                             CashUnit = unit1,
-                            Phones = new string[]{"+84909933033", "+84933933033"},
-                            PhoneOwners = new string[]{"C. Hải", "A. Cường"},
+                            Phones = new string[] { "+84909933033", "+84933933033" },
+                            PhoneOwners = new string[] { "C. Hải", "A. Cường" },
 
                             Assets = new ShopAsset[]
                             {

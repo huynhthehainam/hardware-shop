@@ -1,11 +1,5 @@
-﻿using HardwareShop.Core.Constants;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
+﻿using System.Text.Json;
+using HardwareShop.Core.Constants;
 
 namespace HardwareShop.Dal.Helpers
 {
@@ -38,11 +32,11 @@ namespace HardwareShop.Dal.Helpers
                             },
                             Footer = new
                             {
-                                Display = true,
+                                Display = false,
                                 Style = "fixed",
                                 Position = "below"
                             },
-                            Mode = "fullwidth"
+                            Mode = "fullwidth",
                         }
                     },
                     CustomScrollbars = true,

@@ -15,5 +15,9 @@ namespace HardwareShop.Business.Services
         Task<PageData<UserDto>?> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search);
         Task<PageData<UserDto>> GetUserPageDataAsync(PagingModel pagingModel, string? search);
         Task<bool> UpdateCurrentUserInterfaceSettings(JsonDocument settings);
+        Task<PageData<NotificationDto>?> GetNotificationDtoPageDataOfCurrentUserAsync(PagingModel pagingModel);
+        Task<CreatedNotificationDto?> CreateNotificationOfCurrentUserAsync(string? message, string variant, string? translation, JsonDocument? translationParams);
+        Task<bool> DismissNotificationOfCurrentUserAsync(Guid id);
+        Task<bool> DismissAllNotificationsOfCurrentUserAsync();
     }
 }

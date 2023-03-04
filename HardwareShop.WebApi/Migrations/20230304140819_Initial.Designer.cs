@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230227083228_Initial")]
+    [Migration("20230304140819_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -186,6 +186,43 @@ namespace HardwareShop.WebApi.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("InvoiceDetails");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDismissed")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Translation")
+                        .HasColumnType("text");
+
+                    b.Property<JsonDocument>("TranslationParams")
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Variant")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Order", b =>
@@ -740,6 +777,17 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.Notification", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Order", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.Customer", "Customer")
@@ -1014,6 +1062,8 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.User", b =>
                 {
                     b.Navigation("Assets");
+
+                    b.Navigation("Notifications");
 
                     b.Navigation("UserShop");
                 });

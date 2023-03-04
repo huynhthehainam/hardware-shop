@@ -2,6 +2,7 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Constants;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
@@ -12,13 +13,14 @@ namespace HardwareShop.Business.Implementations
     {
         private readonly IRepository<User> userRepository;
         private readonly IRepository<UserAsset> userAssetRepository;
+        private readonly IRepository<Notification> notificationRepository;
         private readonly IJwtService jwtService;
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly ICurrentUserService currentUserService;
         private readonly ILanguageService languageService;
         private readonly IShopService shopService;
-        public UserService(IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService)
+        public UserService(IRepository<Notification> notificationRepository, IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService)
         {
             this.userRepository = userRepository;
             this.jwtService = jwtService;
@@ -28,6 +30,7 @@ namespace HardwareShop.Business.Implementations
             this.languageService = languageService;
             this.hashingPasswordService = hashingPasswordService;
             this.shopService = shopService;
+            this.notificationRepository = notificationRepository;
         }
 
         public Task<CreatedUserDto> CreateUserAsync(string username, string password)
@@ -150,17 +153,90 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> UpdateCurrentUserInterfaceSettings(JsonDocument settings)
         {
+            var user = await getCurrentUserAsync();
+            if (user == null) return false;
+
+            user.InterfaceSettings = settings;
+            await userRepository.UpdateAsync(user);
+            return true;
+        }
+
+        public async Task<PageData<NotificationDto>?> GetNotificationDtoPageDataOfCurrentUserAsync(PagingModel pagingModel)
+        {
+            var user = await getCurrentUserAsync();
+            if (user == null) return null;
+            return await notificationRepository.GetDtoPageDataByQueryAsync<NotificationDto>(pagingModel, e => e.UserId == user.Id && e.IsDismissed == false, e => new NotificationDto
+            {
+                Id = e.Id,
+                CreatedDate = e.CreatedDate,
+                Message = e.Message,
+                Translation = e.Translation,
+                TranslationParams = e.TranslationParams,
+                Options = JsonDocument.Parse(JsonSerializer.Serialize(new
+                {
+                    Variant = e.Variant
+                }, JsonSerializerConstants.CamelOptions))
+            }, null, new List<QueryOrder<Notification>>() { new QueryOrder<Notification>(e => e.CreatedDate, false) });
+
+
+        }
+        private async Task<User?> getCurrentUserAsync()
+        {
             var currentUserId = currentUserService.GetUserId();
             var user = await userRepository.GetItemByQueryAsync(e => e.Id == currentUserId);
             if (user == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("User");
+                return null;
+            }
+            return user;
+        }
+
+
+        public async Task<bool> DismissNotificationOfCurrentUserAsync(Guid id)
+        {
+            var user = await getCurrentUserAsync();
+            if (user == null) return false;
+
+            var notification = await notificationRepository.GetItemByQueryAsync(e => e.Id == id && e.UserId == user.Id);
+            if (notification == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Notification");
                 return false;
             }
-
-            user.InterfaceSettings = settings;
-            await userRepository.UpdateAsync(user);
+            notification.IsDismissed = true;
+            await notificationRepository.UpdateAsync(notification);
             return true;
+        }
+
+        public async Task<bool> DismissAllNotificationsOfCurrentUserAsync()
+        {
+            var user = await getCurrentUserAsync();
+            if (user == null) return false;
+            var notifications = await notificationRepository.GetDataByQueryAsync(e => e.UserId == user.Id && e.IsDismissed == false);
+            foreach (var notification in notifications)
+            {
+                notification.IsDismissed = true;
+                await notificationRepository.UpdateAsync(notification);
+            }
+            return true;
+
+        }
+
+        public async Task<CreatedNotificationDto?> CreateNotificationOfCurrentUserAsync(string? message, string variant, string? translation, JsonDocument? translationParams)
+        {
+            var user = await getCurrentUserAsync();
+            if (user == null) return null;
+            var notification = await notificationRepository.CreateAsync(new Notification
+            {
+                CreatedDate = DateTime.UtcNow,
+                Message = message,
+                Variant = variant,
+                UserId = user.Id,
+                Translation = translation,
+                TranslationParams = translationParams,
+            });
+            return new CreatedNotificationDto { Id = notification.Id };
         }
     }
 }

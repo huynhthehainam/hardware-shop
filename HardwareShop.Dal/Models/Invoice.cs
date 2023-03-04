@@ -15,7 +15,7 @@ namespace HardwareShop.Dal.Models
         {
         }
 
-        public string Code { get; set; } = RandomStringHelper.RandomString(24);
+        public string Code { get; set; } = RandomStringHelper.RandomString(6);
         public int Id { get; set; }
         public int CustomerId { get; set; }
         private Customer? customer;

@@ -28,10 +28,10 @@ namespace HardwareShop.Dal
         public DbSet<ProductCategoryProduct> ProductCategoryProducts => Set<ProductCategoryProduct>();
         public DbSet<Order> Orders => Set<Order>();
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
+        public DbSet<Notification> Notifications => Set<Notification>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
             UserAsset.BuildModel(modelBuilder);
             UserShop.BuildModel(modelBuilder);
             Customer.BuildModel(modelBuilder);
@@ -52,7 +52,7 @@ namespace HardwareShop.Dal
             ProductCategoryProduct.BuildModel(modelBuilder);
             Order.BuildModel(modelBuilder);
             OrderDetail.BuildModel(modelBuilder);
-
+            Notification.BuildModel(modelBuilder);
         }
     }
 }

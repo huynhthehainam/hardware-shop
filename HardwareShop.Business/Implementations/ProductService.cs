@@ -189,7 +189,7 @@ namespace HardwareShop.Business.Implementations
             PageData<Product> productPageData = await productRepository.GetPageDataByQueryAsync(pagingModel, e => (e.ShopId == shop.Id), string.IsNullOrEmpty(search) ? null : new SearchQuery<Product>(search, e => new
             {
                 e.Name
-            }), sortingModel.ToSearchQueries<Product>());
+            }), sortingModel.ToOrderQueries<Product>());
 
             return PageData<ProductDto>.ConvertFromOtherPageData(productPageData, e => new ProductDto
             {

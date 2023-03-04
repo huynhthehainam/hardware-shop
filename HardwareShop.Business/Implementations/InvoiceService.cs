@@ -131,6 +131,7 @@ namespace HardwareShop.Business.Implementations
             return new InvoiceDto
             {
                 Id = invoice.Id,
+                CustomerId = invoice.CustomerId,
                 CustomerName = invoice.Customer?.Name,
                 CustomerPhone = invoice.Customer?.Phone,
                 CustomerAddress = invoice.Customer?.Address,
@@ -138,7 +139,7 @@ namespace HardwareShop.Business.Implementations
                 Code = invoice.Code,
                 Deposit = invoice.Deposit,
                 TotalCost = invoice.GetTotalCost(),
-                Debt = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+                Debt = invoice.CurrentDebtHistory?.OldDebt ?? 0,
                 Rest = invoice.CurrentDebtHistory?.NewDebt ?? 0,
                 Details = (invoice.Details ?? new List<InvoiceDetail>()).Select(e => new InvoiceDetailDto()
                 {
@@ -149,12 +150,15 @@ namespace HardwareShop.Business.Implementations
                     Price = e.Price,
                     UnitName = e.Product?.Unit?.Name,
                     TotalCost = e.GetTotalCost(),
+                    OriginalPrice = e.OriginalPrice,
+                    ProductId = e.ProductId,
+
                 }).ToArray(),
             };
 
         }
 
-        public async Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        public async Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search, SortingModel sortingModel)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
@@ -162,10 +166,13 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
+            var orderQuery = sortingModel.ToOrderQueries<Invoice>();
+            orderQuery.AddRange(new List<QueryOrder<Invoice>>() { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
             var invoices = await invoiceRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, string.IsNullOrEmpty(search) ? null : new SearchQuery<Invoice>(search, e => new
+
             {
                 e.Code,
-            }), new List<QueryOrder<Invoice>>() { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
+            }), orderQuery);
             return PageData<InvoiceDto>.ConvertFromOtherPageData(invoices, invoice => new InvoiceDto
             {
                 Id = invoice.Id,
@@ -175,8 +182,9 @@ namespace HardwareShop.Business.Implementations
                 CreatedDate = invoice.CreatedDate,
                 Code = invoice.Code,
                 Deposit = invoice.Deposit,
+                CustomerId = invoice.CustomerId,
                 TotalCost = invoice.GetTotalCost(),
-                Debt = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+                Debt = invoice.CurrentDebtHistory?.OldDebt ?? 0,
                 Rest = invoice.CurrentDebtHistory?.NewDebt ?? 0,
             });
         }
@@ -313,7 +321,7 @@ namespace HardwareShop.Business.Implementations
                 {"VALUE_TOTAL_COST", cashUnit.ConvertValueToString(invoice.GetTotalCost())},
                 {"VALUE_CASH_UNIT", cashUnit.Name},
                 {"VALUE_DEPOSIT", cashUnit.ConvertValueToString(invoice.Deposit)},
-                {"VALUE_REST", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},       
+                {"VALUE_REST", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
                 {"VALUE_OLD_DEBT", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
                 {"VALUE_INVOICE_CODE",invoice.Code}
             });

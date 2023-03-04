@@ -43,7 +43,7 @@ namespace HardwareShop.Business.Implementations
                 Address = e.Address,
                 IsFamiliar = e.IsFamiliar,
                 Phone = e.Phone,
-                Debt =  e.Debt?.Amount ??  0,
+                Debt = e.Debt?.Amount ?? 0,
             });
         }
         public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
@@ -121,7 +121,7 @@ namespace HardwareShop.Business.Implementations
 
                     if (customer.Debt.Histories != null)
                     {
-                        var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
+                        var reason = amountOfCash > 0 ? CustomerDebtHistoryHelper.GenerateDebtReasonWhenBorrowing() : CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
                         customer.Debt.Histories.Add(new CustomerDebtHistory
                         {
                             ChangeOfDebt = amountOfCash.Value,

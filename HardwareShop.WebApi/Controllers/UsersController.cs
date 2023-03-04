@@ -18,7 +18,7 @@ namespace HardwareShop.WebApi.Controllers
             this.userService = userService;
         }
 
-        [HttpGet("me/GetAvatar")]
+        [HttpGet("Me/GetAvatar")]
         public async Task<IActionResult> GetAvatar()
         {
             var asset = await userService.GetCurrentUserAvatarAsync();
@@ -43,7 +43,7 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetPageData(users);
             return responseResultBuilder.Build();
         }
-        [HttpPost("me/UpdateInterfaceSettings")]
+        [HttpPost("Me/UpdateInterfaceSettings")]
         public async Task<IActionResult> UpdateCurrentUserSettings([FromBody] UpdateInterfaceSettingsCommand command)
         {
             var isSuccess = await userService.UpdateCurrentUserInterfaceSettings(command.Settings ?? JsonDocument.Parse("{}"));
@@ -52,6 +52,39 @@ namespace HardwareShop.WebApi.Controllers
                 return responseResultBuilder.Build();
             }
 
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
+        [HttpGet("Me/Notifications")]
+        public async Task<IActionResult> GetCurrentUserNotifications([FromQuery] PagingModel pagingModel)
+        {
+            var notifications = await userService.GetNotificationDtoPageDataOfCurrentUserAsync(pagingModel);
+            if (notifications == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetPageData(notifications);
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("Me/Notifications")]
+        public async Task<IActionResult> CreateCurrentUserNotification([FromBody] CreateNotificationCommand command)
+        {
+            var notification = await userService.CreateNotificationOfCurrentUserAsync(command.Message, command.Variant ?? "", command.Translation, command.TranslationParams);
+            if (notification == null) return responseResultBuilder.Build();
+
+            responseResultBuilder.SetData(notification);
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("Me/Notifications/{id:Guid}/Dismiss")]
+        public async Task<IActionResult> DismissNotification([FromRoute] Guid id)
+        {
+            bool isSuccess = await userService.DismissNotificationOfCurrentUserAsync(id);
+            if (!isSuccess) return responseResultBuilder.Build();
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("Me/DismissAllNotifications")]
+        public async Task<IActionResult> DismissAllNotifications()
+        {
+            bool isSuccess = await userService.DismissAllNotificationsOfCurrentUserAsync();
+            if (!isSuccess) return responseResultBuilder.Build();
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }

@@ -8,7 +8,7 @@ namespace HardwareShop.Core.Models
         public string? SortFieldName { get; set; }
         public bool? IsSortAscending { get; set; }
 
-        public List<QueryOrder<T>> ToSearchQueries<T>() where T : EntityBase
+        public List<QueryOrder<T>> ToOrderQueries<T>() where T : EntityBase
         {
             if (SortFieldName == null || IsSortAscending == null) return new List<QueryOrder<T>>();
             var properties = typeof(T).GetProperties();

@@ -58,9 +58,9 @@ namespace HardwareShop.WebApi.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetInvoicesOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        public async Task<IActionResult> GetInvoicesOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] SortingModel sortingModel)
         {
-            var invoices = await invoiceService.GetInvoiceDtoPageDataOfCurrentUserShopAsync(pagingModel, search);
+            var invoices = await invoiceService.GetInvoiceDtoPageDataOfCurrentUserShopAsync(pagingModel, search, sortingModel);
             if (invoices == null) return responseResultBuilder.Build();
 
             responseResultBuilder.SetPageData(invoices);

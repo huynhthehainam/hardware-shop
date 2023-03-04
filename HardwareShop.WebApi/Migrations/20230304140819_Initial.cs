@@ -67,6 +67,31 @@ namespace HardwareShop.WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Message = table.Column<string>(type: "text", nullable: true),
+                    Variant = table.Column<string>(type: "text", nullable: true),
+                    Translation = table.Column<string>(type: "text", nullable: true),
+                    TranslationParams = table.Column<JsonDocument>(type: "jsonb", nullable: true),
+                    IsDismissed = table.Column<bool>(type: "boolean", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserAssets",
                 columns: table => new
                 {
@@ -559,6 +584,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_UserId",
+                table: "Notifications",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderDetails_OrderId",
                 table: "OrderDetails",
                 column: "OrderId");
@@ -649,6 +679,9 @@ namespace HardwareShop.WebApi.Migrations
         {
             migrationBuilder.DropTable(
                 name: "InvoiceDetails");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "OrderDetails");
