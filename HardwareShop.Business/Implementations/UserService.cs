@@ -20,6 +20,7 @@ namespace HardwareShop.Business.Implementations
         private readonly ICurrentUserService currentUserService;
         private readonly ILanguageService languageService;
         private readonly IShopService shopService;
+
         public UserService(IRepository<Notification> notificationRepository, IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService)
         {
             this.userRepository = userRepository;
@@ -237,6 +238,21 @@ namespace HardwareShop.Business.Implementations
                 TranslationParams = translationParams,
             });
             return new CreatedNotificationDto { Id = notification.Id };
+        }
+
+        public async Task<bool> UpdateCurrentUserPasswordAsync(string oldPassword, string newPassword)
+        {
+            var user = await getCurrentUserAsync();
+            if (user == null) return false;
+            if (!hashingPasswordService.Verify(oldPassword, user.HashedPassword))
+            {
+                responseResultBuilder.AddInvalidFieldError("OldPassword");
+                return false;
+            }
+
+            user.HashedPassword = hashingPasswordService.Hash(newPassword);
+            await userRepository.UpdateAsync(user);
+            return true;
         }
     }
 }

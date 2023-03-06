@@ -19,5 +19,6 @@ namespace HardwareShop.Business.Services
         Task<CreatedNotificationDto?> CreateNotificationOfCurrentUserAsync(string? message, string variant, string? translation, JsonDocument? translationParams);
         Task<bool> DismissNotificationOfCurrentUserAsync(Guid id);
         Task<bool> DismissAllNotificationsOfCurrentUserAsync();
+        Task<bool> UpdateCurrentUserPasswordAsync(string oldPassword, string newPassword);
     }
 }

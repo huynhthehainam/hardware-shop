@@ -13,10 +13,33 @@ namespace HardwareShop.Business.Implementations
     {
         private readonly IRepository<Unit> unitRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
-        public UnitService(IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder)
+        private readonly ICurrentUserService currentUserService;
+        public UnitService(IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService)
         {
             this.responseResultBuilder = responseResultBuilder;
             this.unitRepository = unitRepository;
+            this.currentUserService = currentUserService;
+        }
+
+        public async Task<CreatedUnitDto?> CreateUnit(string name, double stepNumber, int unitCategoryId)
+        {
+            var isAdmin = currentUserService.IsSystemAdmin();
+            if (!isAdmin)
+            {
+                responseResultBuilder.AddNotPermittedError();
+                return null;
+            }
+            var unit = await unitRepository.CreateIfNotExistsAsync(new Unit { Name = name, StepNumber = stepNumber, UnitCategoryId = unitCategoryId }, e => new { e.Name, e.UnitCategoryId });
+            if (unit == null)
+            {
+                responseResultBuilder.AddExistedEntityError("Unit");
+                return null;
+            }
+            return new CreatedUnitDto
+            {
+                Id = unit.Id
+            };
+
         }
 
         public async Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId)

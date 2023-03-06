@@ -17,6 +17,14 @@ namespace HardwareShop.WebApi.Controllers
         {
             this.unitService = unitService;
         }
+        [HttpPost]
+        public async Task<IActionResult> CreateUnit([FromBody] CreateUnitCommand command)
+        {
+            var unit = await unitService.CreateUnit(command.Name ?? "", command.StepNumber ?? 0, command.UnitCategoryId ?? 0);
+            if (unit == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetData(unit);
+            return responseResultBuilder.Build();
+        }
         [HttpPost("{id:int}/RoundValue")]
         public async Task<IActionResult> RoundValue([FromRoute] int id, [FromBody] RoundNumberCommand command)
         {
@@ -28,7 +36,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUnits([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] int? categoryId)
         {
-            var units =  await unitService.GetUnitDtoPageDataAsync(pagingModel, search, categoryId);
+            var units = await unitService.GetUnitDtoPageDataAsync(pagingModel, search, categoryId);
             responseResultBuilder.SetPageData(units);
             return responseResultBuilder.Build();
         }

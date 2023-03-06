@@ -55,6 +55,17 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }
+
+
+        [HttpPost("Me/UpdatePassword")]
+        public async Task<IActionResult> UpdateCurrentUserPassword([FromBody] UpdatePasswordCommand command)
+        {
+            var isSuccess = await userService.UpdateCurrentUserPasswordAsync(command.OldPassword ?? "", command.NewPassword ?? "");
+            if (!isSuccess) return responseResultBuilder.Build();
+
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
         [HttpGet("Me/Notifications")]
         public async Task<IActionResult> GetCurrentUserNotifications([FromQuery] PagingModel pagingModel)
         {

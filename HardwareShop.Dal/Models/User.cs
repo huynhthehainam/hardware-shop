@@ -17,7 +17,7 @@ namespace HardwareShop.Dal.Models
         public string Username { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Phone { get; set; }
-        public String? HashedPassword { get; set; }
+        public string HashedPassword { get; set; } = string.Empty;
         public SystemUserRole Role { get; set; } = SystemUserRole.Staff;
         public User()
         {

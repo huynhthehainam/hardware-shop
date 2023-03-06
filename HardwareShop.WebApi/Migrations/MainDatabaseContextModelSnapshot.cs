@@ -558,6 +558,7 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("HashedPassword")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<JsonDocument>("InterfaceSettings")
