@@ -45,7 +45,12 @@ namespace HardwareShop.Business.Implementations
         public async Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId)
         {
             var units = await unitRepository.GetPageDataByQueryAsync(pagingModel, e => categoryId == null ? true : e.UnitCategoryId == categoryId, string.IsNullOrEmpty(search) ? null : new SearchQuery<Unit>(search, e => new { e.Name }));
-            return PageData<UnitDto>.ConvertFromOtherPageData(units, e => new UnitDto { Id = e.Id, Name = e.Name });
+            return PageData<UnitDto>.ConvertFromOtherPageData(units, e => new UnitDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                UnitCategoryName = e.UnitCategory?.Name,
+            });
         }
 
         public async Task<double?> RoundValue(int unitId, double value)
