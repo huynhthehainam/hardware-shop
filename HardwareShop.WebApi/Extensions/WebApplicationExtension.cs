@@ -14,6 +14,7 @@ namespace HardwareShop.WebApi.Extensions
             const string productAssetFile = "ProductAsset.jpg";
             const string shopAssetFile = "ShopAsset.jpg";
             const string userAssetFile = "UserAsset.jpg";
+            const string countryAssetFile = "CountryAsset.png";
             using (IServiceScope scope = services.CreateScope())
             {
                 IWebHostEnvironment? env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
@@ -27,6 +28,18 @@ namespace HardwareShop.WebApi.Extensions
                 {
                     if (!db.Users.Any())
                     {
+                        var productAssetPath = Path.Join(assetFolder, productAssetFile);
+                        var productAssetBytes = File.ReadAllBytes(productAssetPath);
+
+                        var shopAssetPath = Path.Join(assetFolder, shopAssetFile);
+                        var shopAssetBytes = File.ReadAllBytes(shopAssetPath);
+
+                        var userAssetPath = Path.Join(assetFolder, userAssetFile);
+                        var userAssetBytes = File.ReadAllBytes(userAssetPath);
+
+                        var countryAssetPath = Path.Join(assetFolder, countryAssetFile);
+                        var countryAssetBytes = File.ReadAllBytes(countryAssetPath);
+
                         UnitCategory unitCategory = new UnitCategory()
                         {
                             Name = UnitCategoryConstants.MassCategoryName
@@ -49,19 +62,19 @@ namespace HardwareShop.WebApi.Extensions
                         var country = new Country()
                         {
                             Name = "Vietnam",
-                            PhonePrefix = "+84"
+                            PhonePrefix = "+84",
+                            Asset = new CountryAsset()
+                            {
+                                AssetType = CountryAssetConstants.IconType,
+                                Bytes = countryAssetBytes,
+                                Filename = countryAssetFile,
+                                ContentType = ContentTypeConstants.PngContentType
+                            }
                         };
                         db.Countries.Add(country);
                         db.SaveChanges();
 
-                        var productAssetPath = Path.Join(assetFolder, productAssetFile);
-                        var productAssetBytes = File.ReadAllBytes(productAssetPath);
 
-                        var shopAssetPath = Path.Join(assetFolder, shopAssetFile);
-                        var shopAssetBytes = File.ReadAllBytes(shopAssetPath);
-
-                        var userAssetPath = Path.Join(assetFolder, userAssetFile);
-                        var userAssetBytes = File.ReadAllBytes(userAssetPath);
 
                         var user = new User
                         {

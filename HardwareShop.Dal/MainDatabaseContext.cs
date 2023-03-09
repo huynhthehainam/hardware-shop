@@ -30,6 +30,7 @@ namespace HardwareShop.Dal
         public DbSet<OrderDetail> OrderDetails => Set<OrderDetail>();
         public DbSet<Notification> Notifications => Set<Notification>();
         public DbSet<Country> Countries => Set<Country>();
+        public DbSet<CountryAsset> CountryAssets => Set<CountryAsset>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,6 +56,7 @@ namespace HardwareShop.Dal
             OrderDetail.BuildModel(modelBuilder);
             Notification.BuildModel(modelBuilder);
             Country.BuildModel(modelBuilder);
+            CountryAsset.BuildModel(modelBuilder);
         }
     }
 }

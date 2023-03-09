@@ -33,6 +33,13 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader.Load(this, ref users);
             set => users = value;
         }
+        private CountryAsset? asset;
+        public CountryAsset? Asset
+        {
+            get => lazyLoader.Load(this, ref asset);
+            set => asset = value;
+
+        }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Country>(e =>

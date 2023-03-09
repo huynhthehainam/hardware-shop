@@ -23,5 +23,14 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetPageData(countries);
             return responseResultBuilder.Build();
         }
+
+        [HttpGet("{id:int}/Icon")]
+        public async Task<IActionResult> GetCountryIcon([FromRoute] int id)
+        {
+            var asset = await countryService.GetCountryIconByIdAsync(id);
+            if (asset == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetAsset(asset);
+            return responseResultBuilder.Build();
+        }
     }
 }

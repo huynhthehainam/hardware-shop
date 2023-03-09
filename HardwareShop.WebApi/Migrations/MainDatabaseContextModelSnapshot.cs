@@ -44,6 +44,38 @@ namespace HardwareShop.WebApi.Migrations
                     b.ToTable("Countries");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.CountryAsset", b =>
+                {
+                    b.Property<int>("CountryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("Bytes")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("CountryId");
+
+                    b.ToTable("CountryAssets");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -722,6 +754,17 @@ namespace HardwareShop.WebApi.Migrations
                     b.ToTable("WarehouseProducts");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.CountryAsset", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Country", "Country")
+                        .WithOne("Asset")
+                        .HasForeignKey("HardwareShop.Dal.Models.CountryAsset", "CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.Country", "PhoneCountry")
@@ -1028,6 +1071,8 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>
                 {
+                    b.Navigation("Asset");
+
                     b.Navigation("Customers");
 
                     b.Navigation("Users");
