@@ -16,6 +16,13 @@ namespace HardwareShop.Dal.Models
         public int Id { get; set; }
         public string? Name { get; set; }
         public string? Phone { get; set; }
+        public int? PhoneCountryId { get; set; }
+        private Country? phoneCountry;
+        public Country? PhoneCountry
+        {
+            get => lazyLoader.Load(this, ref phoneCountry);
+            set => phoneCountry = value;
+        }
         public string? Address { get; set; }
         public int ShopId { get; set; }
         public bool IsFamiliar { get; set; } = false;
@@ -50,6 +57,7 @@ namespace HardwareShop.Dal.Models
             {
                 e.HasKey(e => e.Id);
                 e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+                e.HasOne(e => e.PhoneCountry).WithMany(e => e.Customers).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
             });
         }
     }

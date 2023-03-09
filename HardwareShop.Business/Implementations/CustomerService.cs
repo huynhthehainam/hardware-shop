@@ -42,6 +42,7 @@ namespace HardwareShop.Business.Implementations
                 Name = e.Name,
                 Address = e.Address,
                 IsFamiliar = e.IsFamiliar,
+                PhonePrefix = e.PhoneCountry?.PhonePrefix,
                 Phone = e.Phone,
                 Debt = e.Debt?.Amount ?? 0,
             });
@@ -66,7 +67,7 @@ namespace HardwareShop.Business.Implementations
             });
         }
 
-        public async Task<CreatedCustomerDto?> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar)
+        public async Task<CreatedCustomerDto?> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar, int? phoneCountryId)
         {
             var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -81,7 +82,8 @@ namespace HardwareShop.Business.Implementations
                 Name = name,
                 Phone = phone,
                 Address = address,
-                IsFamiliar = isFamiliar
+                IsFamiliar = isFamiliar,
+                PhoneCountryId = phoneCountryId,
             }, e => new { e.Name, e.Address, e.Phone });
             if (customer == null)
             {

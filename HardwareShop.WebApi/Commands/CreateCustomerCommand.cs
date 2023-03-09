@@ -10,5 +10,6 @@ namespace HardwareShop.WebApi.Commands
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public bool IsFamiliar { get; set; } = false;
+        public int? PhoneCountryId { get; set; }
     }
 }

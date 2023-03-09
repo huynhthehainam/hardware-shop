@@ -45,6 +45,15 @@ namespace HardwareShop.WebApi.Extensions
                         db.Units.Add(unit1);
                         db.SaveChanges();
 
+
+                        var country = new Country()
+                        {
+                            Name = "Vietnam",
+                            PhonePrefix = "+84"
+                        };
+                        db.Countries.Add(country);
+                        db.SaveChanges();
+
                         var productAssetPath = Path.Join(assetFolder, productAssetFile);
                         var productAssetBytes = File.ReadAllBytes(productAssetPath);
 
@@ -58,11 +67,12 @@ namespace HardwareShop.WebApi.Extensions
                         {
                             Email = "huynhthehainam@gmail.com",
                             HashedPassword = hashingPasswordService.Hash("123"),
-                            Phone = "+84967044037",
+                            Phone = "967044037",
                             FirstName = "Nam",
                             LastName = "Huỳnh",
                             Role = HardwareShop.Core.Models.SystemUserRole.Admin,
                             Username = "admin",
+                            PhoneCountryId = country.Id,
                             Assets = new UserAsset[]
                             {
                             new UserAsset
@@ -137,8 +147,8 @@ namespace HardwareShop.WebApi.Extensions
                                 new Customer{
                                     Address="HCM",
                                     Name = "Nam",
-                                    Phone = "+84967044037",
-
+                                    Phone = "967044037",
+                                    PhoneCountryId= country.Id,
                                 }
                             }
 

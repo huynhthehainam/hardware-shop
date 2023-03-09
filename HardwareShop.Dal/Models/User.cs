@@ -17,6 +17,13 @@ namespace HardwareShop.Dal.Models
         public string Username { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Phone { get; set; }
+        public int? PhoneCountryId { get; set; }
+        private Country? phoneCountry;
+        public Country? PhoneCountry
+        {
+            get => lazyLoader.Load(this, ref phoneCountry);
+            set => phoneCountry = value;
+        }
         public string HashedPassword { get; set; } = string.Empty;
         public SystemUserRole Role { get; set; } = SystemUserRole.Staff;
         public User()
@@ -27,8 +34,6 @@ namespace HardwareShop.Dal.Models
         {
 
         }
-
-
         private UserShop? userShop;
         public UserShop? UserShop
         {
@@ -37,15 +42,6 @@ namespace HardwareShop.Dal.Models
         }
         public bool IsDeleted { get; set; }
 
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>(s =>
-            {
-                s.HasKey(a => a.Id);
-                s.HasIndex(e => e.Username).IsUnique();
-            });
-
-        }
         public JsonDocument InterfaceSettings { get; set; } = InterfaceSettingsHelper.GenerateDefaultInterfaceSettings();
 
         private ICollection<UserAsset>? assets;
@@ -60,5 +56,17 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader.Load(this, ref notifications);
             set => notifications = value;
         }
+
+        public static void BuildModel(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<User>(s =>
+            {
+                s.HasKey(a => a.Id);
+                s.HasIndex(e => e.Username).IsUnique();
+                s.HasOne(e => e.PhoneCountry).WithMany(e => e.Users).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
+            });
+
+        }
+
     }
 }

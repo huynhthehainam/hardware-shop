@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230306065657_Initial")]
+    [Migration("20230309022437_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,27 @@ namespace HardwareShop.WebApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PhonePrefix")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Countries");
+                });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
@@ -45,10 +66,15 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("text");
 
+                    b.Property<int?>("PhoneCountryId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ShopId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PhoneCountryId");
 
                     b.HasIndex("ShopId");
 
@@ -577,6 +603,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("text");
 
+                    b.Property<int?>("PhoneCountryId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Role")
                         .HasColumnType("integer");
 
@@ -585,6 +614,8 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("PhoneCountryId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -695,11 +726,18 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>
                 {
+                    b.HasOne("HardwareShop.Dal.Models.Country", "PhoneCountry")
+                        .WithMany("Customers")
+                        .HasForeignKey("PhoneCountryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
                         .WithMany("Customers")
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("PhoneCountry");
 
                     b.Navigation("Shop");
                 });
@@ -920,6 +958,16 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("UnitCategory");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.User", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Country", "PhoneCountry")
+                        .WithMany("Users")
+                        .HasForeignKey("PhoneCountryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("PhoneCountry");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.UserAsset", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.User", "User")
@@ -978,6 +1026,13 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>
+                {
+                    b.Navigation("Customers");
+
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Customer", b =>

@@ -12,6 +12,20 @@ namespace HardwareShop.WebApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Countries",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    PhonePrefix = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Countries", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UnitCategories",
                 columns: table => new
                 {
@@ -35,6 +49,7 @@ namespace HardwareShop.WebApi.Migrations
                     Username = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: true),
+                    PhoneCountryId = table.Column<int>(type: "integer", nullable: true),
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
@@ -43,6 +58,12 @@ namespace HardwareShop.WebApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Countries_PhoneCountryId",
+                        column: x => x.PhoneCountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
@@ -151,6 +172,7 @@ namespace HardwareShop.WebApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Phone = table.Column<string>(type: "text", nullable: true),
+                    PhoneCountryId = table.Column<int>(type: "integer", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
                     ShopId = table.Column<int>(type: "integer", nullable: false),
                     IsFamiliar = table.Column<bool>(type: "boolean", nullable: false)
@@ -158,6 +180,12 @@ namespace HardwareShop.WebApi.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Customers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Customers_Countries_PhoneCountryId",
+                        column: x => x.PhoneCountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_Customers_Shops_ShopId",
                         column: x => x.ShopId,
@@ -549,6 +577,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "CustomerDebtId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Customers_PhoneCountryId",
+                table: "Customers",
+                column: "PhoneCountryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Customers_ShopId",
                 table: "Customers",
                 column: "ShopId");
@@ -654,6 +687,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_PhoneCountryId",
+                table: "Users",
+                column: "PhoneCountryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Username",
                 table: "Users",
                 column: "Username",
@@ -730,6 +768,9 @@ namespace HardwareShop.WebApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "Countries");
 
             migrationBuilder.DropTable(
                 name: "Shops");

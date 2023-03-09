@@ -28,12 +28,12 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCustomerOfCurrentUserShop([FromBody] CreateCustomerCommand command)
         {
-            var customer = await customerService.CreateCustomerOfCurrentUserShopAsync(command.Name ?? "", command.Phone, command.Address, command.IsFamiliar);
+            var customer = await customerService.CreateCustomerOfCurrentUserShopAsync(command.Name ?? "", command.Phone, command.Address, command.IsFamiliar, command.PhoneCountryId);
             if (customer == null) return responseResultBuilder.Build();
 
             responseResultBuilder.SetData(customer);
 
-            
+
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/Update")]
@@ -44,7 +44,7 @@ namespace HardwareShop.WebApi.Controllers
                 return responseResultBuilder.Build();
 
             responseResultBuilder.SetUpdatedMessage();
-           
+
             return responseResultBuilder.Build();
         }
     }
