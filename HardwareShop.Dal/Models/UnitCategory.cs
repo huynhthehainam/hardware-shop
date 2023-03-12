@@ -7,8 +7,6 @@ namespace HardwareShop.Dal.Models
     public static class UnitCategoryConstants
     {
         public const string CurrencyCategoryName = "Currency";
-        public const string MassCategoryName = "Mass";
-
     }
     public sealed class UnitCategory : EntityBase
     {

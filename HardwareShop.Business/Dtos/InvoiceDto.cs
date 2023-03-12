@@ -30,7 +30,6 @@ namespace HardwareShop.Business.Dtos
         public double TotalCost { get; set; }
         public double Debt { get; set; }
         public double Rest { get; set; }
-
         public InvoiceDetailDto[] Details { get; set; } = new InvoiceDetailDto[0];
         public string? CustomerPhonePrefix { get; set; }
     }

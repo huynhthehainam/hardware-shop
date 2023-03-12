@@ -47,14 +47,29 @@ namespace HardwareShop.WebApi.Extensions
 
                         UnitCategory unitCategory = new UnitCategory()
                         {
-                            Name = UnitCategoryConstants.MassCategoryName
+                            Name = "Mass"
                         };
                         UnitCategory unitCategory2 = new UnitCategory()
                         {
                             Name = UnitCategoryConstants.CurrencyCategoryName
                         };
+                        UnitCategory unitCategory1 = new UnitCategory()
+                        {
+                            Name = "Single"
+                        };
+                        UnitCategory unitCategory3 = new UnitCategory()
+                        {
+                            Name = "Length"
+                        };
+                        UnitCategory unitCategory4 = new UnitCategory()
+                        {
+                            Name = "Volume"
+                        };
                         db.UnitCategories.Add(unitCategory);
+                        db.UnitCategories.Add(unitCategory1);
                         db.UnitCategories.Add(unitCategory2);
+                        db.UnitCategories.Add(unitCategory3);
+                        db.UnitCategories.Add(unitCategory4);
                         db.SaveChanges();
 
                         Unit unit = new Unit { Name = "Kg", UnitCategory = unitCategory };
