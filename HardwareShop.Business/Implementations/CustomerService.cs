@@ -14,13 +14,18 @@ namespace HardwareShop.Business.Implementations
     {
         private readonly IShopService shopService;
         private readonly IRepository<Customer> customerRepository;
+        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
+        private readonly IRepository<Invoice> invoiceRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
-        public CustomerService(IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
+        private readonly ICustomerDebtService customerDebtService;
+        public CustomerService(IRepository<Invoice> invoiceRepository, ICustomerDebtService customerDebtService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
         {
             this.responseResultBuilder = responseResultBuilder;
             this.customerRepository = customerRepository;
             this.shopService = shopService;
-
+            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
+            this.customerDebtService = customerDebtService;
+            this.invoiceRepository = invoiceRepository;
         }
         public async Task<PageData<CustomerDto>?> GetCustomerPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
@@ -43,6 +48,7 @@ namespace HardwareShop.Business.Implementations
                 Address = e.Address,
                 IsFamiliar = e.IsFamiliar,
                 PhonePrefix = e.PhoneCountry?.PhonePrefix,
+                PhoneCountryId = e.PhoneCountryId,
                 Phone = e.Phone,
                 Debt = e.Debt?.Amount ?? 0,
             });
@@ -96,6 +102,23 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CustomerDto?> UpdateCustomerOfCurrentUserShopAsync(int customerId, string? name, string? phone, string? address, bool? isFamiliar, double? amountOfCash)
         {
+            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            if (customer == null) return null;
+            customer.Name = string.IsNullOrEmpty(name) ? customer.Name : name;
+            customer.Phone = string.IsNullOrEmpty(phone) ? customer.Phone : phone;
+            customer.Address = string.IsNullOrEmpty(address) ? customer.Address : address;
+            customer.IsFamiliar = isFamiliar == null ? customer.IsFamiliar : isFamiliar.Value;
+            if (amountOfCash != null && amountOfCash != 0)
+            {
+                var reason = amountOfCash > 0 ? CustomerDebtHistoryHelper.GenerateDebtReasonWhenBorrowing() : CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
+                await customerDebtService.AddDebtToCustomerAsync(customer, amountOfCash.Value, reason.Item1, reason.Item2);
+            }
+            customer = await customerRepository.UpdateAsync(customer);
+            return new CustomerDto { Id = customer.Id };
+        }
+
+        private async Task<Customer?> getCustomerOfCurrentUserShopById(int customerId)
+        {
             var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
@@ -108,38 +131,57 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Customer");
                 return null;
             }
-            customer.Name = string.IsNullOrEmpty(name) ? customer.Name : name;
-            customer.Phone = string.IsNullOrEmpty(phone) ? customer.Phone : phone;
-            customer.Address = string.IsNullOrEmpty(address) ? customer.Address : address;
-            customer.IsFamiliar = isFamiliar == null ? customer.IsFamiliar : isFamiliar.Value;
-            if (amountOfCash != null)
+            return customer;
+        }
+
+        public async Task<CustomerDto?> GetCustomerDtoOfCurrentUserShopByIdAsync(int customerId)
+        {
+            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            if (customer == null) return null;
+
+            return new CustomerDto()
             {
-                if (customer.Debt == null)
-                {
-                    customer.Debt = new CustomerDebt { Amount = amountOfCash.Value };
-                }
-                else
-                {
+                Id = customer.Id,
+                Name = customer.Name,
+                Address = customer.Address,
+                Debt = customer.Debt?.Amount ?? 0,
+                IsFamiliar = customer.IsFamiliar,
+                Phone = customer.Phone,
+                PhoneCountryId = customer.PhoneCountryId,
+                PhonePrefix = customer.PhoneCountry?.PhonePrefix,
 
-                    if (customer.Debt.Histories != null)
-                    {
-                        var reason = amountOfCash > 0 ? CustomerDebtHistoryHelper.GenerateDebtReasonWhenBorrowing() : CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
-                        customer.Debt.Histories.Add(new CustomerDebtHistory
-                        {
-                            ChangeOfDebt = amountOfCash.Value,
-                            CreatedDate = DateTime.UtcNow,
-                            OldDebt = customer.Debt.Amount,
-                            NewDebt = customer.Debt.Amount + amountOfCash.Value,
-                            Reason = reason.Item1,
-                            ReasonParams = reason.Item2,
-                        });
-                    }
-                    customer.Debt.Amount += amountOfCash.Value;
-                }
-            }
-            customer = await customerRepository.UpdateAsync(customer);
+            };
+        }
 
-            return new CustomerDto { Id = customer.Id };
+        public async Task<PageData<CustomerDebtHistoryDto>?> GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
+        {
+            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            if (customer == null) return null;
+
+            return await customerDebtHistoryRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerDebtId == customerId, e => new CustomerDebtHistoryDto
+            {
+                ChangeOfDebt = e.ChangeOfDebt,
+                CreatedDate = e.CreatedDate,
+                NewDebt = e.NewDebt,
+                OldDebt = e.OldDebt,
+                Id = e.Id,
+                Reason = e.Reason,
+                ReasonParams = e.ReasonParams
+            }, null, new List<QueryOrder<CustomerDebtHistory>>() { new QueryOrder<CustomerDebtHistory>(e => e.CreatedDate, false) });
+        }
+
+        public async Task<PageData<InvoiceDto>?> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
+        {
+            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            if (customer == null) return null;
+            return await invoiceRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerId == customer.Id, e => new InvoiceDto
+            {
+                Id = e.Id,
+                Code = e.Code,
+                CreatedDate = e.CreatedDate,
+                Deposit = e.Deposit,
+                TotalCost = e.GetTotalCost(),
+            }, null, new List<QueryOrder<Invoice>> { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
         }
     }
 }

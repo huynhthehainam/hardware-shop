@@ -135,6 +135,7 @@ namespace HardwareShop.Business.Implementations
                 CustomerName = invoice.Customer?.Name,
                 CustomerPhone = invoice.Customer?.Phone,
                 CustomerAddress = invoice.Customer?.Address,
+                CustomerPhonePrefix = invoice.Customer?.PhoneCountry?.PhonePrefix,
                 CreatedDate = invoice.CreatedDate,
                 Code = invoice.Code,
                 Deposit = invoice.Deposit,

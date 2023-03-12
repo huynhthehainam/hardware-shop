@@ -15,6 +15,7 @@ namespace HardwareShop.WebApi.Extensions
             const string shopAssetFile = "ShopAsset.jpg";
             const string userAssetFile = "UserAsset.jpg";
             const string countryAssetFile = "CountryAsset.png";
+            const string countryAsset2File = "CountryAsset2.png";
             using (IServiceScope scope = services.CreateScope())
             {
                 IWebHostEnvironment? env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
@@ -39,6 +40,10 @@ namespace HardwareShop.WebApi.Extensions
 
                         var countryAssetPath = Path.Join(assetFolder, countryAssetFile);
                         var countryAssetBytes = File.ReadAllBytes(countryAssetPath);
+
+                        var countryAsset2Path = Path.Join(assetFolder, countryAsset2File);
+                        var countryAsset2Bytes = File.ReadAllBytes(countryAsset2Path);
+
 
                         UnitCategory unitCategory = new UnitCategory()
                         {
@@ -71,7 +76,21 @@ namespace HardwareShop.WebApi.Extensions
                                 ContentType = ContentTypeConstants.PngContentType
                             }
                         };
+
+                        var country2 = new Country()
+                        {
+                            Name = "China",
+                            PhonePrefix = "+86",
+                            Asset = new CountryAsset()
+                            {
+                                AssetType = CountryAssetConstants.IconType,
+                                Bytes = countryAsset2Bytes,
+                                Filename = countryAsset2File,
+                                ContentType = ContentTypeConstants.PngContentType
+                            }
+                        };
                         db.Countries.Add(country);
+                        db.Countries.Add(country2);
                         db.SaveChanges();
 
 

@@ -47,5 +47,32 @@ namespace HardwareShop.WebApi.Controllers
 
             return responseResultBuilder.Build();
         }
+        [HttpGet("{id:int}")]
+        public async Task<IActionResult> GetCustomerById([FromRoute] int id)
+        {
+            var customer = await customerService.GetCustomerDtoOfCurrentUserShopByIdAsync(id);
+
+            if (customer == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetData(customer);
+            return responseResultBuilder.Build();
+        }
+
+        [HttpGet("{id:int}/DebtHistories")]
+        public async Task<IActionResult> GetDebtHistoriesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)
+        {
+            var histories = await customerService.GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(id, pagingModel);
+            if (histories == null) return responseResultBuilder.Build();
+
+            responseResultBuilder.SetPageData(histories);
+            return responseResultBuilder.Build();
+        }
+        [HttpGet("{id:int}/Invoices")]
+        public async Task<IActionResult> GetInvoicesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)
+        {
+            var invoices = await customerService.GetCustomerInvoiceDtoPageDataByCustomerIdAsync(id, pagingModel);
+            if (invoices == null) return responseResultBuilder.Build();
+            responseResultBuilder.SetPageData(invoices);
+            return responseResultBuilder.Build();
+        }
     }
 }
