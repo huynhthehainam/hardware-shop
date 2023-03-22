@@ -26,7 +26,7 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader.Load(this, ref country);
             set => country = value;
         }
-        public byte[] Bytes { get; set; } = new byte[0];
+        public byte[] Bytes { get; set; } = Array.Empty<byte>();
         public string Filename { get; set; } = string.Empty;
         public string AssetType { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;
@@ -34,10 +34,10 @@ namespace HardwareShop.Dal.Models
         public DateTime? LastModifiedDate { get; set; }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CountryAsset>(e =>
+            _ = modelBuilder.Entity<CountryAsset>(e =>
             {
-                e.HasKey(e => e.CountryId);
-                e.HasOne(e => e.Country).WithOne(e => e.Asset).HasForeignKey<CountryAsset>(e => e.CountryId).OnDelete(DeleteBehavior.Cascade);
+                _ = e.HasKey(e => e.CountryId);
+                _ = e.HasOne(e => e.Country).WithOne(e => e.Asset).HasForeignKey<CountryAsset>(e => e.CountryId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

@@ -19,14 +19,14 @@ namespace HardwareShop.Dal.Models
         public int UnitCategoryId { get; set; }
         public double RoundValue(double value)
         {
-            value = value / StepNumber;
+            value /= StepNumber;
             value = Math.Round(value);
-            value = value * StepNumber;
+            value *= StepNumber;
             return value;
         }
         public string ConvertValueToString(double value)
         {
-            var roundNumber = 0;
+            int roundNumber = 0;
             while (StepNumber < Math.Pow(10, -roundNumber))
             {
                 roundNumber++;
@@ -57,10 +57,10 @@ namespace HardwareShop.Dal.Models
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Unit>(entity =>
+            _ = modelBuilder.Entity<Unit>(entity =>
             {
-                entity.HasKey(entity => entity.Id);
-                entity.HasOne(e => e.UnitCategory).WithMany(e => e.Units).HasForeignKey(e => e.UnitCategoryId).OnDelete(DeleteBehavior.Cascade);
+                _ = entity.HasKey(entity => entity.Id);
+                _ = entity.HasOne(e => e.UnitCategory).WithMany(e => e.Units).HasForeignKey(e => e.UnitCategoryId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

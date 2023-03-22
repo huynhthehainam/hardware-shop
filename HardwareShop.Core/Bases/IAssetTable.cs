@@ -2,8 +2,8 @@
 {
     public static class ContentTypeConstants
     {
-        public static string JpegContentType = "image/jpeg";
-        public static string PngContentType = "image/png";
+        public const string JpegContentType = "image/jpeg";
+        public const string PngContentType = "image/png";
     }
     public interface IAssetTable : ITrackingDate
     {

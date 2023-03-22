@@ -6,7 +6,7 @@ namespace HardwareShop.Core.Services
 {
     public class SearchQuery<T> where T : EntityBase
     {
-        private string search;
+        private readonly string search;
         public Expression<Func<T, object>> selector;
         public SearchQuery(string search, Expression<Func<T, object>> expression)
         {
@@ -77,7 +77,7 @@ namespace HardwareShop.Core.Services
         Task<bool> DeleteAsync(T entity);
         Task<bool> DeleteRangeByQueryAsync(Expression<Func<T, Boolean>> expression);
         Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
-        Task<T?> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector);
-        Task<T> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector);
+        Task<CreateIfNotExistResponse<T>> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector);
+        Task<CreateOrUpdateResponse<T>> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector);
     }
 }

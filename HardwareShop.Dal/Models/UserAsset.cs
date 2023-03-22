@@ -26,7 +26,7 @@ namespace HardwareShop.Dal.Models
             set => user = value;
         }
 
-        public byte[] Bytes { get; set; } = new byte[0];
+        public byte[] Bytes { get; set; } = Array.Empty<byte>();
         public string Filename { get; set; } = string.Empty;
         public string AssetType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -35,10 +35,10 @@ namespace HardwareShop.Dal.Models
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<UserAsset>(e =>
+            _ = modelBuilder.Entity<UserAsset>(e =>
             {
-                e.HasKey(e => e.Id);
-                e.HasOne(e => e.User).WithMany(e => e.Assets).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+                _ = e.HasKey(e => e.Id);
+                _ = e.HasOne(e => e.User).WithMany(e => e.Assets).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

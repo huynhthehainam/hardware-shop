@@ -23,21 +23,21 @@ namespace HardwareShop.Business.Implementations
         }
         public async Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
 
-            var warehousePageData = await warehouseRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, search == null ? null : new SearchQuery<Warehouse>(search, e => new { e.Name, e.Address }));
+            PageData<Warehouse> warehousePageData = await warehouseRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, search == null ? null : new SearchQuery<Warehouse>(search, e => new { e.Name, e.Address }));
 
             return PageData<WarehouseDto>.ConvertFromOtherPageData(warehousePageData, e => new WarehouseDto(e.Id, e.Name, e.Address));
         }
 
         public async Task<bool> DeleteWarehouseOfCurrentUserShopAsync(int warehouseId)
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
@@ -47,7 +47,7 @@ namespace HardwareShop.Business.Implementations
         }
         public async Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address)
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
                 return null;
@@ -66,26 +66,26 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<WarehouseProductDto?> CreateOrUpdateWarehouseProductAsync(int warehouseId, int productId, double quantity)
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync();
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var warehouse = await warehouseRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == warehouseId);
+            Warehouse? warehouse = await warehouseRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == warehouseId);
             if (warehouse == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Warehouse");
                 return null;
             }
 
-            var product = await productRepository.GetItemByQueryAsync(e => (e.ShopId == shop.Id) && e.Id == productId);
+            Product? product = await productRepository.GetItemByQueryAsync(e => (e.ShopId == shop.Id) && e.Id == productId);
             if (product == null)
             {
                 responseResultBuilder.AddInvalidFieldError("ProductId");
                 return null;
             }
-            WarehouseProduct item = await warehouseProductRepository.CreateOrUpdateAsync(new WarehouseProduct { ProductId = productId, Quantity = quantity, WarehouseId = warehouseId }, e => new
+            CreateOrUpdateResponse<WarehouseProduct> createOrUpdateResponse = await warehouseProductRepository.CreateOrUpdateAsync(new WarehouseProduct { ProductId = productId, Quantity = quantity, WarehouseId = warehouseId }, e => new
             {
                 e.ProductId,
                 e.WarehouseId
@@ -93,6 +93,7 @@ namespace HardwareShop.Business.Implementations
             {
                 e.Quantity
             });
+            WarehouseProduct item = createOrUpdateResponse.Entity;
             return new WarehouseProductDto(item.WarehouseId, item.ProductId, item.Quantity);
         }
     }

@@ -25,7 +25,7 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
             set => shop = value;
         }
-        public byte[] Bytes { get; set; } = new byte[0];
+        public byte[] Bytes { get; set; } = Array.Empty<byte>();
         public string Filename { get; set; } = string.Empty;
         public string AssetType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -34,10 +34,10 @@ namespace HardwareShop.Dal.Models
 
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<ShopAsset>(s =>
+            _ = modelBuilder.Entity<ShopAsset>(s =>
             {
-                s.HasKey(s => s.Id);
-                s.HasOne(e => e.Shop).WithMany(e => e.Assets).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+                _ = s.HasKey(s => s.Id);
+                _ = s.HasOne(e => e.Shop).WithMany(e => e.Assets).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
         }
     }

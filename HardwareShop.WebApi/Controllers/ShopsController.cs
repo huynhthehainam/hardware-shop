@@ -11,11 +11,10 @@ namespace HardwareShop.WebApi.Controllers
     public class ShopsController : AuthorizedApiControllerBase
     {
         private readonly IShopService shopService;
-        private readonly ICustomerService customerService;
+
         private readonly IUserService userService;
-        public ShopsController(ICustomerService customerService, IUserService userService, IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        public ShopsController(IUserService userService, IShopService shopService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
-            this.customerService = customerService;
             this.userService = userService;
             this.shopService = shopService;
         }
@@ -28,7 +27,7 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            var shop = await shopService.CreateShopAsync(command.Name ?? "", command.Address);
+            CreatedShopDto? shop = await shopService.CreateShopAsync(command.Name ?? "", command.Address);
             if (shop == null)
             {
                 return responseResultBuilder.Build();
@@ -49,8 +48,11 @@ namespace HardwareShop.WebApi.Controllers
                 return responseResultBuilder.Build();
             }
 
-            var shopAsset = await shopService.UpdateLogoAsync(id, command.Logo);
-            if (shopAsset == null) return responseResultBuilder.Build();
+            ShopAssetDto? shopAsset = await shopService.UpdateLogoAsync(id, command.Logo);
+            if (shopAsset == null)
+            {
+                return responseResultBuilder.Build();
+            }
 
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
@@ -63,8 +65,11 @@ namespace HardwareShop.WebApi.Controllers
             {
                 return responseResultBuilder.Build();
             }
-            var shopAsset = await shopService.UpdateYourShopLogoAsync(command.Logo);
-            if (shopAsset == null) return responseResultBuilder.Build();
+            ShopAssetDto? shopAsset = await shopService.UpdateYourShopLogoAsync(command.Logo);
+            if (shopAsset == null)
+            {
+                return responseResultBuilder.Build();
+            }
 
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
@@ -73,8 +78,12 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("YourShop/Logo")]
         public async Task<IActionResult> GetYourShopLogo()
         {
-            var asset = await shopService.GetCurrentUserShopLogo();
-            if (asset == null) return responseResultBuilder.Build();
+            IAssetTable? asset = await shopService.GetCurrentUserShopLogo();
+            if (asset == null)
+            {
+                return responseResultBuilder.Build();
+            }
+
             responseResultBuilder.SetAsset(asset);
             return responseResultBuilder.Build();
         }
@@ -84,7 +93,10 @@ namespace HardwareShop.WebApi.Controllers
         public async Task<IActionResult> GetUsersOfYourShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
             PageData<UserDto>? users = await userService.GetUserPageDataOfShopAsync(pagingModel, search);
-            if (users == null) return responseResultBuilder.Build();
+            if (users == null)
+            {
+                return responseResultBuilder.Build();
+            }
 
             responseResultBuilder.SetPageData(users);
             return responseResultBuilder.Build();
@@ -99,8 +111,12 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            var isSuccess = await shopService.DeleteShopSoftlyAsync(id);
-            if (!isSuccess) return responseResultBuilder.Build();
+            bool isSuccess = await shopService.DeleteShopSoftlyAsync(id);
+            if (!isSuccess)
+            {
+                return responseResultBuilder.Build();
+            }
+
             responseResultBuilder.SetDeletedMessage();
             return responseResultBuilder.Build();
         }
@@ -114,7 +130,7 @@ namespace HardwareShop.WebApi.Controllers
                 return responseResultBuilder.Build();
             }
 
-            var user = await shopService.CreateAdminUserAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
+            CreatedUserDto? user = await shopService.CreateAdminUserAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
 
             responseResultBuilder.SetData(user);
             return responseResultBuilder.Build();

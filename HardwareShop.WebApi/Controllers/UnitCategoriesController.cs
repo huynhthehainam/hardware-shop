@@ -10,7 +10,7 @@ namespace HardwareShop.WebApi.Controllers
 {
     public class UnitCategoriesController : AuthorizedApiControllerBase
     {
-        private IUnitCategoryService unitCategoryService;
+        private readonly IUnitCategoryService unitCategoryService;
         public UnitCategoriesController(IUnitCategoryService unitCategoryService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
             this.unitCategoryService = unitCategoryService;
@@ -18,7 +18,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCategories([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            var categories = await unitCategoryService.GetUnitCategoryPageDataAsync(pagingModel, search);
+            PageData<Business.Dtos.UnitCategoryDto> categories = await unitCategoryService.GetUnitCategoryPageDataAsync(pagingModel, search);
             responseResultBuilder.SetPageData(categories);
             return responseResultBuilder.Build();
         }

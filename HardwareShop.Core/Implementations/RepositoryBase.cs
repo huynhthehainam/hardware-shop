@@ -13,18 +13,18 @@ namespace HardwareShop.Core.Implementations
         {
             this.db = db;
         }
-        private DbSet<T> dbSet => db.Set<T>();
+        public DbSet<T> DbSet => db.Set<T>();
         public async Task<T> CreateAsync(T entity)
         {
-            await dbSet.AddAsync(entity);
-            await db.SaveChangesAsync();
+            _ = await DbSet.AddAsync(entity);
+            _ = await db.SaveChangesAsync();
             return entity;
         }
 
         public async Task<bool> DeleteAsync(T entity)
         {
-            dbSet.Remove(entity);
-            await db.SaveChangesAsync();
+            _ = DbSet.Remove(entity);
+            _ = await db.SaveChangesAsync();
             return true;
 
         }
@@ -33,43 +33,41 @@ namespace HardwareShop.Core.Implementations
 
             entity.IsDeleted = true;
             db.Entry(entity).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _ = await db.SaveChangesAsync();
             return true;
         }
 
         public async Task<bool> DeleteRangeByQueryAsync(Expression<Func<T, bool>> expression)
         {
-            var entities = dbSet.Where(expression);
+            IQueryable<T> entities = DbSet.Where(expression);
             db.RemoveRange(entities);
-            await db.SaveChangesAsync();
+            _ = await db.SaveChangesAsync();
             return true;
         }
         public async Task<bool> DeleteByQueryAsync(Expression<Func<T, bool>> expression)
         {
-            var entity = dbSet.FirstOrDefault(expression);
-            if (entity == null)
-                return false;
-            return await DeleteAsync(entity);
+            T? entity = DbSet.FirstOrDefault(expression);
+            return entity != null && await DeleteAsync(entity);
         }
 
         public async Task<List<T>> GetDataByQueryAsync(Expression<Func<T, bool>> expression)
         {
-            return await dbSet.Where(expression).ToListAsync();
+            return await DbSet.Where(expression).ToListAsync();
         }
 
         public async Task<PageData<T1>> GetDtoPageDataByQueryAsync<T1>(PagingModel pagingModel, Expression<Func<T, bool>> expression, Func<T, T1> convertor, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null) where T1 : class
         {
-            var pageIndex = pagingModel.PageIndex;
-            var pageSize = pagingModel.PageSize;
+            int? pageIndex = pagingModel.PageIndex;
+            int? pageSize = pagingModel.PageSize;
 
-            var filteredDbSet = dbSet.Where(expression);
+            IQueryable<T> filteredDbSet = DbSet.Where(expression);
             if (searchQuery != null)
             {
-                var searchExpression = searchQuery.BuildSearchExpression();
+                Expression<Func<T, bool>> searchExpression = searchQuery.BuildSearchExpression();
                 filteredDbSet = filteredDbSet.Where(searchExpression);
             }
 
-            var count = await filteredDbSet.CountAsync();
+            int count = await filteredDbSet.CountAsync();
 
 
             IQueryable<T> data = filteredDbSet;
@@ -79,38 +77,19 @@ namespace HardwareShop.Core.Implementations
                 if (orders is not null && orders.Count > 0)
                 {
                     IOrderedEnumerable<T>? orderedData = null;
-                    for (var i = 0; i < orders.Count; i++)
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        var order = orders[i];
-                        if (i == 0)
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = data.OrderBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = data.OrderByDescending(order.Order);
-                            }
-                        }
-                        else
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = orderedData!.ThenBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = orderedData!.ThenByDescending(order.Order);
-                            }
-                        }
+                        QueryOrder<T> order = orders[i];
+                        orderedData = i == 0
+                            ? order.IsAscending ? data.OrderBy(order.Order) : data.OrderByDescending(order.Order)
+                            : order.IsAscending ? orderedData!.ThenBy(order.Order) : orderedData!.ThenByDescending(order.Order);
                     }
-                    var finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
+                    List<T1> finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
                     return new PageData<T1> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
-                    var finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
+                    List<T1> finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
                     return new PageData<T1> { Items = finalData, TotalRecords = count };
                 }
             }
@@ -119,55 +98,36 @@ namespace HardwareShop.Core.Implementations
                 if (orders is not null && orders.Count > 0)
                 {
                     IOrderedEnumerable<T>? orderedData = null;
-                    for (var i = 0; i < orders.Count; i++)
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        var order = orders[i];
-                        if (i == 0)
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = data.OrderBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = data.OrderByDescending(order.Order);
-                            }
-                        }
-                        else
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = orderedData!.ThenBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = orderedData!.ThenByDescending(order.Order);
-                            }
-                        }
+                        QueryOrder<T> order = orders[i];
+                        orderedData = i == 0
+                            ? order.IsAscending ? data.OrderBy(order.Order) : data.OrderByDescending(order.Order)
+                            : order.IsAscending ? orderedData!.ThenBy(order.Order) : orderedData!.ThenByDescending(order.Order);
                     }
-                    var finalData = orderedData!.Select(convertor).ToList();
+                    List<T1> finalData = orderedData!.Select(convertor).ToList();
                     return new PageData<T1> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
-                    var finalData = data.Select(convertor).ToList();
+                    List<T1> finalData = data.Select(convertor).ToList();
                     return new PageData<T1> { Items = finalData, TotalRecords = count };
                 }
             }
         }
         public async Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, SearchQuery<T>? searchQuery, List<QueryOrder<T>>? orders)
         {
-            var pageIndex = pagingModel.PageIndex;
-            var pageSize = pagingModel.PageSize;
+            int? pageIndex = pagingModel.PageIndex;
+            int? pageSize = pagingModel.PageSize;
 
-            var filteredDbSet = dbSet.Where(expression);
+            IQueryable<T> filteredDbSet = DbSet.Where(expression);
             if (searchQuery != null)
             {
-                var searchExpression = searchQuery.BuildSearchExpression();
+                Expression<Func<T, bool>> searchExpression = searchQuery.BuildSearchExpression();
                 filteredDbSet = filteredDbSet.Where(searchExpression);
             }
 
-            var count = await filteredDbSet.CountAsync();
+            int count = await filteredDbSet.CountAsync();
 
 
             IQueryable<T> data = filteredDbSet;
@@ -177,38 +137,19 @@ namespace HardwareShop.Core.Implementations
                 if (orders is not null && orders.Count > 0)
                 {
                     IOrderedEnumerable<T>? orderedData = null;
-                    for (var i = 0; i < orders.Count; i++)
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        var order = orders[i];
-                        if (i == 0)
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = data.OrderBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = data.OrderByDescending(order.Order);
-                            }
-                        }
-                        else
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = orderedData!.ThenBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = orderedData!.ThenByDescending(order.Order);
-                            }
-                        }
+                        QueryOrder<T> order = orders[i];
+                        orderedData = i == 0
+                            ? order.IsAscending ? data.OrderBy(order.Order) : data.OrderByDescending(order.Order)
+                            : order.IsAscending ? orderedData!.ThenBy(order.Order) : orderedData!.ThenByDescending(order.Order);
                     }
-                    var finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).ToList();
+                    List<T> finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).ToList();
                     return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
-                    var finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).ToList();
+                    List<T> finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).ToList();
                     return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
             }
@@ -217,38 +158,19 @@ namespace HardwareShop.Core.Implementations
                 if (orders is not null && orders.Count > 0)
                 {
                     IOrderedEnumerable<T>? orderedData = null;
-                    for (var i = 0; i < orders.Count; i++)
+                    for (int i = 0; i < orders.Count; i++)
                     {
-                        var order = orders[i];
-                        if (i == 0)
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = data.OrderBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = data.OrderByDescending(order.Order);
-                            }
-                        }
-                        else
-                        {
-                            if (order.IsAscending)
-                            {
-                                orderedData = orderedData!.ThenBy(order.Order);
-                            }
-                            else
-                            {
-                                orderedData = orderedData!.ThenByDescending(order.Order);
-                            }
-                        }
+                        QueryOrder<T> order = orders[i];
+                        orderedData = i == 0
+                            ? order.IsAscending ? data.OrderBy(order.Order) : data.OrderByDescending(order.Order)
+                            : order.IsAscending ? orderedData!.ThenBy(order.Order) : orderedData!.ThenByDescending(order.Order);
                     }
-                    var finalData = orderedData!.ToList();
+                    List<T> finalData = orderedData!.ToList();
                     return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
                 else
                 {
-                    var finalData = data.ToList();
+                    List<T> finalData = data.ToList();
                     return new PageData<T> { Items = finalData, TotalRecords = count };
                 }
             }
@@ -256,125 +178,112 @@ namespace HardwareShop.Core.Implementations
 
         public async Task<T> UpdateAsync(T entity)
         {
-            dbSet.Update(entity);
+            _ = DbSet.Update(entity);
             db.Entry(entity).State = EntityState.Modified;
-            await db.SaveChangesAsync();
+            _ = await db.SaveChangesAsync();
             return entity;
         }
 
         public async Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression)
         {
-            if (typeof(ITrackingDate).IsAssignableFrom(typeof(T)))
-            {
-                return await dbSet.OrderByDescending(e => ((ITrackingDate)e).CreatedDate).FirstOrDefaultAsync(expression);
-            }
-            else
-            {
-                return await dbSet.FirstOrDefaultAsync(expression);
-            }
+            return typeof(ITrackingDate).IsAssignableFrom(typeof(T))
+                ? await DbSet.OrderByDescending(e => ((ITrackingDate)e).CreatedDate).FirstOrDefaultAsync(expression)
+                : await DbSet.FirstOrDefaultAsync(expression);
 
         }
 
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
         {
-            return await dbSet.AnyAsync(expression);
+            return await DbSet.AnyAsync(expression);
         }
 
-        public async Task<T?> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector)
+        public async Task<CreateIfNotExistResponse<T>> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector)
         {
-            var properties = selector.Body.Type.GetProperties();
-            var entityProperties = typeof(T).GetProperties();
+            System.Reflection.PropertyInfo[] properties = selector.Body.Type.GetProperties();
+            System.Reflection.PropertyInfo[] entityProperties = typeof(T).GetProperties();
 
             ParameterExpression parameterExpression = selector.Parameters[0];
-            Expression expression = (Expression)parameterExpression;
+            Expression expression = parameterExpression;
 
             Expression? body = null;
-            foreach (var property in properties)
+            foreach (System.Reflection.PropertyInfo property in properties)
             {
-                var existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
+                System.Reflection.PropertyInfo? existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
                 if (existedProperty != null)
                 {
                     ConstantExpression valueExpression = Expression.Constant(existedProperty.GetValue(entity));
-                    if (body == null)
-                    {
-
-                        body = Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression);
-                    }
-                    else
-                    {
-                        body = Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
-                    }
+                    body = body == null
+                        ? Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression)
+                        : (Expression)Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
                 }
             }
             if (body == null)
             {
-                return await CreateAsync(entity);
+                entity = await CreateAsync(entity);
+                return new CreateIfNotExistResponse<T>(false, entity);
             }
 
             Expression<Func<T, bool>> existQuery = Expression.Lambda<Func<T, bool>>(body, parameterExpression);
-            var exist = dbSet.Where(existQuery).Any();
-            if (!exist)
+            T? existingEntity = DbSet.Where(existQuery).FirstOrDefault();
+            if (existingEntity == null)
             {
-                return await CreateAsync(entity);
+                entity = await CreateAsync(entity);
+                return new CreateIfNotExistResponse<T>(false, entity);
             }
 
-            return null;
+            return new CreateIfNotExistResponse<T>(true, existingEntity); ;
         }
 
-        public async Task<T> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
+        public async Task<CreateOrUpdateResponse<T>> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
         {
-            var searchProperties = searchSelector.Body.Type.GetProperties();
-            var entityProperties = typeof(T).GetProperties();
+            System.Reflection.PropertyInfo[] searchProperties = searchSelector.Body.Type.GetProperties();
+            System.Reflection.PropertyInfo[] entityProperties = typeof(T).GetProperties();
             T? item = null;
 
             ParameterExpression parameterExpression = searchSelector.Parameters[0];
-            Expression expression = (Expression)parameterExpression;
+            Expression expression = parameterExpression;
 
             Expression? body = null;
-            foreach (var property in searchProperties)
+            foreach (System.Reflection.PropertyInfo property in searchProperties)
             {
-                var existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
+                System.Reflection.PropertyInfo? existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
                 if (existedProperty != null)
                 {
                     ConstantExpression valueExpression = Expression.Constant(existedProperty.GetValue(entity));
-                    if (body == null)
-                    {
-
-                        body = Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression);
-                    }
-                    else
-                    {
-                        body = Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
-                    }
+                    body = body == null
+                        ? Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression)
+                        : (Expression)Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
                 }
             }
             if (body == null)
             {
-                return await CreateAsync(entity);
+                entity = await CreateAsync(entity);
+                return new CreateOrUpdateResponse<T>(false, entity);
             }
             else
             {
                 Expression<Func<T, bool>> existQuery = Expression.Lambda<Func<T, bool>>(body, parameterExpression);
-                item = dbSet.Where(existQuery).FirstOrDefault();
+                item = DbSet.Where(existQuery).FirstOrDefault();
                 if (item != null)
                 {
                     // Parse item
-                    var updateProperties = updateSelector.Body.Type.GetProperties();
-                    foreach (var property in updateProperties)
+                    System.Reflection.PropertyInfo[] updateProperties = updateSelector.Body.Type.GetProperties();
+                    foreach (System.Reflection.PropertyInfo property in updateProperties)
                     {
-                        var existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
+                        System.Reflection.PropertyInfo? existedProperty = entityProperties.Where(e => e.Name == property.Name && e.PropertyType.FullName == property.PropertyType.FullName).FirstOrDefault();
                         if (existedProperty != null)
                         {
-                            var value = existedProperty.GetValue(entity);
+                            object? value = existedProperty.GetValue(entity);
                             existedProperty.SetValue(item, value);
                         }
                     }
-
-                    return await UpdateAsync(item);
+                    entity = await UpdateAsync(item);
+                    return new CreateOrUpdateResponse<T>(true, entity);
                 }
                 else
                 {
-                    return await CreateAsync(entity);
+                    entity = await CreateAsync(entity);
+                    return new CreateOrUpdateResponse<T>(false, entity);
                 }
             }
 

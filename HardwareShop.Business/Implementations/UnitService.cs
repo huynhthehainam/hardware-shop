@@ -23,28 +23,28 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CreatedUnitDto?> CreateUnit(string name, double stepNumber, int unitCategoryId)
         {
-            var isAdmin = currentUserService.IsSystemAdmin();
+            bool isAdmin = currentUserService.IsSystemAdmin();
             if (!isAdmin)
             {
                 responseResultBuilder.AddNotPermittedError();
                 return null;
             }
-            var unit = await unitRepository.CreateIfNotExistsAsync(new Unit { Name = name, StepNumber = stepNumber, UnitCategoryId = unitCategoryId }, e => new { e.Name, e.UnitCategoryId });
-            if (unit == null)
+            CreateIfNotExistResponse<Unit> createIfNotExistResponse = await unitRepository.CreateIfNotExistsAsync(new Unit { Name = name, StepNumber = stepNumber, UnitCategoryId = unitCategoryId }, e => new { e.Name, e.UnitCategoryId });
+            if (createIfNotExistResponse.IsExist)
             {
                 responseResultBuilder.AddExistedEntityError("Unit");
                 return null;
             }
             return new CreatedUnitDto
             {
-                Id = unit.Id
+                Id = createIfNotExistResponse.Entity.Id
             };
 
         }
 
         public async Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId)
         {
-            var units = await unitRepository.GetPageDataByQueryAsync(pagingModel, e => categoryId == null ? true : e.UnitCategoryId == categoryId, string.IsNullOrEmpty(search) ? null : new SearchQuery<Unit>(search, e => new { e.Name }));
+            PageData<Unit> units = await unitRepository.GetPageDataByQueryAsync(pagingModel, e => categoryId == null || e.UnitCategoryId == categoryId, string.IsNullOrEmpty(search) ? null : new SearchQuery<Unit>(search, e => new { e.Name }));
             return PageData<UnitDto>.ConvertFromOtherPageData(units, e => new UnitDto
             {
                 Id = e.Id,
@@ -55,7 +55,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<double?> RoundValue(int unitId, double value)
         {
-            var unit = await unitRepository.GetItemByQueryAsync(e => e.Id == unitId);
+            Unit? unit = await unitRepository.GetItemByQueryAsync(e => e.Id == unitId);
             if (unit == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Unit");

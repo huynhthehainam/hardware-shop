@@ -39,19 +39,22 @@ namespace HardwareShop.Business.Implementations
             return Task.FromResult(new CreatedUserDto { Id = 1 });
         }
 
-        private async Task<IAssetTable?> getUserAvatarByUserId(int userId)
+        private async Task<IAssetTable?> GetUserAvatarByUserId(int userId)
         {
-            var user = await userRepository.GetItemByQueryAsync(e => e.Id == userId);
-            if (user == null) return null;
+            User? user = await userRepository.GetItemByQueryAsync(e => e.Id == userId);
+            if (user == null)
+            {
+                return null;
+            }
 
-            var userAsset = await userAssetRepository.GetItemByQueryAsync(e => e.UserId == user.Id
+            UserAsset? userAsset = await userAssetRepository.GetItemByQueryAsync(e => e.UserId == user.Id
 && e.AssetType == UserAssetConstants.AvatarAssetType);
             return userAsset;
         }
         public Task<IAssetTable?> GetCurrentUserAvatarAsync()
         {
-            var userId = currentUserService.GetUserId();
-            return getUserAvatarByUserId(userId);
+            int userId = currentUserService.GetUserId();
+            return GetUserAvatarByUserId(userId);
         }
 
         public async Task<List<UserDto>> GetUserDtosAsync()
@@ -62,19 +65,16 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<LoginDto?> LoginAsync(string username, string password)
         {
-            var user = await userRepository.GetItemByQueryAsync(e => e.Username == username);
-            if (user == null) return null;
-            if (!hashingPasswordService.Verify(password, user.HashedPassword ?? ""))
-            {
-                return null;
-            }
-            return generateLoginDtoFromUser(user);
+            User? user = await userRepository.GetItemByQueryAsync(e => e.Username == username);
+            return user == null
+                ? null
+                : !hashingPasswordService.Verify(password, user.HashedPassword ?? "") ? null : GenerateLoginDtoFromUser(user);
         }
 
-        private LoginDto? generateLoginDtoFromUser(User user)
+        private LoginDto? GenerateLoginDtoFromUser(User user)
         {
 
-            var cacheUser = new CacheUser()
+            CacheUser cacheUser = new()
             {
                 Id = user.Id,
                 Username = user.Username ?? "",
@@ -84,9 +84,13 @@ namespace HardwareShop.Business.Implementations
                 LastName = user.LastName,
             };
 
-            var tokens = jwtService.GenerateTokens(cacheUser);
-            if (tokens == null) return null;
-            var userShop = user.UserShop;
+            LoginResponse? tokens = jwtService.GenerateTokens(cacheUser);
+            if (tokens == null)
+            {
+                return null;
+            }
+
+            UserShop? userShop = user.UserShop;
 
 
             return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
@@ -101,20 +105,19 @@ namespace HardwareShop.Business.Implementations
             {
                 return null;
             }
-            var user = await userRepository.GetItemByQueryAsync(e => e.Id == cacheUser.Id);
-            if (user == null) return null;
-            return generateLoginDtoFromUser(user);
+            User? user = await userRepository.GetItemByQueryAsync(e => e.Id == cacheUser.Id);
+            return user == null ? null : GenerateLoginDtoFromUser(user);
         }
 
         public async Task<PageData<UserDto>?> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search)
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            PageData<User> users = await userRepository.GetPageDataByQueryAsync(pagingModel, e => (e.UserShop != null && e.UserShop.ShopId == shop.Id), search == null ? null : new SearchQuery<User>(search, e => new
+            PageData<User> users = await userRepository.GetPageDataByQueryAsync(pagingModel, e => e.UserShop != null && e.UserShop.ShopId == shop.Id, search == null ? null : new SearchQuery<User>(search, e => new
             {
                 e.Email,
                 e.Username,
@@ -134,7 +137,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<UserDto>> GetUserPageDataAsync(PagingModel pagingModel, string? search)
         {
-            var users = await userRepository.GetPageDataByQueryAsync(pagingModel, e => true, string.IsNullOrEmpty(search) ? null : new SearchQuery<User>(search, e => new
+            PageData<User> users = await userRepository.GetPageDataByQueryAsync(pagingModel, e => true, string.IsNullOrEmpty(search) ? null : new SearchQuery<User>(search, e => new
             {
                 e.Email,
                 e.FirstName,
@@ -154,37 +157,39 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> UpdateCurrentUserInterfaceSettings(JsonDocument settings)
         {
-            var user = await getCurrentUserAsync();
-            if (user == null) return false;
+            User? user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return false;
+            }
 
             user.InterfaceSettings = settings;
-            await userRepository.UpdateAsync(user);
+            _ = await userRepository.UpdateAsync(user);
             return true;
         }
 
         public async Task<PageData<NotificationDto>?> GetNotificationDtoPageDataOfCurrentUserAsync(PagingModel pagingModel)
         {
-            var user = await getCurrentUserAsync();
-            if (user == null) return null;
-            return await notificationRepository.GetDtoPageDataByQueryAsync<NotificationDto>(pagingModel, e => e.UserId == user.Id && e.IsDismissed == false, e => new NotificationDto
-            {
-                Id = e.Id,
-                CreatedDate = e.CreatedDate,
-                Message = e.Message,
-                Translation = e.Translation,
-                TranslationParams = e.TranslationParams,
-                Options = JsonDocument.Parse(JsonSerializer.Serialize(new
+            User? user = await GetCurrentUserAsync();
+            return user == null
+                ? null
+                : await notificationRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.UserId == user.Id && e.IsDismissed == false, e => new NotificationDto
                 {
-                    Variant = e.Variant
-                }, JsonSerializerConstants.CamelOptions))
-            }, null, new List<QueryOrder<Notification>>() { new QueryOrder<Notification>(e => e.CreatedDate, false) });
-
-
+                    Id = e.Id,
+                    CreatedDate = e.CreatedDate,
+                    Message = e.Message,
+                    Translation = e.Translation,
+                    TranslationParams = e.TranslationParams,
+                    Options = JsonDocument.Parse(JsonSerializer.Serialize(new
+                    {
+                        e.Variant
+                    }, JsonSerializerConstants.CamelOptions))
+                }, null, new List<QueryOrder<Notification>>() { new QueryOrder<Notification>(e => e.CreatedDate, false) });
         }
-        private async Task<User?> getCurrentUserAsync()
+        private async Task<User?> GetCurrentUserAsync()
         {
-            var currentUserId = currentUserService.GetUserId();
-            var user = await userRepository.GetItemByQueryAsync(e => e.Id == currentUserId);
+            int currentUserId = currentUserService.GetUserId();
+            User? user = await userRepository.GetItemByQueryAsync(e => e.Id == currentUserId);
             if (user == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("User");
@@ -196,29 +201,36 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> DismissNotificationOfCurrentUserAsync(Guid id)
         {
-            var user = await getCurrentUserAsync();
-            if (user == null) return false;
+            User? user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return false;
+            }
 
-            var notification = await notificationRepository.GetItemByQueryAsync(e => e.Id == id && e.UserId == user.Id);
+            Notification? notification = await notificationRepository.GetItemByQueryAsync(e => e.Id == id && e.UserId == user.Id);
             if (notification == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Notification");
                 return false;
             }
             notification.IsDismissed = true;
-            await notificationRepository.UpdateAsync(notification);
+            _ = await notificationRepository.UpdateAsync(notification);
             return true;
         }
 
         public async Task<bool> DismissAllNotificationsOfCurrentUserAsync()
         {
-            var user = await getCurrentUserAsync();
-            if (user == null) return false;
-            var notifications = await notificationRepository.GetDataByQueryAsync(e => e.UserId == user.Id && e.IsDismissed == false);
-            foreach (var notification in notifications)
+            User? user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return false;
+            }
+
+            List<Notification> notifications = await notificationRepository.GetDataByQueryAsync(e => e.UserId == user.Id && e.IsDismissed == false);
+            foreach (Notification notification in notifications)
             {
                 notification.IsDismissed = true;
-                await notificationRepository.UpdateAsync(notification);
+                _ = await notificationRepository.UpdateAsync(notification);
             }
             return true;
 
@@ -226,9 +238,13 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CreatedNotificationDto?> CreateNotificationOfCurrentUserAsync(string? message, string variant, string? translation, JsonDocument? translationParams)
         {
-            var user = await getCurrentUserAsync();
-            if (user == null) return null;
-            var notification = await notificationRepository.CreateAsync(new Notification
+            User? user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return null;
+            }
+
+            Notification notification = await notificationRepository.CreateAsync(new Notification
             {
                 CreatedDate = DateTime.UtcNow,
                 Message = message,
@@ -242,8 +258,12 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> UpdateCurrentUserPasswordAsync(string oldPassword, string newPassword)
         {
-            var user = await getCurrentUserAsync();
-            if (user == null) return false;
+            User? user = await GetCurrentUserAsync();
+            if (user == null)
+            {
+                return false;
+            }
+
             if (!hashingPasswordService.Verify(oldPassword, user.HashedPassword))
             {
                 responseResultBuilder.AddInvalidFieldError("OldPassword");
@@ -251,7 +271,7 @@ namespace HardwareShop.Business.Implementations
             }
 
             user.HashedPassword = hashingPasswordService.Hash(newPassword);
-            await userRepository.UpdateAsync(user);
+            _ = await userRepository.UpdateAsync(user);
             return true;
         }
     }

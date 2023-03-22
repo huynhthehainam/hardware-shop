@@ -15,12 +15,12 @@ namespace HardwareShop.Core.Implementations
 
     public static class ResponseMessages
     {
-        public readonly static Dictionary<SupportedLanguage, string> UpdatedMessage = new Dictionary<SupportedLanguage, string>
+        public readonly static Dictionary<SupportedLanguage, string> UpdatedMessage = new()
         {
             {SupportedLanguage.English, "Updated"},
             {SupportedLanguage.Vietnamese, "Đã cập nhật" }
         };
-        public readonly static Dictionary<SupportedLanguage, string> DeletedMessage = new Dictionary<SupportedLanguage, string>
+        public readonly static Dictionary<SupportedLanguage, string> DeletedMessage = new()
         {
             {SupportedLanguage.English, "Deleted"},
             {SupportedLanguage.Vietnamese, "Đã xoá" }
@@ -34,12 +34,12 @@ namespace HardwareShop.Core.Implementations
         {
             this.languageService = languageService;
         }
-        private IDictionary<string, List<string>>? error { get; set; }
+        private IDictionary<string, List<string>>? error = null;
         private string? message;
         private ResponseResultType type = ResponseResultType.Json;
-        private int statusCode { get; set; } = 200;
-        private Object? data { get; set; }
-        private int? totalItems { get; set; }
+        private int statusCode = 200;
+        private Object? data = null;
+        private int? totalItems = null;
         public void SetMessage(IDictionary<SupportedLanguage, string> message)
         {
             var language = languageService.GetLanguage();
@@ -91,8 +91,10 @@ namespace HardwareShop.Core.Implementations
                     { StatusCode = this.statusCode };
 
                 case ResponseResultType.File:
-                    var result = new FileContentResult(bytes ?? new Byte[0], contentType ?? "text/plain");
-                    result.FileDownloadName = fileName;
+                    var result = new FileContentResult(bytes ?? Array.Empty<byte>(), contentType ?? "text/plain")
+                    {
+                        FileDownloadName = fileName
+                    };
                     return result;
                 default:
                     return new ObjectResult(new
@@ -109,10 +111,7 @@ namespace HardwareShop.Core.Implementations
 
         public void AddError(string fieldName, IDictionary<SupportedLanguage, string> message)
         {
-            if (error is null)
-            {
-                error = new Dictionary<string, List<string>>();
-            }
+            error ??= new Dictionary<string, List<string>>();
 
             if (!error.ContainsKey(fieldName))
             {

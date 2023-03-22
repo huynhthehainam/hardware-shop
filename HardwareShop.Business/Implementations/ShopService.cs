@@ -12,18 +12,16 @@ namespace HardwareShop.Business.Implementations
     {
         private readonly IRepository<Shop> shopRepository;
         private readonly IRepository<User> userRepository;
-        private readonly IRepository<Warehouse> warehouseRepository;
         private readonly ICurrentUserService currentUserService;
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly IRepository<UserShop> userShopRepository;
         private readonly IRepository<ShopAsset> shopAssetRepository;
 
-        public ShopService(IRepository<Shop> shopRepository, IRepository<Warehouse> warehouseRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository)
+        public ShopService(IRepository<Shop> shopRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository)
         {
             this.shopRepository = shopRepository;
             this.currentUserService = currentUserService;
-            this.warehouseRepository = warehouseRepository;
             this.responseResultBuilder = responseResultBuilder;
             this.userRepository = userRepository;
             this.hashingPasswordService = hashingPasswordService;
@@ -39,7 +37,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var user = await userRepository.CreateIfNotExistsAsync(new User
+            var createIfNotExistResponse = await userRepository.CreateIfNotExistsAsync(new User
             {
                 Username = username,
                 HashedPassword = hashingPasswordService.Hash(password),
@@ -48,7 +46,7 @@ namespace HardwareShop.Business.Implementations
             {
                 e.Username
             });
-            if (user == null)
+            if (createIfNotExistResponse.IsExist)
             {
                 responseResultBuilder.AddExistedEntityError("User");
                 return null;
@@ -57,18 +55,18 @@ namespace HardwareShop.Business.Implementations
             UserShop userShop = await userShopRepository.CreateAsync(new UserShop
             {
 
-                UserId = user.Id,
+                UserId = createIfNotExistResponse.Entity.Id,
                 ShopId = shop.Id,
                 Role = UserShopRole.Admin
             });
 
-            return new CreatedUserDto { Id = user.Id };
+            return new CreatedUserDto { Id = createIfNotExistResponse.Entity.Id };
 
         }
 
         public async Task<CreatedShopDto?> CreateShopAsync(string name, string? address)
         {
-            var shop = await shopRepository.CreateIfNotExistsAsync(new Shop
+            var createIfNotExistResponse = await shopRepository.CreateIfNotExistsAsync(new Shop
             {
                 Name = name,
                 Address = address
@@ -77,12 +75,12 @@ namespace HardwareShop.Business.Implementations
                 {
                     e.Name,
                 });
-            if (shop == null)
+            if (createIfNotExistResponse.IsExist)
             {
                 responseResultBuilder.AddExistedEntityError("Shop");
                 return null;
             }
-            return new CreatedShopDto { Id = shop.Id };
+            return new CreatedShopDto { Id = createIfNotExistResponse.Entity.Id };
         }
 
 
@@ -100,7 +98,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff)
         {
-            var userShop = await getUserShopByUserIdAsync(userId, role);
+            var userShop = await GetUserShopByUserIdAsync(userId, role);
             if (userShop == null)
                 return null;
             if (userShop.Shop == null)
@@ -108,7 +106,7 @@ namespace HardwareShop.Business.Implementations
             return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
         }
 
-        private async Task<UserShop?> getUserShopByUserIdAsync(int userId, UserShopRole role)
+        private async Task<UserShop?> GetUserShopByUserIdAsync(int userId, UserShopRole role)
         {
             var acceptedRoles = new List<UserShopRole>();
             switch (role)
@@ -128,7 +126,7 @@ namespace HardwareShop.Business.Implementations
         }
         public async Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role)
         {
-            var userShop = await getUserShopByUserIdAsync(currentUserService.GetUserId(), role);
+            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserId(), role);
             if (userShop == null)
             {
                 return null;
@@ -137,7 +135,7 @@ namespace HardwareShop.Business.Implementations
         }
         public async Task<ShopDto?> GetShopDtoByCurrentUserIdAsync(UserShopRole role)
         {
-            var userShop = await getUserShopByUserIdAsync(currentUserService.GetUserId(), role);
+            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserId(), role);
             if (userShop == null)
             {
                 return null;
@@ -146,9 +144,9 @@ namespace HardwareShop.Business.Implementations
                 return null;
             return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
         }
-        private async Task<ShopAssetDto> updateShopLogo(Shop shop, IFormFile file)
+        private async Task<ShopAssetDto> UpdateShopLogo(Shop shop, IFormFile file)
         {
-            ShopAsset shopAsset = new ShopAsset()
+            ShopAsset shopAsset = new()
             {
                 AssetType = ShopAssetConstants.LogoAssetType,
                 CreatedDate = DateTime.UtcNow,
@@ -156,8 +154,9 @@ namespace HardwareShop.Business.Implementations
                 ShopId = shop.Id,
             };
             shopAsset = file.ConvertToAsset(shopAsset);
-            shopAsset = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
-            return new ShopAssetDto { Id = shopAsset.Id };
+            var createOrUpdateResponse = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
+
+            return new ShopAssetDto { Id = createOrUpdateResponse.Entity.Id };
         }
         public async Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file)
         {
@@ -167,7 +166,7 @@ namespace HardwareShop.Business.Implementations
                 this.responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            return await updateShopLogo(shop, file);
+            return await UpdateShopLogo(shop, file);
         }
 
         public async Task<ShopAssetDto?> UpdateYourShopLogoAsync(IFormFile file)
@@ -178,7 +177,7 @@ namespace HardwareShop.Business.Implementations
                 this.responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            return await updateShopLogo(shop, file);
+            return await UpdateShopLogo(shop, file);
         }
 
         public async Task<IAssetTable?> GetCurrentUserShopLogo()

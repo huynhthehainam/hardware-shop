@@ -24,21 +24,16 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<Product> productRepository;
         private readonly ICustomerDebtService customerDebtService;
         private readonly IRepository<Invoice> invoiceRepository;
-        private readonly IRepository<Unit> unitRepository;
-        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
-        private readonly IRepository<CustomerDebt> customerDebtRepository;
+
         private readonly ILanguageService languageService;
-        public InvoiceService(ILanguageService languageService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<CustomerDebt> customerDebtRepository, IShopService shopService, IRepository<Unit> unitRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
+        public InvoiceService(ILanguageService languageService,   IShopService shopService,  IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
         {
-            this.unitRepository = unitRepository;
             this.responseResultBuilder = responseResultBuilder;
             this.customerDebtService = customerDebtService;
-            this.customerDebtRepository = customerDebtRepository;
             this.shopService = shopService;
             this.customerRepository = customerRepository;
             this.orderRepository = orderRepository;
             this.productRepository = productRepository;
-            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.invoiceRepository = invoiceRepository;
             this.languageService = languageService;
 
@@ -190,7 +185,7 @@ namespace HardwareShop.Business.Implementations
             });
         }
 
-        private async Task<Invoice?> getInvoiceOfCurrentUserShopAsync(int invoiceId)
+        private async Task<Invoice?> GetInvoiceOfCurrentUserShopAsync(int invoiceId)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
@@ -209,7 +204,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id)
         {
-            var invoice = await getInvoiceOfCurrentUserShopAsync(id);
+            var invoice = await GetInvoiceOfCurrentUserShopAsync(id);
             if (invoice == null) return false;
             var customer = invoice.Customer;
             if (customer == null) return false;
@@ -228,7 +223,7 @@ namespace HardwareShop.Business.Implementations
         }
         public async Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId)
         {
-            var invoice = await getInvoiceOfCurrentUserShopAsync(invoiceId);
+            var invoice = await GetInvoiceOfCurrentUserShopAsync(invoiceId);
             if (invoice == null)
             {
                 return null;
@@ -326,17 +321,15 @@ namespace HardwareShop.Business.Implementations
                 {"VALUE_OLD_DEBT", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
                 {"VALUE_INVOICE_CODE",invoice.Code}
             });
-            using (MemoryStream ms = new MemoryStream())
-            {
-                ConverterProperties properties = new ConverterProperties();
-                properties.SetFontProvider(new DefaultFontProvider(true, true, true));
-                PdfDocument pdf = new PdfDocument(new PdfWriter(ms));
-                Document document = new Document(pdf, PageSize.A4);
-                HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
+            using MemoryStream ms = new();
+            ConverterProperties properties = new();
+            properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+            PdfDocument pdf = new(new PdfWriter(ms));
+            Document document = new(pdf, PageSize.A4);
+            HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
 
-                var bytes = ms.ToArray();
-                return bytes;
-            }
+            var bytes = ms.ToArray();
+            return bytes;
         }
     }
 }

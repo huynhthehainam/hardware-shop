@@ -22,5 +22,10 @@ namespace HardwareShop.Business.Helpers
         {
             return new Tuple<string, JsonDocument>("DEBT_REASON_WHEN_RESTORING_INVOICE", JsonDocument.Parse(JsonSerializer.Serialize(new { InvoiceCode = invoiceCode }, JsonSerializerConstants.CamelOptions)));
         }
+        public static Tuple<string, JsonDocument> GenerateDebtReasonWhenPayingAll()
+        {
+            return new Tuple<string, JsonDocument>("DEBT_REASON_WHEN_PAYING_ALL", JsonDocument.Parse(JsonSerializer.Serialize(new { }, JsonSerializerConstants.CamelOptions)));
+
+        }
     }
 }

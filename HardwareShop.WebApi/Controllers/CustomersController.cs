@@ -11,7 +11,7 @@ namespace HardwareShop.WebApi.Controllers
 {
     public class CustomersController : AuthorizedApiControllerBase
     {
-        private ICustomerService customerService;
+        private readonly ICustomerService customerService;
         public CustomersController(ICustomerService customerService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
             this.customerService = customerService;
@@ -19,8 +19,12 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCustomersOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] bool? isInDebt)
         {
-            var customers = isInDebt.GetValueOrDefault(false) ? await customerService.GetCustomerInDebtPageDataOfCurrentUserShopAsync(pagingModel, search) : await customerService.GetCustomerPageDataOfCurrentUserShopAsync(pagingModel, search);
-            if (customers == null) return responseResultBuilder.Build();
+            PageData<Business.Dtos.CustomerDto>? customers = isInDebt.GetValueOrDefault(false) ? await customerService.GetCustomerInDebtPageDataOfCurrentUserShopAsync(pagingModel, search) : await customerService.GetCustomerPageDataOfCurrentUserShopAsync(pagingModel, search);
+            if (customers == null)
+            {
+                return responseResultBuilder.Build();
+            }
+
             responseResultBuilder.SetPageData(customers);
             return responseResultBuilder.Build();
         }
@@ -28,8 +32,11 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCustomerOfCurrentUserShop([FromBody] CreateCustomerCommand command)
         {
-            var customer = await customerService.CreateCustomerOfCurrentUserShopAsync(command.Name ?? "", command.Phone, command.Address, command.IsFamiliar, command.PhoneCountryId);
-            if (customer == null) return responseResultBuilder.Build();
+            Business.Dtos.CreatedCustomerDto? customer = await customerService.CreateCustomerOfCurrentUserShopAsync(command.Name ?? "", command.Phone, command.Address, command.IsFamiliar, command.PhoneCountryId);
+            if (customer == null)
+            {
+                return responseResultBuilder.Build();
+            }
 
             responseResultBuilder.SetData(customer);
 
@@ -39,9 +46,11 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("{id:int}/Update")]
         public async Task<IActionResult> UpdateCustomerOfCurrentUserShop([FromRoute] int id, [FromBody] UpdateCustomerCommand command)
         {
-            var customer = await customerService.UpdateCustomerOfCurrentUserShopAsync(id, command.Name, command.Phone, command.Address, command.IsFamiliar, command.AmountOfCash);
+            Business.Dtos.CustomerDto? customer = await customerService.UpdateCustomerOfCurrentUserShopAsync(id, command.Name, command.Phone, command.Address, command.IsFamiliar, command.AmountOfCash);
             if (customer == null)
+            {
                 return responseResultBuilder.Build();
+            }
 
             responseResultBuilder.SetUpdatedMessage();
 
@@ -50,9 +59,13 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCustomerById([FromRoute] int id)
         {
-            var customer = await customerService.GetCustomerDtoOfCurrentUserShopByIdAsync(id);
+            Business.Dtos.CustomerDto? customer = await customerService.GetCustomerDtoOfCurrentUserShopByIdAsync(id);
 
-            if (customer == null) return responseResultBuilder.Build();
+            if (customer == null)
+            {
+                return responseResultBuilder.Build();
+            }
+
             responseResultBuilder.SetData(customer);
             return responseResultBuilder.Build();
         }
@@ -60,8 +73,11 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}/DebtHistories")]
         public async Task<IActionResult> GetDebtHistoriesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)
         {
-            var histories = await customerService.GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(id, pagingModel);
-            if (histories == null) return responseResultBuilder.Build();
+            PageData<Business.Dtos.CustomerDebtHistoryDto>? histories = await customerService.GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(id, pagingModel);
+            if (histories == null)
+            {
+                return responseResultBuilder.Build();
+            }
 
             responseResultBuilder.SetPageData(histories);
             return responseResultBuilder.Build();
@@ -69,8 +85,12 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}/Invoices")]
         public async Task<IActionResult> GetInvoicesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)
         {
-            var invoices = await customerService.GetCustomerInvoiceDtoPageDataByCustomerIdAsync(id, pagingModel);
-            if (invoices == null) return responseResultBuilder.Build();
+            PageData<Business.Dtos.InvoiceDto>? invoices = await customerService.GetCustomerInvoiceDtoPageDataByCustomerIdAsync(id, pagingModel);
+            if (invoices == null)
+            {
+                return responseResultBuilder.Build();
+            }
+
             responseResultBuilder.SetPageData(invoices);
             return responseResultBuilder.Build();
         }

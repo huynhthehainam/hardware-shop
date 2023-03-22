@@ -1,5 +1,6 @@
 using System.Text.Json;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 
@@ -7,8 +8,8 @@ namespace HardwareShop.Business.Implementations
 {
     public class CustomerDebtService : ICustomerDebtService
     {
-        private IRepository<CustomerDebt> customerDebtRepository;
-        private IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
+        private readonly IRepository<CustomerDebt> customerDebtRepository;
+        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
         public CustomerDebtService(IRepository<CustomerDebt> customerDebtRepository, IRepository<CustomerDebtHistory> customerDebtHistoryRepository)
         {
             this.customerDebtHistoryRepository = customerDebtHistoryRepository;
@@ -17,11 +18,12 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CustomerDebtHistory> AddDebtToCustomerAsync(Customer customer, double changeOfDebt, string reason, JsonDocument? reasonParams)
         {
-            CustomerDebt debt = await customerDebtRepository.CreateOrUpdateAsync(new CustomerDebt
+            CreateOrUpdateResponse<CustomerDebt> createOrUpdateResponse = await customerDebtRepository.CreateOrUpdateAsync(new CustomerDebt
             {
                 CustomerId = customer.Id,
                 Amount = 0,
             }, e => new { e.CustomerId }, e => new { e.CustomerId });
+            CustomerDebt debt = createOrUpdateResponse.Entity;
             CustomerDebtHistory history = await customerDebtHistoryRepository.CreateAsync(new CustomerDebtHistory
             {
                 ChangeOfDebt = changeOfDebt,

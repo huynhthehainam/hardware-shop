@@ -73,7 +73,7 @@ public class Program
                     Id = "Bearer"
                 }
                 },
-                new string[] { }
+                Array.Empty<string>()
             }
     });
         });
@@ -91,12 +91,14 @@ public class Program
             })
            .AddJwtBearer(x =>
            {
-               x.Events = new JwtBearerEvents();
-               x.Events.OnMessageReceived = (context) =>
+               x.Events = new JwtBearerEvents
+               {
+                   OnMessageReceived = (context) =>
                {
                    var bb = context.HttpContext.Request.Query["access_token"];
                    context.Token = context.HttpContext.Request.Query["access_token"];
                    return Task.CompletedTask;
+               }
                };
 
                x.RequireHttpsMetadata = false;
@@ -112,9 +114,8 @@ public class Program
                    LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken,
                                             TokenValidationParameters validationParameters) =>
                    {
-                       Console.WriteLine("hello world");
-                       return notBefore.HasValue ? notBefore.Value <= DateTime.UtcNow : true &&
-                                  expires.HasValue ? expires.Value >= DateTime.UtcNow : true;
+                       return notBefore.HasValue ? notBefore.Value <= DateTime.UtcNow : false ||
+!expires.HasValue || expires.Value >= DateTime.UtcNow;
                    }
                };
            });

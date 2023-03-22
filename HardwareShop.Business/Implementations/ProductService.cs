@@ -64,7 +64,7 @@ namespace HardwareShop.Business.Implementations
                     validatedCategoryIds.Add(categoryId);
                 }
             }
-            List<Tuple<int, double>>? validatedWarehouses = new List<Tuple<int, double>>();
+            List<Tuple<int, double>>? validatedWarehouses = new();
             if (warehouses != null)
             {
                 for (var i = 0; i < warehouses.Count; i++)
@@ -80,7 +80,7 @@ namespace HardwareShop.Business.Implementations
                     validatedWarehouses.Add(new Tuple<int, double>(warehouse.Item1, warehouse.Item2));
                 }
             }
-            var product = await productRepository.CreateIfNotExistsAsync(new Product
+            var createIfNotExistResponse = await productRepository.CreateIfNotExistsAsync(new Product
             {
                 Name = name,
                 PricePerMass = pricePerMass,
@@ -102,12 +102,12 @@ namespace HardwareShop.Business.Implementations
                 e.Name
             });
 
-            if (product == null)
+            if (createIfNotExistResponse.IsExist)
             {
                 responseResultBuilder.AddInvalidFieldError("Name");
                 return null;
             }
-            return new CreatedProductDto { Id = product.Id };
+            return new CreatedProductDto { Id = createIfNotExistResponse.Entity.Id };
         }
 
         public async Task<IAssetTable?> GetProductAssetByIdAsync(int productId, int assetId)
@@ -131,8 +131,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<bool> RemoveProductAssetByIdAsync(int productId, int assetId)
         {
-            var asset = await GetProductAssetByIdAsync(productId, assetId) as ProductAsset;
-            if (asset == null)
+            if (await GetProductAssetByIdAsync(productId, assetId) is not ProductAsset asset)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return false;
@@ -143,7 +142,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<ProductDto?> GetProductOrCurrentUserShopAsync(int productId)
         {
-            var product = await getProductOfCurrentUserShop(productId);
+            var product = await GetProductOfCurrentUserShop(productId);
             if (product == null) return null;
             var assets = await productAssetRepository.GetDtoPageDataByQueryAsync<SimpleAssetDto>(new PagingModel(), e => e.ProductId == product.Id, e => new SimpleAssetDto { Id = e.Id, AssetType = e.AssetType });
             return new ProductDto
@@ -157,8 +156,8 @@ namespace HardwareShop.Business.Implementations
                 PriceForCustomer = product.PriceForCustomer,
                 PriceForFamiliarCustomer = product.PriceForFamiliarCustomer,
                 PricePerMass = product.PricePerMass,
-                ProductCategoryIds = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => e.ProductCategoryId).ToArray() : new int[0],
-                ProductCategoryNames = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => e.ProductCategory?.Name).ToArray() : new string[0],
+                ProductCategoryIds = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => e.ProductCategoryId).ToArray() : Array.Empty<int>(),
+                ProductCategoryNames = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => e.ProductCategory?.Name).ToArray() : Array.Empty<string>(),
                 UnitId = product.UnitId,
                 UnitName = product.Unit?.Name,
                 OriginalPrice = product.OriginalPrice,
@@ -167,7 +166,7 @@ namespace HardwareShop.Business.Implementations
                     Id = e.ProductCategory?.Id ?? 0,
                     Name = e.ProductCategory?.Name ?? ""
                 }).ToList() : new List<CategoryDto>(),
-                Warehouses = product.WarehouseProducts == null ? null : product.WarehouseProducts.Select(e => new ProductWarehouseDto
+                Warehouses = product.WarehouseProducts?.Select(e => new ProductWarehouseDto
                 {
                     WarehouseId = e.WarehouseId,
                     Quantity = e.Quantity,
@@ -201,8 +200,8 @@ namespace HardwareShop.Business.Implementations
                 PriceForCustomer = e.PriceForCustomer,
                 PriceForFamiliarCustomer = e.PriceForFamiliarCustomer,
                 PricePerMass = e.PricePerMass,
-                ProductCategoryIds = e.ProductCategoryProducts != null ? e.ProductCategoryProducts.Select(e => e.ProductCategoryId).ToArray() : new int[0],
-                ProductCategoryNames = e.ProductCategoryProducts != null ? e.ProductCategoryProducts.Select(e => e.ProductCategory?.Name).ToArray() : new string[0],
+                ProductCategoryIds = e.ProductCategoryProducts != null ? e.ProductCategoryProducts.Select(e => e.ProductCategoryId).ToArray() : Array.Empty<int>(),
+                ProductCategoryNames = e.ProductCategoryProducts != null ? e.ProductCategoryProducts.Select(e => e.ProductCategory?.Name).ToArray() : Array.Empty<string>(),
                 UnitId = e.UnitId,
                 UnitName = e.Unit?.Name
 
@@ -248,7 +247,7 @@ namespace HardwareShop.Business.Implementations
             productAsset = await productAssetRepository.CreateAsync(productAsset);
             return productAsset.Id;
         }
-        private async Task<Product?> getProductOfCurrentUserShop(int productId)
+        private async Task<Product?> GetProductOfCurrentUserShop(int productId)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -266,7 +265,7 @@ namespace HardwareShop.Business.Implementations
         }
         public async Task<bool> SetProductThumbnailAsync(int productId, int assetId)
         {
-            var product = await getProductOfCurrentUserShop(productId);
+            var product = await GetProductOfCurrentUserShop(productId);
             if (product == null) return false;
             var assets = product.ProductAssets;
             if (assets == null)
@@ -302,7 +301,7 @@ namespace HardwareShop.Business.Implementations
         double? priceForCustomer, bool? hasAutoCalculatePermission,
         List<int>? categoryIds, List<Tuple<int, double>>? warehouses)
         {
-            var product = await getProductOfCurrentUserShop(productId);
+            var product = await GetProductOfCurrentUserShop(productId);
             if (product == null) return false;
             product.Name = string.IsNullOrEmpty(name) ? product.Name : name;
             product.UnitId = unitId == null ? product.UnitId : unitId.Value;
@@ -385,7 +384,7 @@ namespace HardwareShop.Business.Implementations
             return true;
         }
 
-        public async Task<bool> AddPricePerMassOfCurrentUserShopAsync(List<int> productIds, double amountOfCash)
+        public async Task<bool> AddPricePerMassOfCurrentUserShopAsync(List<int> categoryIds, double amountOfCash)
         {
             var shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
@@ -399,17 +398,8 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return false;
             }
-            var products = new List<Product>();
-            foreach (var (productId, index) in productIds.Select((item, index) => (item, index)))
-            {
-                var product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == productId && e.Mass != null && e.Mass > 0 && e.PricePerMass != null && e.PricePerMass > 0);
-                if (product == null)
-                {
-                    responseResultBuilder.AddInvalidFieldError($"ProductIds[{index}]");
-                    return false;
-                }
-                products.Add(product);
-            }
+            var productPageData = await productRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ShopId == shop.Id && e.HasAutoCalculatePermission && e.ProductCategoryProducts != null && e.ProductCategoryProducts.Any(c => categoryIds.Contains(c.ProductCategoryId)));
+            var products = productPageData.Items;
             foreach (var product in products)
             {
                 if (product.HasAutoCalculatePermission)

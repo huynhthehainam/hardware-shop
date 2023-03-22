@@ -82,7 +82,7 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
 
-            var customer = await customerRepository.CreateIfNotExistsAsync(new Customer
+            var createIfNotExistResponse = await customerRepository.CreateIfNotExistsAsync(new Customer
             {
                 ShopId = shop.Id,
                 Name = name,
@@ -91,18 +91,18 @@ namespace HardwareShop.Business.Implementations
                 IsFamiliar = isFamiliar,
                 PhoneCountryId = phoneCountryId,
             }, e => new { e.Name, e.Address, e.Phone });
-            if (customer == null)
+            if (createIfNotExistResponse.IsExist)
             {
                 responseResultBuilder.AddExistedEntityError("Customer");
                 return null;
             }
-            return new CreatedCustomerDto { Id = customer.Id };
+            return new CreatedCustomerDto { Id = createIfNotExistResponse.Entity.Id };
 
         }
 
         public async Task<CustomerDto?> UpdateCustomerOfCurrentUserShopAsync(int customerId, string? name, string? phone, string? address, bool? isFamiliar, double? amountOfCash)
         {
-            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopById(customerId);
             if (customer == null) return null;
             customer.Name = string.IsNullOrEmpty(name) ? customer.Name : name;
             customer.Phone = string.IsNullOrEmpty(phone) ? customer.Phone : phone;
@@ -117,7 +117,7 @@ namespace HardwareShop.Business.Implementations
             return new CustomerDto { Id = customer.Id };
         }
 
-        private async Task<Customer?> getCustomerOfCurrentUserShopById(int customerId)
+        private async Task<Customer?> GetCustomerOfCurrentUserShopById(int customerId)
         {
             var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -136,7 +136,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CustomerDto?> GetCustomerDtoOfCurrentUserShopByIdAsync(int customerId)
         {
-            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopById(customerId);
             if (customer == null) return null;
 
             return new CustomerDto()
@@ -155,7 +155,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<CustomerDebtHistoryDto>?> GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
-            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopById(customerId);
             if (customer == null) return null;
 
             return await customerDebtHistoryRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerDebtId == customerId, e => new CustomerDebtHistoryDto
@@ -172,7 +172,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<InvoiceDto>?> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
-            var customer = await getCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopById(customerId);
             if (customer == null) return null;
             return await invoiceRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerId == customer.Id, e => new InvoiceDto
             {

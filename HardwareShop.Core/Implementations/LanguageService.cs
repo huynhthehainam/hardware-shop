@@ -17,15 +17,12 @@ namespace HardwareShop.Core.Implementations
         public string GenerateFullName(string firstName, string lastName)
         {
             var language = supportedLanguage;
-            switch (language)
+            return language switch
             {
-                case SupportedLanguage.English:
-                    return $"{firstName} {lastName}";
-                case SupportedLanguage.Vietnamese:
-                    return $"{lastName} {firstName}";
-                default:
-                    return $"{firstName} {lastName}";
-            }
+                SupportedLanguage.English => $"{firstName} {lastName}",
+                SupportedLanguage.Vietnamese => $"{lastName} {firstName}",
+                _ => $"{firstName} {lastName}",
+            };
         }
 
         public void SetLanguage(SupportedLanguage language)
@@ -40,7 +37,7 @@ namespace HardwareShop.Core.Implementations
 
         public string Translate(string html, Dictionary<string, Dictionary<SupportedLanguage, string>> translations)
         {
-            Dictionary<string, string> values = new Dictionary<string, string>();
+            Dictionary<string, string> values = new();
             foreach (var key in translations.Keys)
             {
                 var translationKey = $"TRANSLATE_{key}";
