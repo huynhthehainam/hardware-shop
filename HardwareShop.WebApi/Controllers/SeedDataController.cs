@@ -12,11 +12,25 @@ using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.Sqlite;
 
 namespace HardwareShop.WebApi.Controllers
 {
     public class SeedDataController : AuthorizedApiControllerBase
     {
+        private class DbUnitModel
+        {
+            public string Name { get; set; }
+            public List<string> Variants { get; set; } = new List<string>();
+            public string CategoryName { get; set; }
+            public int? CategoryId { get; set; }
+            public int? Id { get; set; }
+            public DbUnitModel(string name, string categoryName)
+            {
+                Name = name;
+                CategoryName = categoryName;
+            }
+        }
         private readonly IRepository<Unit> unitRepository;
         private readonly IRepository<Product> productRepository;
         private readonly IRepository<Shop> shopRepository;
@@ -27,6 +41,28 @@ namespace HardwareShop.WebApi.Controllers
             this.productRepository = productRepository;
             this.shopRepository = shopRepository;
             this.customerRepository = customerRepository;
+        }
+        [HttpPost("SeedFromDbFile")]
+        public async Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
+        {
+            if (command.DbFile == null)
+            {
+                return responseResultBuilder.Build();
+            }
+            using MemoryStream ms = new();
+
+            command.DbFile.CopyTo(ms);
+
+            using SqliteConnection connection = new("Data Source=:memory:");
+            await connection.OpenAsync();
+
+
+
+
+            SqliteCommand sqlCommand = connection.CreateCommand();
+            sqlCommand.CommandText = "Select * from Product";
+
+            return responseResultBuilder.Build();
         }
         [HttpPost("SeedUnits")]
         public async Task<IActionResult> SeedUnit([FromBody] List<SeedUnitCommand> commands)
