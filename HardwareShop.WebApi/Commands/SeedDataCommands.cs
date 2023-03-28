@@ -3,6 +3,11 @@ using System.ComponentModel.DataAnnotations;
 
 namespace HardwareShop.WebApi.Commands
 {
+    public class SeedFromFileCommand
+    {
+        [Required]
+        public IFormFile? DbFile { get; set; }
+    }
     public class SeedUnitCommand
     {
         [Required]
