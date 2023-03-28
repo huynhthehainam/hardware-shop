@@ -71,9 +71,9 @@ namespace HardwareShop.WebApi.Controllers
                     Name = command.Name ?? "",
                     OriginalPrice = command.OriginalPrice ?? 0,
                     HasAutoCalculatePermission = command.HasAutoCalculatePermission,
-                    PercentForCustomer = command.PriceForCustomer,
+                    PercentForCustomer = command.PercentForCustomer,
                     PercentForFamiliarCustomer = command.PercentForFamiliarCustomer,
-                    PriceForCustomer = command.PercentForCustomer ?? 0,
+                    PriceForCustomer = command.PriceForCustomer ?? 0,
                     PriceForFamiliarCustomer = command.PriceForFamiliarCustomer,
                     PricePerMass = command.PricePerMass,
 

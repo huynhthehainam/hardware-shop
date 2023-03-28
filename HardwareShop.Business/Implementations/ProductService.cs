@@ -417,7 +417,7 @@ namespace HardwareShop.Business.Implementations
                         {
                             var price = product.Mass.Value * product.PricePerMass.Value * (100 + product.PercentForCustomer.Value) / 100;
                             price = cashUnit.RoundValue(price);
-                            product.PercentForCustomer = price;
+                            product.PriceForCustomer = price;
                         }
                     }
                 }
