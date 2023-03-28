@@ -43,37 +43,82 @@ namespace HardwareShop.WebApi.Extensions
                 var countryAsset2Bytes = File.ReadAllBytes(countryAsset2Path);
 
 
-                UnitCategory unitCategory = new()
+                UnitCategory massCategory = new()
                 {
                     Name = "Mass"
                 };
-                UnitCategory unitCategory2 = new()
+                UnitCategory currencyCategory = new()
                 {
                     Name = UnitCategoryConstants.CurrencyCategoryName
                 };
-                UnitCategory unitCategory1 = new()
+                UnitCategory singleCategory = new()
                 {
                     Name = "Single"
                 };
-                UnitCategory unitCategory3 = new()
+                UnitCategory lengthCategory = new()
                 {
                     Name = "Length"
                 };
-                UnitCategory unitCategory4 = new()
+                UnitCategory volumeCategory = new()
                 {
                     Name = "Volume"
                 };
-                db.UnitCategories.Add(unitCategory);
-                db.UnitCategories.Add(unitCategory1);
-                db.UnitCategories.Add(unitCategory2);
-                db.UnitCategories.Add(unitCategory3);
-                db.UnitCategories.Add(unitCategory4);
+                db.UnitCategories.Add(massCategory);
+                db.UnitCategories.Add(singleCategory);
+                db.UnitCategories.Add(currencyCategory);
+                db.UnitCategories.Add(lengthCategory);
+                db.UnitCategories.Add(volumeCategory);
                 db.SaveChanges();
 
-                Unit unit = new() { Name = "Kg", UnitCategory = unitCategory };
-                Unit unit1 = new() { Name = "VND", UnitCategory = unitCategory2, StepNumber = 500 };
-                db.Units.Add(unit);
-                db.Units.Add(unit1);
+                Unit unit = new()
+                {
+                    Name = "Kg",
+                    UnitCategory = massCategory,
+                    IsPrimary = true
+                };
+                Unit unit1 = new()
+                {
+                    Name = "VND",
+                    UnitCategory = currencyCategory,
+                    StepNumber = 500,
+                    CompareWithPrimaryUnit = 23495
+                };
+                Unit unit2 = new()
+                {
+                    Name = "USD",
+                    UnitCategory = currencyCategory,
+                    StepNumber = 0.01,
+                    IsPrimary = true
+                };
+                Unit unit3 = new()
+                {
+                    Name = "Piece",
+                    UnitCategory = singleCategory,
+                    CompareWithPrimaryUnit = 1,
+                    IsPrimary = true,
+                    StepNumber = 1,
+                };
+                Unit unit4 = new()
+                {
+                    Name = "Meter",
+                    UnitCategory = lengthCategory,
+                    StepNumber = 0.01,
+                    CompareWithPrimaryUnit = 1,
+                    IsPrimary = true,
+                };
+                Unit unit5 = new()
+                {
+                    Name = "Litter",
+                    UnitCategory = volumeCategory,
+                    StepNumber = 0.01,
+                    CompareWithPrimaryUnit = 1,
+                    IsPrimary = true,
+                };
+
+                db.Units.AddRange(new Unit[]{
+                    unit, unit1, unit2,unit3, unit4, unit5
+                });
+
                 db.SaveChanges();
 
 

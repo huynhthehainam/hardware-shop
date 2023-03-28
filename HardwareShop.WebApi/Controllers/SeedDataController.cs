@@ -21,14 +21,14 @@ namespace HardwareShop.WebApi.Controllers
         private class DbUnitModel
         {
             public string Name { get; set; }
-            public List<string> Variants { get; set; } = new List<string>();
-            public string CategoryName { get; set; }
-            public int? CategoryId { get; set; }
+            public List<string> Variants { get; set; }
+            public int CategoryId { get; set; }
             public int? Id { get; set; }
-            public DbUnitModel(string name, string categoryName)
+            public DbUnitModel(string name, int categoryId, List<string> variants)
             {
                 Name = name;
-                CategoryName = categoryName;
+                CategoryId = categoryId;
+                Variants = variants;
             }
         }
         private readonly IRepository<Unit> unitRepository;
@@ -60,7 +60,32 @@ namespace HardwareShop.WebApi.Controllers
 
 
             SqliteCommand sqlCommand = connection.CreateCommand();
-            sqlCommand.CommandText = "Select * from Product";
+            sqlCommand.CommandText = "Select * from Warehouses w";
+            int singleCategoryId = 2;
+            int lengthCategoryId = 4;
+            int volumeCategoryId = 5;
+            int massCategoryId = 1;
+            List<DbUnitModel> units = new List<DbUnitModel>()
+            {
+                new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}),
+new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"}),
+new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ),
+new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ),
+new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"}),
+new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"}),
+new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"}),
+new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"}),
+new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"}),
+new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"}),
+new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"}),
+new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"}),
+new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ),
+new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"})
+            };
+            using SqliteDataReader reader = sqlCommand.ExecuteReader();
+            while (reader.Read())
+            {
+            }
 
             return responseResultBuilder.Build();
         }

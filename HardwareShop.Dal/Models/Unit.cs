@@ -16,6 +16,8 @@ namespace HardwareShop.Dal.Models
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public double StepNumber { get; set; } = 0.01;
+        public double CompareWithPrimaryUnit { get; set; } = 1;
+        public bool IsPrimary { get; set; }
         public int UnitCategoryId { get; set; }
         public double RoundValue(double value)
         {
