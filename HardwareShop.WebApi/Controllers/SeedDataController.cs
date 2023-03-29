@@ -23,12 +23,16 @@ namespace HardwareShop.WebApi.Controllers
             public string Name { get; set; }
             public List<string> Variants { get; set; }
             public int CategoryId { get; set; }
+            public double StepNumber { get; set; }
+            public double CompareWithPrimaryUnit { get; set; }
             public int? Id { get; set; }
-            public DbUnitModel(string name, int categoryId, List<string> variants)
+            public DbUnitModel(string name, int categoryId, List<string> variants, double stepNumber, double compareWithPrimaryUnit)
             {
                 Name = name;
                 CategoryId = categoryId;
                 Variants = variants;
+                StepNumber = stepNumber;
+                CompareWithPrimaryUnit = compareWithPrimaryUnit;
             }
         }
         private readonly IRepository<Unit> unitRepository;
@@ -49,44 +53,82 @@ namespace HardwareShop.WebApi.Controllers
             {
                 return responseResultBuilder.Build();
             }
-            using MemoryStream ms = new();
-
-            command.DbFile.CopyTo(ms);
-
-            using SqliteConnection connection = new("Data Source=:memory:");
-            await connection.OpenAsync();
-
-
-
-
-            SqliteCommand sqlCommand = connection.CreateCommand();
-            sqlCommand.CommandText = "Select * from Warehouses w";
-            int singleCategoryId = 2;
-            int lengthCategoryId = 4;
-            int volumeCategoryId = 5;
-            int massCategoryId = 1;
-            List<DbUnitModel> units = new List<DbUnitModel>()
+            string dbFilePath = Path.Combine("UploadedDb");
+            _ = Directory.CreateDirectory(dbFilePath);
+            dbFilePath = Path.Combine(dbFilePath, "dbab.db");
+            using (FileStream fileStream = new(dbFilePath, FileMode.Create))
             {
-                new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}),
-new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"}),
-new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ),
-new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ),
-new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"}),
-new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"}),
-new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"}),
-new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"}),
-new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"}),
-new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"}),
-new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"}),
-new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"}),
-new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ),
-new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"})
+                command.DbFile.CopyTo(fileStream);
+            }
+            using SqliteConnection connection = new($"Data source={dbFilePath}");
+            try
+            {
+
+                connection.Open();
+                int singleCategoryId = 2;
+                int lengthCategoryId = 4;
+                int volumeCategoryId = 5;
+                int massCategoryId = 1;
+                List<DbUnitModel> units = new()
+            {
+                new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}, 1,1),
+                new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"},1,1),
+                new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ,1,1),
+                new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ,1,1),
+                new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"},1,1),
+                new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"},1,1),
+                new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"},1,1),
+                new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"},1,1),
+                new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"},0.01,1),
+                new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"},0.01,0.1),
+                new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"},1,1),
+                new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"},0.01,1),
+                new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ,1,1),
+                new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"},0.01,1)
             };
-            using SqliteDataReader reader = sqlCommand.ExecuteReader();
-            while (reader.Read())
-            {
+                foreach (DbUnitModel dbUnit in units)
+                {
+                    CreateOrUpdateResponse<Unit> unit = await unitRepository.CreateOrUpdateAsync(new Unit()
+                    {
+                        CompareWithPrimaryUnit = dbUnit.CompareWithPrimaryUnit,
+                        IsPrimary = false,
+                        Name = dbUnit.Name,
+                        StepNumber = dbUnit.StepNumber,
+                        UnitCategoryId = dbUnit.CategoryId,
+                    }, e => new { e.Name, e.UnitCategoryId }, e => new
+                    {
+                        e.Name
+                    });
+                    dbUnit.Id = unit.Entity.Id;
+                }
+                SqliteCommand getAllProductCommand = connection.CreateCommand();
+                getAllProductCommand.CommandText = "SELECT * from Warehouses w";
+                using SqliteDataReader getAllProductReader = getAllProductCommand.ExecuteReader();
+                while (getAllProductReader.Read())
+                {
+                    string name = getAllProductReader.GetString(1);
+                    string unitName = getAllProductReader.GetString(3);
+                    double pricePerMass = getAllProductReader.GetDouble(4);
+                    double mass = getAllProductReader.GetDouble(5);
+                    double percentForFamiliarCustomer = getAllProductReader.GetDouble(6);
+                    double percentForCustomer = getAllProductReader.GetDouble(7);
+                    double priceForFamiliarCustomer = getAllProductReader.GetDouble(8);
+                    double priceForCustomer = getAllProductReader.GetDouble(9);
+                    double originalPrice = getAllProductReader.GetDouble(11);
+                }
+
+
             }
 
+            catch (Exception)
+            {
+
+            }
+            finally
+            {
+                connection.Close();
+                System.IO.File.Delete(dbFilePath);
+            }
             return responseResultBuilder.Build();
         }
         [HttpPost("SeedUnits")]
