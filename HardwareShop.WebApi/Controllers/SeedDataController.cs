@@ -35,6 +35,63 @@ namespace HardwareShop.WebApi.Controllers
                 CompareWithPrimaryUnit = compareWithPrimaryUnit;
             }
         }
+        private class DbDebtHistoryModel
+        {
+            public DateTime CreatedDate { get; set; }
+            public double Amount { get; set; }
+            public string Reason { get; set; }
+            public DbDebtHistoryModel(DateTime createdDate, double amount, string reason)
+            {
+                CreatedDate = createdDate;
+                Amount = amount;
+                Reason = reason;
+            }
+            public Tuple<string, JsonDocument> GetReasonTuple()
+            {
+
+                switch (Reason)
+                {
+                    case "Mua hàng":
+                        {
+                            return CustomerDebtHistoryHelper.GenerateDebtReasonWhenBuying("");
+                        }
+                    case "Thêm nợ":
+                        {
+                            return CustomerDebtHistoryHelper.GenerateDebtReasonWhenBorrowing();
+                        }
+                    case "Trả tiền":
+                        {
+                            return CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
+                        }
+                    case "Xóa nợ":
+                        {
+                            return CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingAll();
+                        }
+                    default:
+                        {
+                            return CustomerDebtHistoryHelper.GenerateDebtReasonWhenBuying("");
+                        }
+                }
+
+            }
+        }
+
+        private class DbCustomerModel
+        {
+            public int OldId { get; s; }
+            public string Name { get; set; }
+            public string Address { get; set; }
+            public double Debt { get; set; }
+            public DbDebtHistoryModel[] DebtHistories { get; set; }
+            public DbCustomerModel(int oldId, string name, string address, double debt, IEnumerable<DbDebtHistoryModel> debtHistories)
+            {
+                OldId = oldId;
+                Name = name;
+                Address = address;
+                Debt = debt;
+                DebtHistories = debtHistories.ToArray();
+            }
+        }
         private readonly IRepository<Unit> unitRepository;
         private readonly IRepository<Product> productRepository;
         private readonly IRepository<Shop> shopRepository;
@@ -49,7 +106,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("SeedFromDbFile")]
         public async Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
         {
-            if (command.DbFile == null)
+            if (command.DbFile == null || command.ShopId == null)
             {
                 return responseResultBuilder.Build();
             }
@@ -61,15 +118,15 @@ namespace HardwareShop.WebApi.Controllers
                 command.DbFile.CopyTo(fileStream);
             }
             using SqliteConnection connection = new($"Data source={dbFilePath}");
+            connection.Open();
             try
             {
 
-                connection.Open();
                 int singleCategoryId = 2;
                 int lengthCategoryId = 4;
                 int volumeCategoryId = 5;
                 int massCategoryId = 1;
-                List<DbUnitModel> units = new()
+                List<DbUnitModel> dbUnits = new()
             {
                 new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}, 1,1),
                 new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"},1,1),
@@ -86,7 +143,7 @@ namespace HardwareShop.WebApi.Controllers
                 new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ,1,1),
                 new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"},0.01,1)
             };
-                foreach (DbUnitModel dbUnit in units)
+                foreach (DbUnitModel dbUnit in dbUnits)
                 {
                     CreateOrUpdateResponse<Unit> unit = await unitRepository.CreateOrUpdateAsync(new Unit()
                     {
@@ -102,10 +159,15 @@ namespace HardwareShop.WebApi.Controllers
                     dbUnit.Id = unit.Entity.Id;
                 }
                 SqliteCommand getAllProductCommand = connection.CreateCommand();
+
+
                 getAllProductCommand.CommandText = "SELECT * from Warehouses w";
                 using SqliteDataReader getAllProductReader = getAllProductCommand.ExecuteReader();
+                int index = 0;
+                List<Product> products = new();
                 while (getAllProductReader.Read())
                 {
+                    index++;
                     string name = getAllProductReader.GetString(1);
                     string unitName = getAllProductReader.GetString(3);
                     double pricePerMass = getAllProductReader.GetDouble(4);
@@ -115,8 +177,61 @@ namespace HardwareShop.WebApi.Controllers
                     double priceForFamiliarCustomer = getAllProductReader.GetDouble(8);
                     double priceForCustomer = getAllProductReader.GetDouble(9);
                     double originalPrice = getAllProductReader.GetDouble(11);
+                    int? unitId = dbUnits.FirstOrDefault(e => e.Variants.Contains(unitName))?.Id;
+                    if (unitId == null)
+                    {
+                        responseResultBuilder.AddInvalidFieldError($"Products[{index}].Unit");
+                        continue;
+                    }
+                    CreateIfNotExistResponse<Product> createIfNotExistResponse = await productRepository.CreateIfNotExistsAsync(new Product()
+                    {
+                        Name = name,
+                        HasAutoCalculatePermission = true,
+                        Mass = mass,
+                        OriginalPrice = originalPrice,
+                        PercentForCustomer = percentForCustomer,
+                        PercentForFamiliarCustomer = percentForFamiliarCustomer,
+                        PriceForCustomer = priceForCustomer,
+                        PriceForFamiliarCustomer = priceForFamiliarCustomer,
+                        UnitId = unitId.Value,
+                        ShopId = command.ShopId.Value,
+                        PricePerMass = pricePerMass,
+
+                    }, e => new { e.ShopId, e.Name });
+                    products.Add(createIfNotExistResponse.Entity);
+
                 }
 
+                SqliteCommand getAllCustomerCommand = connection.CreateCommand();
+                getAllCustomerCommand.CommandText = "SELECT * from Customers c ";
+
+                using SqliteDataReader getAllCustomerReader = getAllCustomerCommand.ExecuteReader();
+                List<DbCustomerModel> dbCustomers = new();
+
+                while (getAllCustomerReader.Read())
+                {
+                    int oldId = getAllCustomerReader.GetInt32(0);
+                    string name = getAllCustomerReader.GetString(1);
+                    string address = getAllCustomerReader.GetString(2);
+                    double currentDebt = getAllCustomerReader.GetDouble(3);
+                    List<DbDebtHistoryModel> debtHistories = new();
+                    SqliteCommand getAllCustomerDebtHistoryCommand = connection.CreateCommand();
+                    getAllCustomerDebtHistoryCommand.CommandText = $"SELECT * from DeptHistories dh where dh.customer_id = {oldId}";
+                    SqliteDataReader getAllCustomerDebtHistoryReader = getAllCustomerDebtHistoryCommand.ExecuteReader();
+                    while (getAllCustomerDebtHistoryReader.Read())
+                    {
+                        DateTime createdDate = getAllCustomerDebtHistoryReader.GetDateTime(1);
+                        double amount = getAllCustomerDebtHistoryReader.GetDouble(2);
+                        string reason = getAllCustomerDebtHistoryReader.GetString(3);
+                        debtHistories.Add(new DbDebtHistoryModel(createdDate, amount, reason));
+                    }
+                    dbCustomers.Add(new DbCustomerModel(oldId, name, address, currentDebt, debtHistories));
+
+                }
+                foreach (DbCustomerModel dbCustomer in dbCustomers)
+                {
+                    var customer
+                }
 
             }
 
@@ -127,6 +242,7 @@ namespace HardwareShop.WebApi.Controllers
             finally
             {
                 connection.Close();
+                SqliteConnection.ClearAllPools();
                 System.IO.File.Delete(dbFilePath);
             }
             return responseResultBuilder.Build();
