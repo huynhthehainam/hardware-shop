@@ -7,6 +7,8 @@ namespace HardwareShop.WebApi.Commands
     {
         [Required]
         public IFormFile? DbFile { get; set; }
+        [Required]
+        public int? ShopId { get; set; }
     }
     public class SeedUnitCommand
     {
