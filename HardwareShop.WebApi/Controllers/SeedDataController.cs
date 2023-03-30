@@ -103,14 +103,14 @@ namespace HardwareShop.WebApi.Controllers
             public int? DebtHistoryId { get; set; }
             public double NewDebt { get; set; }
             public double OldDebt { get; set; }
-            public int OldCustomerId { get; set; }
-            public DbInvoiceModel(double deposit, DateTime createdDate, double newDebt, double oldDebt, int oldCustomerId)
+            public int CustomerId { get; set; }
+            public DbInvoiceModel(double deposit, DateTime createdDate, double newDebt, double oldDebt, int customerId)
             {
                 Deposit = deposit;
                 CreatedDate = createdDate;
                 NewDebt = newDebt;
                 OldDebt = oldDebt;
-                OldCustomerId = oldCustomerId;
+                CustomerId = customerId;
             }
         }
         private class DbInvoiceDetailModel
@@ -135,12 +135,14 @@ namespace HardwareShop.WebApi.Controllers
         private readonly IRepository<Product> productRepository;
         private readonly IRepository<Shop> shopRepository;
         private readonly IRepository<Customer> customerRepository;
-        public SeedDataController(IRepository<Customer> customerRepository, IRepository<Shop> shopRepository, IRepository<Product> productRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly IRepository<Invoice> invoiceRepository;
+        public SeedDataController(IRepository<Customer> customerRepository, IRepository<Shop> shopRepository, IRepository<Product> productRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService, IRepository<Invoice> invoiceRepository) : base(responseResultBuilder, currentUserService)
         {
             this.unitRepository = unitRepository;
             this.productRepository = productRepository;
             this.shopRepository = shopRepository;
             this.customerRepository = customerRepository;
+            this.invoiceRepository = invoiceRepository;
         }
         [HttpPost("SeedFromDbFile")]
         public async Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
@@ -158,6 +160,7 @@ namespace HardwareShop.WebApi.Controllers
             }
             using SqliteConnection connection = new($"Data source={dbFilePath}");
             connection.Open();
+            TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             try
             {
 
@@ -276,7 +279,7 @@ namespace HardwareShop.WebApi.Controllers
                 }
                 foreach (DbCustomerModel dbCustomer in dbCustomers)
                 {
-                    TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
 
                     CreateIfNotExistResponse<Customer> createIfNotExistResponse = await customerRepository.CreateIfNotExistsAsync(new Customer
                     {
@@ -304,10 +307,12 @@ namespace HardwareShop.WebApi.Controllers
                 getAllInvoiceCommand.CommandText = "SELECT * from Invoices i ";
 
                 SqliteDataReader getAllInvoiceReader = getAllInvoiceCommand.ExecuteReader();
+                List<DbInvoiceModel> dbInvoices = new();
                 while (getAllInvoiceReader.Read())
                 {
                     int oldId = getAllInvoiceReader.GetInt32(0);
                     DateTime createdDate = getAllInvoiceReader.GetDateTime(1);
+                    createdDate = TimeZoneInfo.ConvertTimeToUtc(createdDate, timeZoneInfo);
                     double newDebt = getAllInvoiceReader.GetDouble(2);
                     double deposit = getAllInvoiceReader.GetDouble(3);
                     double oldDebt = getAllInvoiceReader.GetDouble(4);
@@ -317,6 +322,7 @@ namespace HardwareShop.WebApi.Controllers
                     SqliteDataReader getAllInvoiceDetailReader = getAllInvoiceDetailCommand.ExecuteReader();
                     bool isAllDetailValid = true;
                     List<DbInvoiceDetailModel> details = new();
+                    int? customerId = dbCustomers.FirstOrDefault(e => e.OldId == oldCustomerId)?.Id;
                     while (getAllInvoiceDetailReader.Read())
                     {
                         string productName = getAllInvoiceDetailReader.GetString(1);
@@ -335,11 +341,22 @@ namespace HardwareShop.WebApi.Controllers
                         }
                         details.Add(new DbInvoiceDetailModel(productId.Value, quantity, unitId.Value, price, originalPrice, description));
                     }
-                    if (!isAllDetailValid)
+
+                    if (!isAllDetailValid || customerId == null)
                     {
+                        Console.WriteLine("Invoice is invalid");
                         continue;
                     }
-
+                    dbInvoices.Add(new DbInvoiceModel(deposit, createdDate, newDebt, oldDebt, customerId.Value));
+                }
+                foreach (DbInvoiceModel dbInvoice in dbInvoices)
+                {
+                    var createIfNotExistResponse = await invoiceRepository.CreateIfNotExistsAsync(new Invoice()
+                    {
+                        new Invoice(){
+                            CreatedDate = dbInvoice.CreatedDate,
+                        }
+                    })
                 }
 
             }
