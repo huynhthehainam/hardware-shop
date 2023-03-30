@@ -39,6 +39,8 @@ namespace HardwareShop.WebApi.Controllers
         {
             public DateTime CreatedDate { get; set; }
             public double Amount { get; set; }
+            public double OldDebt { get; set; }
+            public double NewDebt { get; set; }
             public string Reason { get; set; }
             public DbDebtHistoryModel(DateTime createdDate, double amount, string reason)
             {
@@ -79,12 +81,11 @@ namespace HardwareShop.WebApi.Controllers
         private class DbCustomerModel
         {
             public int OldId { get; set; }
-
-
             public string Name { get; set; }
             public string Address { get; set; }
             public double Debt { get; set; }
             public DbDebtHistoryModel[] DebtHistories { get; set; }
+            public int? Id { get; set; }
             public DbCustomerModel(int oldId, string name, string address, double debt, IEnumerable<DbDebtHistoryModel> debtHistories)
             {
                 OldId = oldId;
@@ -92,6 +93,42 @@ namespace HardwareShop.WebApi.Controllers
                 Address = address;
                 Debt = debt;
                 DebtHistories = debtHistories.ToArray();
+            }
+        }
+
+        private class DbInvoiceModel
+        {
+            public double Deposit { get; set; }
+            public DateTime CreatedDate { get; set; }
+            public int? DebtHistoryId { get; set; }
+            public double NewDebt { get; set; }
+            public double OldDebt { get; set; }
+            public int OldCustomerId { get; set; }
+            public DbInvoiceModel(double deposit, DateTime createdDate, double newDebt, double oldDebt, int oldCustomerId)
+            {
+                Deposit = deposit;
+                CreatedDate = createdDate;
+                NewDebt = newDebt;
+                OldDebt = oldDebt;
+                OldCustomerId = oldCustomerId;
+            }
+        }
+        private class DbInvoiceDetailModel
+        {
+            public int ProductId { get; set; }
+            public double Quantity { get; set; }
+            public int UnitId { get; set; }
+            public double Price { get; set; }
+            public double OriginalPrice { get; set; }
+            public string? Description { get; set; }
+            public DbInvoiceDetailModel(int productId, double quantity, int unitId, double price, double originalPrice, string? description)
+            {
+                ProductId = productId;
+                Quantity = quantity;
+                UnitId = unitId;
+                Price = price;
+                OriginalPrice = originalPrice;
+                Description = description;
             }
         }
         private readonly IRepository<Unit> unitRepository;
@@ -218,20 +255,91 @@ namespace HardwareShop.WebApi.Controllers
                     double currentDebt = getAllCustomerReader.GetDouble(3);
                     List<DbDebtHistoryModel> debtHistories = new();
                     SqliteCommand getAllCustomerDebtHistoryCommand = connection.CreateCommand();
-                    getAllCustomerDebtHistoryCommand.CommandText = $"SELECT * from DeptHistories dh where dh.customer_id = {oldId}";
+                    getAllCustomerDebtHistoryCommand.CommandText = $"SELECT * from DeptHistories dh where dh.customer_id = {oldId} order by dh .created DESC ";
                     SqliteDataReader getAllCustomerDebtHistoryReader = getAllCustomerDebtHistoryCommand.ExecuteReader();
+                    double debt = currentDebt;
                     while (getAllCustomerDebtHistoryReader.Read())
                     {
                         DateTime createdDate = getAllCustomerDebtHistoryReader.GetDateTime(1);
                         double amount = getAllCustomerDebtHistoryReader.GetDouble(2);
                         string reason = getAllCustomerDebtHistoryReader.GetString(3);
-                        debtHistories.Add(new DbDebtHistoryModel(createdDate, amount, reason));
+                        DbDebtHistoryModel debtHistory = new(createdDate, amount, reason)
+                        {
+                            NewDebt = debt,
+                            OldDebt = debt - amount
+                        };
+                        debt = debtHistory.OldDebt;
+                        debtHistories.Add(debtHistory);
                     }
                     dbCustomers.Add(new DbCustomerModel(oldId, name, address, currentDebt, debtHistories));
 
                 }
                 foreach (DbCustomerModel dbCustomer in dbCustomers)
                 {
+                    TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+
+                    CreateIfNotExistResponse<Customer> createIfNotExistResponse = await customerRepository.CreateIfNotExistsAsync(new Customer
+                    {
+                        Address = dbCustomer.Address,
+                        Name = dbCustomer.Name,
+                        ShopId = command.ShopId.Value,
+                        IsFamiliar = false,
+                        Debt = new CustomerDebt
+                        {
+                            Amount = dbCustomer.Debt,
+                            Histories = dbCustomer.DebtHistories.Select(e => new CustomerDebtHistory()
+                            {
+                                ChangeOfDebt = e.Amount,
+                                CreatedDate = TimeZoneInfo.ConvertTimeToUtc(e.CreatedDate, timeZoneInfo),
+                                NewDebt = e.NewDebt,
+                                OldDebt = e.OldDebt,
+                                Reason = e.GetReasonTuple().Item1,
+                                ReasonParams = e.GetReasonTuple().Item2,
+                            }).ToList()
+                        }
+                    }, e => new { e.ShopId, e.Name });
+                    dbCustomer.Id = createIfNotExistResponse.Entity.Id;
+                }
+                SqliteCommand getAllInvoiceCommand = connection.CreateCommand();
+                getAllInvoiceCommand.CommandText = "SELECT * from Invoices i ";
+
+                SqliteDataReader getAllInvoiceReader = getAllInvoiceCommand.ExecuteReader();
+                while (getAllInvoiceReader.Read())
+                {
+                    int oldId = getAllInvoiceReader.GetInt32(0);
+                    DateTime createdDate = getAllInvoiceReader.GetDateTime(1);
+                    double newDebt = getAllInvoiceReader.GetDouble(2);
+                    double deposit = getAllInvoiceReader.GetDouble(3);
+                    double oldDebt = getAllInvoiceReader.GetDouble(4);
+                    int oldCustomerId = getAllInvoiceReader.GetInt32(5);
+                    SqliteCommand getAllInvoiceDetailCommand = connection.CreateCommand();
+                    getAllInvoiceDetailCommand.CommandText = $"SELECT * from InvoiceDetails id where id.invoice_id = {oldId}";
+                    SqliteDataReader getAllInvoiceDetailReader = getAllInvoiceDetailCommand.ExecuteReader();
+                    bool isAllDetailValid = true;
+                    List<DbInvoiceDetailModel> details = new();
+                    while (getAllInvoiceDetailReader.Read())
+                    {
+                        string productName = getAllInvoiceDetailReader.GetString(1);
+                        productName = productName.Trim();
+                        double quantity = getAllInvoiceDetailReader.GetDouble(2);
+                        string unitName = getAllInvoiceDetailReader.GetString(3);
+                        double price = getAllInvoiceDetailReader.GetDouble(4);
+                        double originalPrice = getAllInvoiceDetailReader.GetDouble(5);
+                        string description = getAllInvoiceDetailReader.GetString(8);
+                        int? productId = products.FirstOrDefault(e => e.Name == productName)?.Id;
+                        int? unitId = dbUnits.FirstOrDefault(e => e.Variants.Contains(unitName))?.Id;
+                        if (productId == null || unitId == null)
+                        {
+                            isAllDetailValid = false;
+                            break;
+                        }
+                        details.Add(new DbInvoiceDetailModel(productId.Value, quantity, unitId.Value, price, originalPrice, description));
+                    }
+                    if (!isAllDetailValid)
+                    {
+                        continue;
+                    }
+
                 }
 
             }
