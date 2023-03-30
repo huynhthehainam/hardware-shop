@@ -78,7 +78,9 @@ namespace HardwareShop.WebApi.Controllers
 
         private class DbCustomerModel
         {
-            public int OldId { get; s; }
+            public int OldId { get; set; }
+
+
             public string Name { get; set; }
             public string Address { get; set; }
             public double Debt { get; set; }
@@ -230,7 +232,6 @@ namespace HardwareShop.WebApi.Controllers
                 }
                 foreach (DbCustomerModel dbCustomer in dbCustomers)
                 {
-                    var customer
                 }
 
             }
