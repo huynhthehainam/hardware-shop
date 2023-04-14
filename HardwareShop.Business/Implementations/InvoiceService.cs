@@ -25,8 +25,9 @@ namespace HardwareShop.Business.Implementations
         private readonly ICustomerDebtService customerDebtService;
         private readonly IRepository<Invoice> invoiceRepository;
 
+        private readonly IRepository<WarehouseProduct> warehouseProductRepository;
         private readonly ILanguageService languageService;
-        public InvoiceService(ILanguageService languageService,   IShopService shopService,  IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
+        public InvoiceService(ILanguageService languageService, IShopService shopService, IRepository<WarehouseProduct> warehouseProductRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
         {
             this.responseResultBuilder = responseResultBuilder;
             this.customerDebtService = customerDebtService;
@@ -36,7 +37,7 @@ namespace HardwareShop.Business.Implementations
             this.productRepository = productRepository;
             this.invoiceRepository = invoiceRepository;
             this.languageService = languageService;
-
+            this.warehouseProductRepository = warehouseProductRepository;
         }
         public async Task<CreatedInvoiceDto?> CreateInvoiceOfCurrentUserShopAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details)
         {
@@ -64,14 +65,17 @@ namespace HardwareShop.Business.Implementations
             for (int i = 0; i < details.Count; i++)
             {
                 var detail = details[i];
-                var isProductExist = await productRepository.AnyAsync(e => e.ShopId == shop.Id && e.Id == detail.ProductId);
-                if (!isProductExist)
+                var product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == detail.ProductId);
+                if (product == null)
                 {
-                    responseResultBuilder.AddInvalidFieldError($"Products[{i}].ProductId");
+                    responseResultBuilder.AddInvalidFieldError($"Details[{i}].ProductId");
                     return null;
                 }
-
-
+                if (detail.Quantity > product.InventoryNumber)
+                {
+                    responseResultBuilder.AddInvalidFieldError($"Details[{i}].Quantity");
+                    return null;
+                }
             }
             Invoice invoice = await invoiceRepository.CreateAsync(new Invoice
             {
@@ -92,6 +96,17 @@ namespace HardwareShop.Business.Implementations
                     };
                 }).ToList(),
             });
+            foreach (var detail in invoice.Details ?? Array.Empty<InvoiceDetail>())
+            {
+                var remainingQuantity = detail.Quantity;
+                var warehouseProductPageData = await warehouseProductRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ProductId == detail.ProductId);
+                foreach (var warehouseProduct in warehouseProductPageData.Items)
+                {
+                    warehouseProduct.Quantity -= Math.Min(remainingQuantity, warehouseProduct.Quantity);
+                    remainingQuantity -= Math.Min(remainingQuantity, warehouseProduct.Quantity);
+                    await warehouseProductRepository.UpdateAsync(warehouseProduct);
+                }
+            }
 
             var totalCost = details.Sum(e => e.Quantity * e.Price);
             var roundedTotalCost = shop.CashUnit == null ? totalCost : shop.CashUnit.RoundValue(totalCost);

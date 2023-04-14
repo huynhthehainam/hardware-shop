@@ -18,6 +18,7 @@ namespace HardwareShop.WebApi.Controllers
 {
     public class SeedDataController : AuthorizedApiControllerBase
     {
+        #region SqliteModels
         private class DbUnitModel
         {
             public string Name { get; set; }
@@ -104,13 +105,17 @@ namespace HardwareShop.WebApi.Controllers
             public double NewDebt { get; set; }
             public double OldDebt { get; set; }
             public int CustomerId { get; set; }
-            public DbInvoiceModel(double deposit, DateTime createdDate, double newDebt, double oldDebt, int customerId)
+            public string Code { get; set; }
+            public DbInvoiceDetailModel[] Details { get; set; }
+            public DbInvoiceModel(double deposit, DateTime createdDate, double newDebt, double oldDebt, int customerId, string code, IEnumerable<DbInvoiceDetailModel> details)
             {
                 Deposit = deposit;
                 CreatedDate = createdDate;
                 NewDebt = newDebt;
                 OldDebt = oldDebt;
                 CustomerId = customerId;
+                Code = code;
+                Details = details.ToArray();
             }
         }
         private class DbInvoiceDetailModel
@@ -131,17 +136,20 @@ namespace HardwareShop.WebApi.Controllers
                 Description = description;
             }
         }
+        #endregion
         private readonly IRepository<Unit> unitRepository;
         private readonly IRepository<Product> productRepository;
         private readonly IRepository<Shop> shopRepository;
         private readonly IRepository<Customer> customerRepository;
         private readonly IRepository<Invoice> invoiceRepository;
-        public SeedDataController(IRepository<Customer> customerRepository, IRepository<Shop> shopRepository, IRepository<Product> productRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService, IRepository<Invoice> invoiceRepository) : base(responseResultBuilder, currentUserService)
+        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
+        public SeedDataController(IRepository<Customer> customerRepository, IRepository<Shop> shopRepository, IRepository<Product> productRepository, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<Invoice> invoiceRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
             this.unitRepository = unitRepository;
             this.productRepository = productRepository;
             this.shopRepository = shopRepository;
             this.customerRepository = customerRepository;
+            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.invoiceRepository = invoiceRepository;
         }
         [HttpPost("SeedFromDbFile")]
@@ -163,28 +171,28 @@ namespace HardwareShop.WebApi.Controllers
             TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             try
             {
-
+                #region SeedUnits
                 int singleCategoryId = 2;
                 int lengthCategoryId = 4;
                 int volumeCategoryId = 5;
                 int massCategoryId = 1;
                 List<DbUnitModel> dbUnits = new()
-            {
-                new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}, 1,1),
-                new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"},1,1),
-                new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ,1,1),
-                new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ,1,1),
-                new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"},1,1),
-                new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"},1,1),
-                new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"},1,1),
-                new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"},1,1),
-                new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"},0.01,1),
-                new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"},0.01,0.1),
-                new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"},1,1),
-                new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"},0.01,1),
-                new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ,1,1),
-                new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"},0.01,1)
-            };
+                {
+                    new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}, 1,1),
+                    new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"},1,1),
+                    new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ,1,1),
+                    new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ,1,1),
+                    new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"},1,1),
+                    new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"},1,1),
+                    new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"},1,1),
+                    new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"},1,1),
+                    new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"},0.01,1),
+                    new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"},0.01,0.1),
+                    new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"},1,1),
+                    new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"},0.01,1),
+                    new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ,1,1),
+                    new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"},0.01,1)
+                };
                 foreach (DbUnitModel dbUnit in dbUnits)
                 {
                     CreateOrUpdateResponse<Unit> unit = await unitRepository.CreateOrUpdateAsync(new Unit()
@@ -200,6 +208,8 @@ namespace HardwareShop.WebApi.Controllers
                     });
                     dbUnit.Id = unit.Entity.Id;
                 }
+                #endregion
+                #region SeedProducts
                 SqliteCommand getAllProductCommand = connection.CreateCommand();
 
 
@@ -211,6 +221,7 @@ namespace HardwareShop.WebApi.Controllers
                 {
                     index++;
                     string name = getAllProductReader.GetString(1);
+                    name = name.Trim();
                     string unitName = getAllProductReader.GetString(3);
                     double pricePerMass = getAllProductReader.GetDouble(4);
                     double mass = getAllProductReader.GetDouble(5);
@@ -243,7 +254,9 @@ namespace HardwareShop.WebApi.Controllers
                     products.Add(createIfNotExistResponse.Entity);
 
                 }
+                #endregion
 
+                #region SeedCustomers
                 SqliteCommand getAllCustomerCommand = connection.CreateCommand();
                 getAllCustomerCommand.CommandText = "SELECT * from Customers c ";
 
@@ -303,6 +316,9 @@ namespace HardwareShop.WebApi.Controllers
                     }, e => new { e.ShopId, e.Name });
                     dbCustomer.Id = createIfNotExistResponse.Entity.Id;
                 }
+                #endregion
+
+                #region SeedInvoice
                 SqliteCommand getAllInvoiceCommand = connection.CreateCommand();
                 getAllInvoiceCommand.CommandText = "SELECT * from Invoices i ";
 
@@ -310,6 +326,7 @@ namespace HardwareShop.WebApi.Controllers
                 List<DbInvoiceModel> dbInvoices = new();
                 while (getAllInvoiceReader.Read())
                 {
+
                     int oldId = getAllInvoiceReader.GetInt32(0);
                     DateTime createdDate = getAllInvoiceReader.GetDateTime(1);
                     createdDate = TimeZoneInfo.ConvertTimeToUtc(createdDate, timeZoneInfo);
@@ -337,6 +354,7 @@ namespace HardwareShop.WebApi.Controllers
                         if (productId == null || unitId == null)
                         {
                             isAllDetailValid = false;
+                            Console.WriteLine($"ProductName: {productName}, UnitId: {unitId}");
                             break;
                         }
                         details.Add(new DbInvoiceDetailModel(productId.Value, quantity, unitId.Value, price, originalPrice, description));
@@ -347,17 +365,34 @@ namespace HardwareShop.WebApi.Controllers
                         Console.WriteLine("Invoice is invalid");
                         continue;
                     }
-                    dbInvoices.Add(new DbInvoiceModel(deposit, createdDate, newDebt, oldDebt, customerId.Value));
+                    dbInvoices.Add(new DbInvoiceModel(deposit, createdDate, newDebt, oldDebt, customerId.Value, $"OLD_{oldId}", details));
                 }
                 foreach (DbInvoiceModel dbInvoice in dbInvoices)
                 {
-                    var createIfNotExistResponse = await invoiceRepository.CreateIfNotExistsAsync(new Invoice()
+                    Task<CustomerDebtHistory?> history = customerDebtHistoryRepository.GetItemByQueryAsync(e => e.OldDebt == dbInvoice.OldDebt && e.NewDebt == dbInvoice.NewDebt);
+                    CreateIfNotExistResponse<Invoice> createIfNotExistResponse = await invoiceRepository.CreateIfNotExistsAsync(new Invoice()
                     {
-                        new Invoice(){
-                            CreatedDate = dbInvoice.CreatedDate,
-                        }
-                    })
+
+                        CreatedDate = dbInvoice.CreatedDate,
+                        Code = dbInvoice.Code,
+                        CustomerId = dbInvoice.CustomerId,
+                        ShopId = command.ShopId.Value,
+                        Deposit = dbInvoice.Deposit,
+                        CurrentDebtHistoryId = history?.Id,
+                        Details = dbInvoice.Details.Select(e => new InvoiceDetail
+                        {
+                            Description = e.Description,
+                            OriginalPrice = e.OriginalPrice,
+                            Price = e.Price,
+                            ProductId = e.ProductId,
+                            Quantity = e.Quantity,
+
+                        }).ToList(),
+
+                    }, e => new { e.Code });
                 }
+
+                #endregion
 
             }
 

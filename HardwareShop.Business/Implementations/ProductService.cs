@@ -161,6 +161,7 @@ namespace HardwareShop.Business.Implementations
                 UnitId = product.UnitId,
                 UnitName = product.Unit?.Name,
                 OriginalPrice = product.OriginalPrice,
+                InventoryNumber = product.InventoryNumber,
                 Categories = product.ProductCategoryProducts != null ? product.ProductCategoryProducts.Select(e => new CategoryDto()
                 {
                     Id = e.ProductCategory?.Id ?? 0,
@@ -203,7 +204,8 @@ namespace HardwareShop.Business.Implementations
                 ProductCategoryIds = e.ProductCategoryProducts != null ? e.ProductCategoryProducts.Select(e => e.ProductCategoryId).ToArray() : Array.Empty<int>(),
                 ProductCategoryNames = e.ProductCategoryProducts != null ? e.ProductCategoryProducts.Select(e => e.ProductCategory?.Name).ToArray() : Array.Empty<string>(),
                 UnitId = e.UnitId,
-                UnitName = e.Unit?.Name
+                UnitName = e.Unit?.Name,
+                InventoryNumber = e.InventoryNumber,
 
             });
 

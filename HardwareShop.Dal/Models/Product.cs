@@ -23,9 +23,9 @@ namespace HardwareShop.Dal.Models
         public double? PriceForFamiliarCustomer { get; set; }
         public double OriginalPrice { get; set; }
         public double PriceForCustomer { get; set; }
-    
 
-        public bool HasAutoCalculatePermission { get; set; } = false;
+
+        public bool HasAutoCalculatePermission { get; set; }
         public int ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
@@ -73,13 +73,20 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategoryProducts) : productCategoryProducts;
             set => productCategoryProducts = value;
         }
+        public double InventoryNumber
+        {
+            get
+            {
+                return WarehouseProducts == null ? 0 : WarehouseProducts.Sum(e => e.Quantity);
+            }
+        }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Product>(e =>
+            _ = modelBuilder.Entity<Product>(e =>
             {
-                e.HasKey(e => e.Id);
-                e.HasOne(e => e.Unit).WithMany(e => e.Products).HasForeignKey(e => e.UnitId).OnDelete(DeleteBehavior.Cascade);
-                e.HasOne(e => e.Shop).WithMany(e => e.Products).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+                _ = e.HasKey(e => e.Id);
+                _ = e.HasOne(e => e.Unit).WithMany(e => e.Products).HasForeignKey(e => e.UnitId).OnDelete(DeleteBehavior.Cascade);
+                _ = e.HasOne(e => e.Shop).WithMany(e => e.Products).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
             });
 
         }

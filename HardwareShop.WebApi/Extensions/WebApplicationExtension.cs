@@ -207,7 +207,12 @@ namespace HardwareShop.WebApi.Extensions
                     CashUnit = unit1,
                     Phones = new string[] { "+84909933033", "+84933933033" },
                     PhoneOwners = new string[] { "C. Hải", "A. Cường" },
-
+                    Warehouses = new Warehouse[]{
+                        new Warehouse(){
+                            Name = "Kho 1",
+                            Address  = "Châu Đức, BRVT",
+                        }
+                    },
                     Assets = new ShopAsset[]
                     {
                             new ShopAsset
