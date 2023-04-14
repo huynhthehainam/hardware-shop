@@ -1,4 +1,5 @@
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
 using HardwareShop.Dal.Models;
@@ -9,7 +10,7 @@ namespace HardwareShop.WebApi.Extensions
     {
         public static void SeedData(this WebApplication app)
         {
-            var services = app.Services;
+            IServiceProvider services = app.Services;
             const string assetFolder = "SampleImages";
             const string productAssetFile = "ProductAsset.jpg";
             const string shopAssetFile = "ShopAsset.jpg";
@@ -18,29 +19,33 @@ namespace HardwareShop.WebApi.Extensions
             const string countryAsset2File = "CountryAsset2.png";
             using IServiceScope scope = services.CreateScope();
             IWebHostEnvironment? env = scope.ServiceProvider.GetService<IWebHostEnvironment>();
-            if (env == null) return;
+            if (env == null)
+            {
+                return;
+            }
+
             if (!env.IsDevelopment())
             {
                 return;
             }
             IHashingPasswordService hashingPasswordService = scope.ServiceProvider.GetRequiredService<IHashingPasswordService>();
-            using var db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>();
+            using MainDatabaseContext db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>();
             if (!db.Users.Any())
             {
-                var productAssetPath = Path.Join(assetFolder, productAssetFile);
-                var productAssetBytes = File.ReadAllBytes(productAssetPath);
+                string productAssetPath = Path.Join(assetFolder, productAssetFile);
+                byte[] productAssetBytes = File.ReadAllBytes(productAssetPath);
 
-                var shopAssetPath = Path.Join(assetFolder, shopAssetFile);
-                var shopAssetBytes = File.ReadAllBytes(shopAssetPath);
+                string shopAssetPath = Path.Join(assetFolder, shopAssetFile);
+                byte[] shopAssetBytes = File.ReadAllBytes(shopAssetPath);
 
-                var userAssetPath = Path.Join(assetFolder, userAssetFile);
-                var userAssetBytes = File.ReadAllBytes(userAssetPath);
+                string userAssetPath = Path.Join(assetFolder, userAssetFile);
+                byte[] userAssetBytes = File.ReadAllBytes(userAssetPath);
 
-                var countryAssetPath = Path.Join(assetFolder, countryAssetFile);
-                var countryAssetBytes = File.ReadAllBytes(countryAssetPath);
+                string countryAssetPath = Path.Join(assetFolder, countryAssetFile);
+                byte[] countryAssetBytes = File.ReadAllBytes(countryAssetPath);
 
-                var countryAsset2Path = Path.Join(assetFolder, countryAsset2File);
-                var countryAsset2Bytes = File.ReadAllBytes(countryAsset2Path);
+                string countryAsset2Path = Path.Join(assetFolder, countryAsset2File);
+                byte[] countryAsset2Bytes = File.ReadAllBytes(countryAsset2Path);
 
 
                 UnitCategory massCategory = new()
@@ -63,12 +68,12 @@ namespace HardwareShop.WebApi.Extensions
                 {
                     Name = "Volume"
                 };
-                db.UnitCategories.Add(massCategory);
-                db.UnitCategories.Add(singleCategory);
-                db.UnitCategories.Add(currencyCategory);
-                db.UnitCategories.Add(lengthCategory);
-                db.UnitCategories.Add(volumeCategory);
-                db.SaveChanges();
+                _ = db.UnitCategories.Add(massCategory);
+                _ = db.UnitCategories.Add(singleCategory);
+                _ = db.UnitCategories.Add(currencyCategory);
+                _ = db.UnitCategories.Add(lengthCategory);
+                _ = db.UnitCategories.Add(volumeCategory);
+                _ = db.SaveChanges();
 
                 Unit unit = new()
                 {
@@ -119,10 +124,10 @@ namespace HardwareShop.WebApi.Extensions
                     unit, unit1, unit2,unit3, unit4, unit5
                 });
 
-                db.SaveChanges();
+                _ = db.SaveChanges();
 
 
-                var country = new Country()
+                Country country = new()
                 {
                     Name = "Vietnam",
                     PhonePrefix = "+84",
@@ -135,7 +140,7 @@ namespace HardwareShop.WebApi.Extensions
                     }
                 };
 
-                var country2 = new Country()
+                Country country2 = new()
                 {
                     Name = "China",
                     PhonePrefix = "+86",
@@ -147,20 +152,20 @@ namespace HardwareShop.WebApi.Extensions
                         ContentType = ContentTypeConstants.PngContentType
                     }
                 };
-                db.Countries.Add(country);
-                db.Countries.Add(country2);
-                db.SaveChanges();
+                _ = db.Countries.Add(country);
+                _ = db.Countries.Add(country2);
+                _ = db.SaveChanges();
 
 
 
-                var user = new User
+                User user = new()
                 {
                     Email = "huynhthehainam@gmail.com",
                     HashedPassword = hashingPasswordService.Hash("123"),
                     Phone = "967044037",
                     FirstName = "Nam",
                     LastName = "Huỳnh",
-                    Role = HardwareShop.Core.Models.SystemUserRole.Admin,
+                    Role = SystemUserRole.Admin,
                     Username = "admin",
                     PhoneCountryId = country.Id,
                     Assets = new UserAsset[]
@@ -174,14 +179,14 @@ namespace HardwareShop.WebApi.Extensions
                             }
                     }
                 };
-                var user1 = new User
+                User user1 = new()
                 {
                     Email = "huynhthehainam.mismart@gmail.com",
                     HashedPassword = hashingPasswordService.Hash("123"),
                     Phone = "+84967044037",
                     FirstName = "Nam",
                     LastName = "Huỳnh",
-                    Role = HardwareShop.Core.Models.SystemUserRole.Admin,
+                    Role = SystemUserRole.Admin,
                     Username = "admin1",
                     Assets = new UserAsset[]
                     {
@@ -194,25 +199,20 @@ namespace HardwareShop.WebApi.Extensions
                             }
                     }
                 };
-                db.Users.Add(user);
-                db.Users.Add(user1);
-                db.SaveChanges();
+                _ = db.Users.Add(user);
+                _ = db.Users.Add(user1);
+                _ = db.SaveChanges();
 
 
 
-                var shop = new Shop
+                Shop shop = new()
                 {
                     Name = "Admin shop",
                     Address = "850 Xa lộ Hà Nội, Thủ Đức, HCM",
                     CashUnit = unit1,
                     Phones = new string[] { "+84909933033", "+84933933033" },
                     PhoneOwners = new string[] { "C. Hải", "A. Cường" },
-                    Warehouses = new Warehouse[]{
-                        new Warehouse(){
-                            Name = "Kho 1",
-                            Address  = "Châu Đức, BRVT",
-                        }
-                    },
+
                     Assets = new ShopAsset[]
                     {
                             new ShopAsset
@@ -249,10 +249,10 @@ namespace HardwareShop.WebApi.Extensions
 
                 };
 
-                db.Shops.Add(shop);
-                db.SaveChanges();
+                _ = db.Shops.Add(shop);
+                _ = db.SaveChanges();
 
-                var product = new Product
+                Product product = new()
                 {
                     Name = "H13x26",
                     Mass = 2.5,
@@ -265,16 +265,16 @@ namespace HardwareShop.WebApi.Extensions
                     PriceForFamiliarCustomer = 11000,
                     PricePerMass = 600,
                     ProductAssets = new ProductAsset[]{
-                                                new ProductAsset
-                                                {
-                                                    Bytes = productAssetBytes,
-                                                    AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                    Filename = productAssetFile,
-                                                    ContentType= ContentTypeConstants.JpegContentType
-                                                }
-                                            }
+                        new ProductAsset
+                        {
+                            Bytes = productAssetBytes,
+                            AssetType =  ProductAssetConstants.ThumbnailAssetType,
+                            Filename = productAssetFile,
+                            ContentType= ContentTypeConstants.JpegContentType
+                        }
+                    }
                 };
-                var product2 = new Product
+                Product product2 = new()
                 {
                     Name = "H20x40",
                     Mass = 2.5,
@@ -296,7 +296,7 @@ namespace HardwareShop.WebApi.Extensions
                                                 }
                                             }
                 };
-                var product3 = new Product
+                Product product3 = new()
                 {
                     Name = "H30x60",
                     Mass = 2.5,
@@ -318,7 +318,7 @@ namespace HardwareShop.WebApi.Extensions
                                                 }
                                             }
                 };
-                var product4 = new Product
+                Product product4 = new()
                 {
                     Name = "V4",
                     Mass = 2.5,
@@ -340,7 +340,7 @@ namespace HardwareShop.WebApi.Extensions
                                                 }
                                             }
                 };
-                var product5 = new Product
+                Product product5 = new()
                 {
                     Name = "V6",
                     Mass = 2.5,
@@ -362,7 +362,7 @@ namespace HardwareShop.WebApi.Extensions
                                                 }
                                             }
                 };
-                var product6 = new Product
+                Product product6 = new()
                 {
                     Name = "V3",
                     Mass = 2.5,
@@ -384,28 +384,51 @@ namespace HardwareShop.WebApi.Extensions
                                                 }
                                             }
                 };
-                db.Products.Add(product);
-                db.Products.Add(product2);
-                db.Products.Add(product3);
-                db.Products.Add(product4);
-                db.Products.Add(product5);
-                db.Products.Add(product6);
-                db.SaveChanges();
-                var productCategory = new ProductCategory
+                _ = db.Products.Add(product);
+                _ = db.Products.Add(product2);
+                _ = db.Products.Add(product3);
+                _ = db.Products.Add(product4);
+                _ = db.Products.Add(product5);
+                _ = db.Products.Add(product6);
+                _ = db.SaveChanges();
+
+
+                Warehouse warehouse1 = new()
+                {
+                    Name = "Kho 1",
+                    Address = "Châu Đức, BRVT",
+                    ShopId = shop.Id,
+                    WarehouseProducts = new WarehouseProduct[]{
+                        new WarehouseProduct(){
+                            ProductId = product.Id,
+                            Quantity = 2,
+                        },
+                        new WarehouseProduct(){
+                            ProductId=product2.Id,
+                            Quantity = 2,
+                        }
+                    }
+                };
+
+                _ = db.Warehouses.Add(warehouse1);
+                _ = db.SaveChanges();
+
+
+                ProductCategory productCategory = new()
                 {
                     Name = "Hoa Sen",
                     Description = "Hoa Sen",
                     ShopId = shop.Id,
                 };
-                var productCategory2 = new ProductCategory
+                ProductCategory productCategory2 = new()
                 {
                     Name = "Tôn",
                     Description = "Tôn",
                     ShopId = shop.Id,
                 };
-                db.ProductCategories.Add(productCategory);
-                db.ProductCategories.Add(productCategory2);
-                db.SaveChanges();
+                _ = db.ProductCategories.Add(productCategory);
+                _ = db.ProductCategories.Add(productCategory2);
+                _ = db.SaveChanges();
                 ProductCategoryProduct productCategoryProduct = new()
                 {
                     Product = product,
@@ -416,9 +439,9 @@ namespace HardwareShop.WebApi.Extensions
                     Product = product,
                     ProductCategory = productCategory2,
                 };
-                db.ProductCategoryProducts.Add(productCategoryProduct);
-                db.ProductCategoryProducts.Add(productCategoryProduct2);
-                db.SaveChanges();
+                _ = db.ProductCategoryProducts.Add(productCategoryProduct);
+                _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
+                _ = db.SaveChanges();
             }
         }
     }
