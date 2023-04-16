@@ -95,7 +95,13 @@ namespace HardwareShop.Business.Implementations
 
             return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
                 languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings), (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
-                 userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0, userShop.Shop?.Phones, userShop.Shop?.PhoneOwners, userShop.Shop?.Emails, userShop.Shop?.Address
+                 userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0, userShop.Shop?.Phones?.Select(e => new ShopPhoneDto()
+                 {
+                     Id = e.Id,
+                     OwnerName = e.OwnerName,
+                     Phone = e.Phone,
+                     PhonePrefix = e.Country?.PhonePrefix ?? ""
+                 }) ?? Array.Empty<ShopPhoneDto>(), userShop.Shop?.Emails, userShop.Shop?.Address
                  )), tokens.SessionId);
         }
         public async Task<LoginDto?> LoginByTokenAsync(string token)

@@ -170,8 +170,6 @@ namespace HardwareShop.WebApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: true),
                     Address = table.Column<string>(type: "text", nullable: true),
-                    Phones = table.Column<string[]>(type: "text[]", nullable: true),
-                    PhoneOwners = table.Column<string[]>(type: "text[]", nullable: true),
                     Emails = table.Column<string[]>(type: "text[]", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -296,6 +294,52 @@ namespace HardwareShop.WebApi.Migrations
                     table.PrimaryKey("PK_ShopAssets", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ShopAssets_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShopPhones",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ShopId = table.Column<int>(type: "integer", nullable: false),
+                    CountryId = table.Column<int>(type: "integer", nullable: false),
+                    OwnerName = table.Column<string>(type: "text", nullable: false),
+                    Phone = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShopPhones", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShopPhones_Countries_CountryId",
+                        column: x => x.CountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ShopPhones_Shops_ShopId",
+                        column: x => x.ShopId,
+                        principalTable: "Shops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShopSettings",
+                columns: table => new
+                {
+                    ShopId = table.Column<int>(type: "integer", nullable: false),
+                    IsAllowedToShowInvoiceDownloadOptions = table.Column<bool>(type: "boolean", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShopSettings", x => x.ShopId);
+                    table.ForeignKey(
+                        name: "FK_ShopSettings_Shops_ShopId",
                         column: x => x.ShopId,
                         principalTable: "Shops",
                         principalColumn: "Id",
@@ -697,6 +741,16 @@ namespace HardwareShop.WebApi.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShopPhones_CountryId",
+                table: "ShopPhones",
+                column: "CountryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShopPhones_ShopId",
+                table: "ShopPhones",
+                column: "ShopId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shops_CashUnitId",
                 table: "Shops",
                 column: "CashUnitId");
@@ -760,6 +814,12 @@ namespace HardwareShop.WebApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "ShopAssets");
+
+            migrationBuilder.DropTable(
+                name: "ShopPhones");
+
+            migrationBuilder.DropTable(
+                name: "ShopSettings");
 
             migrationBuilder.DropTable(
                 name: "UserAssets");

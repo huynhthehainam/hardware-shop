@@ -2,6 +2,7 @@
 using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using Microsoft.AspNetCore.Http;
@@ -195,6 +196,29 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
             return logo;
+        }
+
+        public async Task<PageData<ShopItemDto>> GetShopDtoPageDataAsync(PagingModel pagingModel, string? search)
+        {
+            var shopDtoPageData = await shopRepository.GetDtoPageDataByQueryAsync<ShopItemDto>(pagingModel, e => true, e => new ShopItemDto()
+            {
+                Id = e.Id,
+                Address = e.Address,
+                Emails = e.Emails,
+                Name = e.Name,
+                Phones = e.Phones?.Select(sp => new ShopPhoneDto()
+                {
+                    Id = sp.Id,
+                    OwnerName = sp.OwnerName,
+                    Phone = sp.Phone,
+                    PhonePrefix = sp.Country?.PhonePrefix ?? ""
+                }).ToArray() ?? Array.Empty<ShopPhoneDto>()
+            }, string.IsNullOrEmpty(search) ? null : new SearchQuery<Shop>(search, e => new
+            {
+                e.Address,
+                e.Name
+            }));
+            return shopDtoPageData;
         }
     }
 }

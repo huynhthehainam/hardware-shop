@@ -1,5 +1,6 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Models;
 using HardwareShop.Dal.Models;
 using Microsoft.AspNetCore.Http;
 
@@ -16,5 +17,6 @@ namespace HardwareShop.Business.Services
         Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
         Task<ShopAssetDto?> UpdateYourShopLogoAsync(IFormFile logo);
         Task<IAssetTable?> GetCurrentUserShopLogo();
+        Task<PageData<ShopItemDto>> GetShopDtoPageDataAsync(PagingModel pagingModel, string? search);
     }
 }

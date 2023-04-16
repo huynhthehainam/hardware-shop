@@ -210,9 +210,22 @@ namespace HardwareShop.WebApi.Extensions
                     Name = "Admin shop",
                     Address = "850 Xa lộ Hà Nội, Thủ Đức, HCM",
                     CashUnit = unit1,
-                    Phones = new string[] { "+84909933033", "+84933933033" },
-                    PhoneOwners = new string[] { "C. Hải", "A. Cường" },
-
+                    ShopSetting = new ShopSetting()
+                    {
+                        IsAllowedToShowInvoiceDownloadOptions = true
+                    },
+                    Phones = new ShopPhone[]{
+                        new ShopPhone(){
+                            CountryId = country.Id,
+                            OwnerName = "A. Cường",
+                            Phone = "909933033"
+                        },
+                         new ShopPhone(){
+                             CountryId = country.Id,
+                            OwnerName = "C. Hải",
+                            Phone = "933933033"
+                         }
+                    },
                     Assets = new ShopAsset[]
                     {
                             new ShopAsset

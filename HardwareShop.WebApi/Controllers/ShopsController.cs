@@ -18,6 +18,19 @@ namespace HardwareShop.WebApi.Controllers
             this.userService = userService;
             this.shopService = shopService;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetShops([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
+        {
+            if (!currentUserService.IsSystemAdmin())
+            {
+                responseResultBuilder.AddNotPermittedError();
+                return responseResultBuilder.Build();
+            }
+
+            PageData<ShopItemDto> shopPageData = await shopService.GetShopDtoPageDataAsync(pagingModel, search);
+            responseResultBuilder.SetPageData(shopPageData);
+            return responseResultBuilder.Build();
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateShop([FromBody] CreateShopCommand command)

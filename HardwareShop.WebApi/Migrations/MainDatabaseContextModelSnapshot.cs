@@ -505,12 +505,6 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
-                    b.Property<string[]>("PhoneOwners")
-                        .HasColumnType("text[]");
-
-                    b.Property<string[]>("Phones")
-                        .HasColumnType("text[]");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CashUnitId");
@@ -556,6 +550,50 @@ namespace HardwareShop.WebApi.Migrations
                     b.HasIndex("ShopId");
 
                     b.ToTable("ShopAssets");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ShopPhone", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CountryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("OwnerName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ShopId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CountryId");
+
+                    b.HasIndex("ShopId");
+
+                    b.ToTable("ShopPhones");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ShopSetting", b =>
+                {
+                    b.Property<int>("ShopId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsAllowedToShowInvoiceDownloadOptions")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("ShopId");
+
+                    b.ToTable("ShopSettings");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Unit", b =>
@@ -994,6 +1032,36 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Shop");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.ShopPhone", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Country", "Country")
+                        .WithMany("ShopPhones")
+                        .HasForeignKey("CountryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
+                        .WithMany("Phones")
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Country");
+
+                    b.Navigation("Shop");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ShopSetting", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
+                        .WithOne("ShopSetting")
+                        .HasForeignKey("HardwareShop.Dal.Models.ShopSetting", "ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Shop");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.Unit", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.UnitCategory", "UnitCategory")
@@ -1081,6 +1149,8 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Navigation("Customers");
 
+                    b.Navigation("ShopPhones");
+
                     b.Navigation("Users");
                 });
 
@@ -1143,9 +1213,13 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Navigation("Orders");
 
+                    b.Navigation("Phones");
+
                     b.Navigation("ProductCategories");
 
                     b.Navigation("Products");
+
+                    b.Navigation("ShopSetting");
 
                     b.Navigation("UserShops");
 

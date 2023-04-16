@@ -40,11 +40,17 @@ namespace HardwareShop.Dal.Models
             set => asset = value;
 
         }
+        private ICollection<ShopPhone>? shopPhones;
+        public ICollection<ShopPhone>? ShopPhones
+        {
+            get => lazyLoader is not null ? lazyLoader.Load(this, ref shopPhones) : shopPhones;
+            set => shopPhones = value;
+        }
         public static void BuildModel(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Country>(e =>
+            _ = modelBuilder.Entity<Country>(e =>
             {
-                e.HasKey(e => e.Id);
+                _ = e.HasKey(e => e.Id);
             });
         }
     }
