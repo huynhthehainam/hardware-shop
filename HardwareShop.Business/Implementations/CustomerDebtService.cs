@@ -16,7 +16,7 @@ namespace HardwareShop.Business.Implementations
             this.customerDebtRepository = customerDebtRepository;
         }
 
-        public async Task<CustomerDebtHistory> AddDebtToCustomerAsync(Customer customer, double changeOfDebt, string reason, JsonDocument? reasonParams)
+        public async Task<CustomerDebtHistory> AddDebtToCustomerAsync(Customer customer, double changeOfDebt, Tuple<string, JsonDocument> reason)
         {
             CreateOrUpdateResponse<CustomerDebt> createOrUpdateResponse = await customerDebtRepository.CreateOrUpdateAsync(new CustomerDebt
             {
@@ -30,9 +30,9 @@ namespace HardwareShop.Business.Implementations
                 CustomerDebtId = debt.CustomerId,
                 OldDebt = debt.Amount,
                 NewDebt = debt.Amount + changeOfDebt,
-                Reason = reason,
+                Reason = reason.Item1,
                 CreatedDate = DateTime.UtcNow,
-                ReasonParams = reasonParams,
+                ReasonParams = reason.Item2,
             });
 
             debt.Amount = history.NewDebt;

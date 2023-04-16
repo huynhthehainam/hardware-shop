@@ -31,7 +31,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetProductById([FromRoute] int id)
         {
-            ProductDto? product = await productService.GetProductOrCurrentUserShopAsync(id);
+            ProductDto? product = await productService.GetProductDtoOfCurrentUserShopAsync(id);
             if (product == null)
             {
                 return responseResultBuilder.Build();
@@ -151,6 +151,18 @@ namespace HardwareShop.WebApi.Controllers
             }
 
             responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
+        [HttpPost("{id:int}/SoftlyDelete")]
+        public async Task<IActionResult> SoftyDelete([FromRoute] int id)
+        {
+            bool isSuccess = await productService.SoftlyDeleteProductOfCurrentUserShopAsync(id);
+            if (!isSuccess)
+            {
+                return responseResultBuilder.Build();
+            }
+
+            responseResultBuilder.SetDeletedMessage();
             return responseResultBuilder.Build();
         }
 

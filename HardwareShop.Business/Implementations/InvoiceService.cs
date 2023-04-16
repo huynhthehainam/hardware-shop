@@ -115,7 +115,7 @@ namespace HardwareShop.Business.Implementations
             if (changeOfCash != 0)
             {
                 var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenBuying(invoice.Code);
-                CustomerDebtHistory history = await customerDebtService.AddDebtToCustomerAsync(customer, changeOfCash, reason.Item1, reason.Item2);
+                CustomerDebtHistory history = await customerDebtService.AddDebtToCustomerAsync(customer, changeOfCash, reason);
                 invoice.CurrentDebtHistory = history;
                 invoice = await invoiceRepository.UpdateAsync(invoice);
             }
@@ -230,7 +230,7 @@ namespace HardwareShop.Business.Implementations
                 if (debt != null)
                 {
                     var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenRestoringInvoice(invoice.Code);
-                    await customerDebtService.AddDebtToCustomerAsync(customer, -debtHistory.ChangeOfDebt, reason.Item1, reason.Item2);
+                    await customerDebtService.AddDebtToCustomerAsync(customer, -debtHistory.ChangeOfDebt, reason);
                     return await invoiceRepository.DeleteAsync(invoice);
                 }
             }

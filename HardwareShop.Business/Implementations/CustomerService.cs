@@ -102,7 +102,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CustomerDto?> UpdateCustomerOfCurrentUserShopAsync(int customerId, string? name, string? phone, string? address, bool? isFamiliar, double? amountOfCash)
         {
-            var customer = await GetCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
             if (customer == null) return null;
             customer.Name = string.IsNullOrEmpty(name) ? customer.Name : name;
             customer.Phone = string.IsNullOrEmpty(phone) ? customer.Phone : phone;
@@ -111,13 +111,13 @@ namespace HardwareShop.Business.Implementations
             if (amountOfCash != null && amountOfCash != 0)
             {
                 var reason = amountOfCash > 0 ? CustomerDebtHistoryHelper.GenerateDebtReasonWhenBorrowing() : CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
-                await customerDebtService.AddDebtToCustomerAsync(customer, amountOfCash.Value, reason.Item1, reason.Item2);
+                await customerDebtService.AddDebtToCustomerAsync(customer, amountOfCash.Value, reason);
             }
             customer = await customerRepository.UpdateAsync(customer);
             return new CustomerDto { Id = customer.Id };
         }
 
-        private async Task<Customer?> GetCustomerOfCurrentUserShopById(int customerId)
+        private async Task<Customer?> GetCustomerOfCurrentUserShopByIdAsync(int customerId)
         {
             var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -136,7 +136,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<CustomerDto?> GetCustomerDtoOfCurrentUserShopByIdAsync(int customerId)
         {
-            var customer = await GetCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
             if (customer == null) return null;
 
             return new CustomerDto()
@@ -155,7 +155,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<CustomerDebtHistoryDto>?> GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
-            var customer = await GetCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
             if (customer == null) return null;
 
             return await customerDebtHistoryRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerDebtId == customerId, e => new CustomerDebtHistoryDto
@@ -172,7 +172,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<InvoiceDto>?> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
-            var customer = await GetCustomerOfCurrentUserShopById(customerId);
+            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
             if (customer == null) return null;
             return await invoiceRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerId == customer.Id, e => new InvoiceDto
             {
@@ -182,6 +182,21 @@ namespace HardwareShop.Business.Implementations
                 Deposit = e.Deposit,
                 TotalCost = e.GetTotalCost(),
             }, null, new List<QueryOrder<Invoice>> { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
+        }
+
+        public async Task<bool> PayAllDebtForCustomerOfCurrentUserShopAsync(int id)
+        {
+            var customer = await GetCustomerOfCurrentUserShopByIdAsync(id);
+            if (customer == null) return false;
+            var debt = customer.Debt?.Amount ?? 0;
+            if (debt < 0)
+            {
+                responseResultBuilder.AddInvalidFieldError("Debt");
+                return false;
+            }
+            var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingAll();
+            await customerDebtService.AddDebtToCustomerAsync(customer, -debt, reason);
+            return true;
         }
     }
 }

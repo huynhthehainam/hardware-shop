@@ -22,7 +22,7 @@ namespace HardwareShop.Business.Services
         Task<IAssetTable?> GetProductThumbnailAsync(int productId);
         Task<IAssetTable?> GetProductAssetByIdAsync(int productId, int assetId);
         Task<int?> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file);
-        Task<ProductDto?> GetProductOrCurrentUserShopAsync(int productId);
+        Task<ProductDto?> GetProductDtoOfCurrentUserShopAsync(int productId);
         Task<bool> RemoveProductAssetByIdAsync(int productId, int assetId);
         Task<bool> SetProductThumbnailAsync(int productId, int assetId);
         Task<bool> UpdateProductOfCurrentUserShopAsync(
@@ -40,5 +40,6 @@ namespace HardwareShop.Business.Services
             List<Tuple<int, double>>? warehouses
         );
         Task<bool> AddPricePerMassOfCurrentUserShopAsync(List<int> categoryIds, double amountOfCash);
+        Task<bool> SoftlyDeleteProductOfCurrentUserShopAsync(int id);
     }
 }

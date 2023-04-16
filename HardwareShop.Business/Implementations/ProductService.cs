@@ -140,7 +140,7 @@ namespace HardwareShop.Business.Implementations
             return true;
         }
 
-        public async Task<ProductDto?> GetProductOrCurrentUserShopAsync(int productId)
+        public async Task<ProductDto?> GetProductDtoOfCurrentUserShopAsync(int productId)
         {
             var product = await GetProductOfCurrentUserShop(productId);
             if (product == null) return null;
@@ -433,6 +433,13 @@ namespace HardwareShop.Business.Implementations
                 await productRepository.UpdateAsync(product);
             }
             return true;
+        }
+
+        public async Task<bool> SoftlyDeleteProductOfCurrentUserShopAsync(int id)
+        {
+            var product = await GetProductOfCurrentUserShop(id);
+            if (product == null) return false;
+            return await productRepository.DeleteSoftlyAsync(product);
         }
     }
 }
