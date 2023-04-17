@@ -28,14 +28,7 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref histories) : histories;
             set => histories = value;
         }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CustomerDebt>(e =>
-            {
-                e.HasKey(e => e.CustomerId);
-                e.HasOne(e => e.Customer).WithOne(e => e.Debt).HasForeignKey<CustomerDebt>(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
-        
+
+
     }
 }

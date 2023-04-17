@@ -35,13 +35,6 @@ namespace HardwareShop.Dal.Models
         public DateTime? LastModifiedDate { get; set; }
         public string ContentType { get; set; } = string.Empty;
 
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            _ = modelBuilder.Entity<ProductAsset>(p =>
-            {
-                _ = p.HasKey(p => p.Id);
-                _ = p.HasOne(e => e.Product).WithMany(e => e.ProductAssets).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
+
     }
 }

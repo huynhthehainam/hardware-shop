@@ -57,19 +57,6 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref currentDebtHistory) : currentDebtHistory;
             set => currentDebtHistory = value;
         }
-
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Invoice>(e =>
-                {
-                    e.HasKey(e => e.Id);
-                    e.HasOne(e => e.Customer).WithMany(e => e.Invoices).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
-                    e.HasOne(e => e.Shop).WithMany(e => e.Invoices).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-                    e.HasOne(e => e.Order).WithMany(e => e.Invoices).HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.Cascade);
-                    e.HasOne(e => e.CurrentDebtHistory).WithMany(e => e.Invoices).HasForeignKey(e => e.CurrentDebtHistoryId).OnDelete(DeleteBehavior.Cascade);
-                });
-        }
-
         // Calculate total cost
 
         public double GetTotalCost()
@@ -80,15 +67,13 @@ namespace HardwareShop.Dal.Models
             }
 
 
-            var cost = 0.0;
-            foreach (var detail in Details)
+            double cost = 0.0;
+            foreach (InvoiceDetail detail in Details)
             {
                 cost += detail.GetTotalCost();
             }
-            var cashUnit = Shop?.CashUnit;
-            if (cashUnit == null)
-                return 0;
-            return cashUnit.RoundValue(cost);
+            Unit? cashUnit = Shop?.CashUnit;
+            return cashUnit == null ? 0 : cashUnit.RoundValue(cost);
         }
     }
 }

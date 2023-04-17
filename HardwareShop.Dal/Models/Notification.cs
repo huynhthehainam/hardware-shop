@@ -27,18 +27,9 @@ namespace HardwareShop.Dal.Models
 
         public string? Translation { get; set; }
         public JsonDocument? TranslationParams { get; set; }
-        public bool IsDismissed { get; set; } = false;
+        public bool IsDismissed { get; set; }
         public int UserId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
-
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Notification>(e =>
-                {
-                    e.HasKey(e => e.Id);
-                    e.HasOne(e => e.User).WithMany(e => e.Notifications).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
-                });
-        }
     }
 }

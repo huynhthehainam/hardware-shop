@@ -1,4 +1,6 @@
-﻿using HardwareShop.Dal.Models;
+﻿using System.Reflection;
+using HardwareShop.Core.Bases;
+using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
 namespace HardwareShop.Dal
 {
@@ -36,31 +38,18 @@ namespace HardwareShop.Dal
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            UserAsset.BuildModel(modelBuilder);
-            UserShop.BuildModel(modelBuilder);
-            Customer.BuildModel(modelBuilder);
-            CustomerDebt.BuildModel(modelBuilder);
-            CustomerDebtHistory.BuildModel(modelBuilder);
-            Invoice.BuildModel(modelBuilder);
-            InvoiceDetail.BuildModel(modelBuilder);
-            Product.BuildModel(modelBuilder);
-            ProductAsset.BuildModel(modelBuilder);
-            ProductCategory.BuildModel(modelBuilder);
-            Shop.BuildModel(modelBuilder);
-            ShopAsset.BuildModel(modelBuilder);
-            Unit.BuildModel(modelBuilder);
-            UnitCategory.BuildModel(modelBuilder);
-            Warehouse.BuildModel(modelBuilder);
-            User.BuildModel(modelBuilder);
-            WarehouseProduct.BuildModel(modelBuilder);
-            ProductCategoryProduct.BuildModel(modelBuilder);
-            Order.BuildModel(modelBuilder);
-            OrderDetail.BuildModel(modelBuilder);
-            Notification.BuildModel(modelBuilder);
-            Country.BuildModel(modelBuilder);
-            CountryAsset.BuildModel(modelBuilder);
-            ShopPhone.BuildModel(modelBuilder);
-            ShopSetting.BuildModel(modelBuilder);
+            const string configurationNamespace = "HardwareShop.Dal.ModelConfigurations";
+            const string buildModelMethodName = "BuildModel";
+            List<Type> configurations = Assembly.GetExecutingAssembly().GetTypes().Where(e => e.IsClass && e.Namespace == configurationNamespace && e.BaseType?.GetGenericArguments().FirstOrDefault()?.BaseType == typeof(EntityBase)).ToList();
+            foreach (Type configuration in configurations)
+            {
+                object? instance = Activator.CreateInstance(configuration, modelBuilder);
+                if (instance != null)
+                {
+                    MethodInfo? buildMethod = configuration.GetMethod(buildModelMethodName);
+                    _ = (buildMethod?.Invoke(instance, null));
+                }
+            }
         }
     }
 }

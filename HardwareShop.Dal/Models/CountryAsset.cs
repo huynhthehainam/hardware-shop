@@ -32,13 +32,6 @@ namespace HardwareShop.Dal.Models
         public string ContentType { get; set; } = string.Empty;
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            _ = modelBuilder.Entity<CountryAsset>(e =>
-            {
-                _ = e.HasKey(e => e.CountryId);
-                _ = e.HasOne(e => e.Country).WithOne(e => e.Asset).HasForeignKey<CountryAsset>(e => e.CountryId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
+
     }
 }

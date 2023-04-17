@@ -1,12 +1,7 @@
 ﻿using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Dal.Models
 {
@@ -43,14 +38,6 @@ namespace HardwareShop.Dal.Models
             set => shop = value;
         }
 
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<UserShop>(e =>
-            {
-                e.HasKey(e => e.UserId);
-                e.HasOne(s => s.User).WithOne(e => e.UserShop).HasForeignKey<UserShop>(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
-                e.HasOne(s => s.Shop).WithMany(e => e.UserShops).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
+
     }
 }

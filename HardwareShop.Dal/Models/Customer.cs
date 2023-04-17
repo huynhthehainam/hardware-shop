@@ -25,7 +25,7 @@ namespace HardwareShop.Dal.Models
         }
         public string? Address { get; set; }
         public int ShopId { get; set; }
-        public bool IsFamiliar { get; set; } = false;
+        public bool IsFamiliar { get; set; }
         private Shop? shop;
         public Shop? Shop
         {
@@ -50,15 +50,6 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref orders) : orders;
             set => orders = value;
-        }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Customer>(e =>
-            {
-                e.HasKey(e => e.Id);
-                e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-                e.HasOne(e => e.PhoneCountry).WithMany(e => e.Customers).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
-            });
         }
     }
 }

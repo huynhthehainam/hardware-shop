@@ -34,15 +34,5 @@ namespace HardwareShop.Dal.Models
         }
         public string OwnerName { get; set; } = string.Empty;
         public string Phone { get; set; } = string.Empty;
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            _ = modelBuilder.Entity<ShopPhone>(sp =>
-            {
-                _ = sp.HasKey(s => s.Id);
-                sp.HasOne(e => e.Shop).WithMany(e => e.Phones).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-                sp.HasOne(e => e.Country).WithMany(e => e.ShopPhones).HasForeignKey(e => e.CountryId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
-
     }
 }

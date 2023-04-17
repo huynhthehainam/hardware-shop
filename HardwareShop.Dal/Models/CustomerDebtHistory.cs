@@ -15,7 +15,7 @@ namespace HardwareShop.Dal.Models
         public CustomerDebtHistory(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
-      
+
         public int Id { get; set; }
         public double OldDebt { get; set; }
         public double ChangeOfDebt { get; set; }
@@ -38,13 +38,6 @@ namespace HardwareShop.Dal.Models
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
 
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<CustomerDebtHistory>(h =>
-            {
-                h.HasKey(e => e.Id);
-                h.HasOne(e => e.CustomerDebt).WithMany(e => e.Histories).HasForeignKey(e => e.CustomerDebtId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
+
     }
 }

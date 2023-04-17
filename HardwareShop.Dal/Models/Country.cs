@@ -46,12 +46,6 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref shopPhones) : shopPhones;
             set => shopPhones = value;
         }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            _ = modelBuilder.Entity<Country>(e =>
-            {
-                _ = e.HasKey(e => e.Id);
-            });
-        }
+
     }
 }

@@ -32,14 +32,6 @@ namespace HardwareShop.Dal.Models
 
         public double Quantity { get; set; }
         public string? Description { get; set; }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<OrderDetail>(m =>
-            {
-                m.HasKey(e => e.Id);
-                m.HasOne(e => e.Order).WithMany(e => e.Details).HasForeignKey(e => e.OrderId).OnDelete(DeleteBehavior.Cascade);
-                m.HasOne(e => e.Product).WithMany(e => e.OrderDetails).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
+
     }
 }

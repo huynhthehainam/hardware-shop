@@ -35,14 +35,5 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategoryProducts) : productCategoryProducts;
             set => productCategoryProducts = value;
         }
-
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<ProductCategory>(e =>
-            {
-                e.HasKey(e => e.Id);
-                e.HasOne(e => e.Shop).WithMany(e => e.ProductCategories).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
     }
 }

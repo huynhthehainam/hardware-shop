@@ -40,20 +40,11 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref details) : details;
             set => details = value;
         }
-         private ICollection<Invoice>? invoices;
+        private ICollection<Invoice>? invoices;
         public ICollection<Invoice>? Invoices
         {
             get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
             set => invoices = value;
-        }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Order>(e =>
-                {
-                    e.HasKey(e => e.Id);
-                    e.HasOne(e => e.Customer).WithMany(e => e.Orders).HasForeignKey(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
-                    e.HasOne(e => e.Shop).WithMany(e => e.Orders).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-                });
         }
     }
 }

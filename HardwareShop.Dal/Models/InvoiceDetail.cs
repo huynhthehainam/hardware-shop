@@ -21,7 +21,6 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref invoice) : invoice;
             set => invoice = value;
         }
-
         public int ProductId { get; set; }
         private Product? product;
         public Product? Product
@@ -29,7 +28,6 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref product) : product;
             set => product = value;
         }
-
         public double Quantity { get; set; }
         public string? Description { get; set; }
 
@@ -37,27 +35,17 @@ namespace HardwareShop.Dal.Models
         {
             get; set;
         }
-
-
         public double OriginalPrice { get; set; }
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<InvoiceDetail>(m =>
-            {
-                m.HasKey(e => e.Id);
-                m.HasOne(e => e.Invoice).WithMany(e => e.Details).HasForeignKey(e => e.InvoiceId).OnDelete(DeleteBehavior.Cascade);
-                m.HasOne(e => e.Product).WithMany(e => e.InvoiceDetails).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
-
-
         // Calculate total cost
         public double GetTotalCost()
         {
-            var cashUnit = Invoice?.Shop?.CashUnit;
+            Unit? cashUnit = Invoice?.Shop?.CashUnit;
             if (cashUnit == null)
+            {
                 return 0;
-            var cost = Quantity * Price;
+            }
+
+            double cost = Quantity * Price;
             return cashUnit.RoundValue(cost);
         }
     }

@@ -57,16 +57,6 @@ namespace HardwareShop.Dal.Models
             set => notifications = value;
         }
 
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<User>(s =>
-            {
-                s.HasKey(a => a.Id);
-                s.HasIndex(e => e.Username).IsUnique();
-                s.HasOne(e => e.PhoneCountry).WithMany(e => e.Users).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
-            });
-
-        }
 
     }
 }

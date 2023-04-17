@@ -25,13 +25,5 @@ namespace HardwareShop.Dal.Models
             set => shop = value;
         }
         public bool IsAllowedToShowInvoiceDownloadOptions { get; set; } = true;
-        public static void BuildModel(ModelBuilder modelBuilder)
-        {
-            _ = modelBuilder.Entity<ShopSetting>(s =>
-            {
-                _ = s.HasKey(s => s.ShopId);
-                _ = s.HasOne(e => e.Shop).WithOne(e => e.ShopSetting).HasForeignKey<ShopSetting>(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-            });
-        }
     }
 }
