@@ -5,7 +5,7 @@ namespace HardwareShop.Core.Bases
 {
     public abstract class ModelConfigurationBase<T> where T : EntityBase
     {
-        private ModelBuilder modelBuilder;
+        private readonly ModelBuilder modelBuilder;
         protected Action<EntityTypeBuilder<T>>? buildAction;
         protected ModelConfigurationBase(ModelBuilder modelBuilder)
         {
