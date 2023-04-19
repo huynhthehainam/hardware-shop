@@ -1,0 +1,42 @@
+# Please refer https://aka.ms/HTTPSinContainer on how to setup an https developer certificate for your ASP .NET Core service.
+
+version: "3.4"
+networks:
+  api-shop:
+    driver: bridge
+
+services:
+  redis:
+    image: redis
+    networks:
+      - api-shop
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  db:
+    image: postgis/postgis
+    environment:
+      - POSTGRES_PASSWORD=Doyouloveme1029
+    volumes:
+      - ./mydata/db_volumne:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - api-shop
+
+  mismartapi:
+    build:
+      context: .
+      dockerfile: HardwareShop.WebApi/Dockerfile
+    restart: unless-stopped
+    ports:
+      - 5024:5000
+      # - 1886:1883
+    networks:
+      - api-shop
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      - db
+      - redis
