@@ -414,11 +414,23 @@ namespace HardwareShop.WebApi.Extensions
                     WarehouseProducts = new WarehouseProduct[]{
                         new WarehouseProduct(){
                             ProductId = product.Id,
-                            Quantity = 2,
+                            Quantity = 200,
                         },
                         new WarehouseProduct(){
                             ProductId=product2.Id,
-                            Quantity = 2,
+                            Quantity = 200,
+                        },
+                        new WarehouseProduct(){
+                            ProductId = product3.Id,
+                            Quantity = 300,
+                        },
+                        new WarehouseProduct(){
+                            ProductId = product4.Id,
+                            Quantity = 40.2,
+                        },
+                        new WarehouseProduct(){
+                            ProductId = product5.Id,
+                            Quantity = 32.1
                         }
                     }
                 };
