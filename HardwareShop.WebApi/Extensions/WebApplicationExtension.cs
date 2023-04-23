@@ -3,6 +3,7 @@ using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
 using HardwareShop.Dal.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.WebApi.Extensions
 {
@@ -23,13 +24,13 @@ namespace HardwareShop.WebApi.Extensions
             {
                 return;
             }
+            IHashingPasswordService hashingPasswordService = scope.ServiceProvider.GetRequiredService<IHashingPasswordService>();
 
+            using MainDatabaseContext db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>();
             if (!env.IsDevelopment())
             {
-                return;
+                db.Database.Migrate();
             }
-            IHashingPasswordService hashingPasswordService = scope.ServiceProvider.GetRequiredService<IHashingPasswordService>();
-            using MainDatabaseContext db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>();
             if (!db.Users.Any())
             {
                 string productAssetPath = Path.Join(assetFolder, productAssetFile);
