@@ -30,7 +30,7 @@ services:
       dockerfile: HardwareShop.WebApi/Dockerfile
     restart: unless-stopped
     ports:
-      - 5024:5000
+      - 5068:5000
       # - 1886:1883
     networks:
       - api-shop
