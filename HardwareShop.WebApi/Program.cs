@@ -22,7 +22,7 @@ public class Program
         // Add services to the container.
 
         var mainAllowSpecificOrigins = "mainAllowSpecificOrigins";
-        var customCorsUrls = new List<string>() { "http://localhost:3000" };
+        var customCorsUrls = new List<string>() { "http://localhost:3000", "https://cuahangsatthep.shop" };
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(name: mainAllowSpecificOrigins, builder =>
