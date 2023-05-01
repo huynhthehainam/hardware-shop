@@ -1,12 +1,19 @@
 
 
 
+using System.Reflection.Metadata;
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using iText.Html2pdf;
+using iText.Html2pdf.Resolver.Font;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
+using iText.Layout;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -18,11 +25,13 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<Invoice> invoiceRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ICustomerDebtService customerDebtService;
-        public CustomerService(IRepository<Invoice> invoiceRepository, ICustomerDebtService customerDebtService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
+        private readonly IInvoiceService invoiceService;
+        public CustomerService(IRepository<Invoice> invoiceRepository, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
         {
             this.responseResultBuilder = responseResultBuilder;
             this.customerRepository = customerRepository;
             this.shopService = shopService;
+            this.invoiceService = invoiceService;
             this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.customerDebtService = customerDebtService;
             this.invoiceRepository = invoiceRepository;
@@ -197,6 +206,31 @@ namespace HardwareShop.Business.Implementations
             var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingAll();
             await customerDebtService.AddDebtToCustomerAsync(customer, -debt, reason);
             return true;
+        }
+        public async Task<byte[]?> GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(int customerId)
+        {
+            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (customer == null) return null;
+            var invoices = customer.Invoices ?? Array.Empty<Invoice>();
+            var invoiceContents = new List<string>();
+            foreach (var invoice in invoices)
+            {
+                invoiceContents.Add(invoiceService.GenerateSingleInvoice(invoice));
+            }
+            var htmlStr = string.Join(",", invoiceContents);
+            var wrapper = File.ReadAllText("HtmlTemplates/PdfWrapper.html");
+            htmlStr = HtmlHelper.ReplaceKeyWithValue(wrapper, new Dictionary<string, string>(){
+                {"VALUE_BODY",htmlStr}
+            });
+            using MemoryStream ms = new();
+            ConverterProperties properties = new();
+            properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+            PdfDocument pdf = new(new PdfWriter(ms));
+            iText.Layout.Document document = new(pdf, PageSize.A4);
+            HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
+
+            var bytes = ms.ToArray();
+            return bytes;
         }
     }
 }

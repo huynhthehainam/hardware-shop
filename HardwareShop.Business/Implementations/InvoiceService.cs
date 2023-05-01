@@ -217,6 +217,7 @@ namespace HardwareShop.Business.Implementations
             return invoice;
         }
 
+
         public async Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id)
         {
             var invoice = await GetInvoiceOfCurrentUserShopAsync(id);
@@ -236,14 +237,9 @@ namespace HardwareShop.Business.Implementations
             }
             return await invoiceRepository.DeleteAsync(invoice);
         }
-        public async Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId)
+        public string GenerateSingleInvoice(Invoice invoice)
         {
-            var invoice = await GetInvoiceOfCurrentUserShopAsync(invoiceId);
-            if (invoice == null)
-            {
-                return null;
-            }
-            var invoiceHtmlFileName = "HtmlTemplates/Invoice.html";
+            var invoiceHtmlFileName = "HtmlTemplates/_SingleInvoice.html";
             var htmlStr = System.IO.File.ReadAllText(invoiceHtmlFileName);
             if (invoice.CurrentDebtHistory != null)
             {
@@ -294,31 +290,29 @@ namespace HardwareShop.Business.Implementations
                 }},
             });
 
-            var shop = invoice.Shop;
-            if (shop == null) return null;
-            var logo = (shop.Assets ?? new List<ShopAsset>()).FirstOrDefault(e => e.AssetType == ShopAssetConstants.LogoAssetType);
-            if (logo == null) return null;
+            var logo = (invoice.Shop?.Assets ?? new List<ShopAsset>()).FirstOrDefault(e => e.AssetType == ShopAssetConstants.LogoAssetType);
 
-            var imgSrc = logo.ConvertToImgSrc();
+
+            var imgSrc = logo == null ? "" : logo.ConvertToImgSrc();
             htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>() {
                 { "VALUE_SHOP_LOGO", imgSrc }
             });
-            var rowHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/_InvoiceRow.html");
+            var rowHtmlStr = File.ReadAllText("HtmlTemplates/_InvoiceRow.html");
             var rows = new List<string>();
             var cashUnit = invoice.Shop?.CashUnit;
-            if (cashUnit == null) return null;
+
             foreach (var detail in invoice.Details ?? new List<InvoiceDetail>())
             {
                 var unit = detail.Product?.Unit;
-                if (unit == null) return null;
+
                 var row = HtmlHelper.ReplaceKeyWithValue(rowHtmlStr, new Dictionary<string, string>(){
                     {"VALUE_PRODUCT", detail.Product?.Name ?? ""},
                     {"VALUE_DESCRIPTION", detail.Description ?? ""},
-                    {"VALUE_PRICE",cashUnit.ConvertValueToString(detail.Price)},
+                    {"VALUE_PRICE",cashUnit == null ? "0" : cashUnit.ConvertValueToString(detail.Price)},
                     {"VALUE_UNIT", detail.Product?.Unit?.Name??""},
-                    {"VALUE_CASH_UNIT", cashUnit.Name},
-                    {"VALUE_QUANTITY",unit.ConvertValueToString(detail.Quantity)},
-                    {"VALUE_TOTAL_COST",cashUnit.ConvertValueToString(detail.GetTotalCost())},
+                    {"VALUE_CASH_UNIT", cashUnit == null ?"": cashUnit.Name},
+                    {"VALUE_QUANTITY",unit== null ? "0": unit.ConvertValueToString(detail.Quantity)},
+                    {"VALUE_TOTAL_COST",cashUnit == null ? "0": cashUnit.ConvertValueToString(detail.GetTotalCost())},
 
                 });
                 rows.Add(row);
@@ -329,12 +323,26 @@ namespace HardwareShop.Business.Implementations
                 {"VALUE_ROWS", rowsStr},
                 {"VALUE_CUSTOMER_PHONE", invoice.Customer?.Name ?? ""},
                 {"VALUE_CUSTOMER_ADDRESS", invoice.Customer?.Address ?? ""},
-                {"VALUE_TOTAL_COST", cashUnit.ConvertValueToString(invoice.GetTotalCost())},
-                {"VALUE_CASH_UNIT", cashUnit.Name},
-                {"VALUE_DEPOSIT", cashUnit.ConvertValueToString(invoice.Deposit)},
-                {"VALUE_REST", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
-                {"VALUE_OLD_DEBT", cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
+                {"VALUE_TOTAL_COST",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.GetTotalCost())},
+                {"VALUE_CASH_UNIT", cashUnit == null ? "":cashUnit.Name},
+                {"VALUE_DEPOSIT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.Deposit)},
+                {"VALUE_REST", cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
+                {"VALUE_OLD_DEBT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
                 {"VALUE_INVOICE_CODE",invoice.Code}
+            });
+            return htmlStr;
+        }
+        public async Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId)
+        {
+            var invoice = await GetInvoiceOfCurrentUserShopAsync(invoiceId);
+            if (invoice == null)
+            {
+                return null;
+            }
+            var htmlStr = GenerateSingleInvoice(invoice);
+            var wrapper = File.ReadAllText("HtmlTemplates/PdfWrapper.html");
+            htmlStr = HtmlHelper.ReplaceKeyWithValue(wrapper, new Dictionary<string, string>(){
+                {"VALUE_BODY",htmlStr}
             });
             using MemoryStream ms = new();
             ConverterProperties properties = new();

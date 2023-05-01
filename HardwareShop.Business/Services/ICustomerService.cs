@@ -17,5 +17,6 @@ namespace HardwareShop.Business.Services
 
         Task<PageData<InvoiceDto>?> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel);
         Task<bool> PayAllDebtForCustomerOfCurrentUserShopAsync(int id);
+        Task<byte[]?> GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(int customerId);
     }
 }

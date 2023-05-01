@@ -1,6 +1,7 @@
 
 using HardwareShop.Business.Dtos;
 using HardwareShop.Core.Models;
+using HardwareShop.Dal.Models;
 
 namespace HardwareShop.Business.Services
 {
@@ -11,5 +12,6 @@ namespace HardwareShop.Business.Services
         Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search, SortingModel sortingModel);
         Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id);
         Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId);
+        string GenerateSingleInvoice(Invoice invoice);
     }
 }

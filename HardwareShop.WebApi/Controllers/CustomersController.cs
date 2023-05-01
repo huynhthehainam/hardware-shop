@@ -70,6 +70,18 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetData(customer);
             return responseResultBuilder.Build();
         }
+        [HttpGet("{id:int}/AllInvoicesPdf")]
+        public async Task<IActionResult> GetAllInvoicesPdf([FromRoute] int id)
+        {
+            byte[]? invoiceBytes = await customerService.GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(id);
+            if (invoiceBytes == null)
+            {
+                return responseResultBuilder.Build();
+            }
+
+            responseResultBuilder.SetFile(invoiceBytes, "application/pdf", "invoice.pdf");
+            return responseResultBuilder.Build();
+        }
 
         [HttpGet("{id:int}/DebtHistories")]
         public async Task<IActionResult> GetDebtHistoriesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)

@@ -1,0 +1,78 @@
+<div style="display: block; padding: 2rem;">
+    <div style="display: flex; width: 100%;">
+        <div style="width: 400px;">
+            <h6 style="font-weight: 300;font-size: 1.8571428571428572rem;
+                    line-height: 1.6; margin: 0;">
+                {TRANSLATE_INVOICE_LABEL} {VALUE_INVOICE_CODE}
+            </h6>
+            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{VALUE_CUSTOMER_PHONE}</p>
+            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{VALUE_CUSTOMER_ADDRESS}</p>
+            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">
+                {TRANSLATE_TOTAL_COST_LABEL}: {VALUE_TOTAL_COST} {VALUE_CASH_UNIT}</p>
+            {VALUE_DEBT_STRING}
+            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{TRANSLATE_DEPOSIT_LABEL}:
+                {VALUE_DEPOSIT}
+                {VALUE_CASH_UNIT}</p>
+            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{TRANSLATE_REST_LABEL}:
+                {VALUE_REST}
+                {VALUE_CASH_UNIT}</p>
+
+        </div>
+        <div style="display: flex;padding: 1.6rem; align-items: center;    
+        background-color: #003737;
+        color: #fff;
+        width: 400px;">
+            <img style="border-style: solid; display: block; max-width: 100%; height: auto; width: 8rem;"
+                src="{VALUE_SHOP_LOGO}" alt="logo" />
+            <div
+                style="margin-left: 0.8rem; margin-right: 0.8rem; width: 1px; height: 90px; background-color: #fff; opacity: 0.5;">
+            </div>
+            <div style="padding-left: 0.8rem; padding-right: 0.8rem;">
+                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">Admin
+                    shop</p>
+                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">850 Xa
+                    lộ Hà Nội, Thủ Đức, HCM</p>
+                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">
+                    +84909933033 (C. Hải)</p>
+                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">
+                    +84933933033 (A. Cường)</p>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 0.6rem;">
+        <table style="text-indent: 0; border-collapse: collapse; display: table;
+        width: 100%; border: none; border-spacing: 0; text-align: left;">
+            <thead>
+                <tr style="color: inherit;display: table-row; 
+                vertical-align: middle; outline: 0;">
+                    <th style="font-size: 1.3rem; line-height: 2.2; 
+                    vertical-align: inherit; text-align: left; color: rgb(17, 24, 39) ;
+                    border-color: rgba(0, 0, 0, 0.12);   
+font-weight: 500;
+border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+white-space: nowrap; padding-left: 0!important;">{TRANSLATE_PRODUCT_LABEL}</th>
+                    <th style="font-size: 1.3rem; line-height: 2.3; vertical-align: inherit; text-align: right; color: rgb(17, 24, 39) ;
+ border-color: rgba(0, 0, 0, 0.12);   
+font-weight: 500;
+border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+white-space: nowrap; padding-left: 0!important;">{TRANSLATE_PRICE_LABEL}</th>
+                    <th style="font-size: 1.3rem; line-height: 2.3; 
+                    vertical-align: inherit; text-align: right; color: rgb(17, 24, 39) ;
+border-color: rgba(0, 0, 0, 0.12);   
+font-weight: 500;
+border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+white-space: nowrap; padding-left: 0!important;">{TRANSLATE_QUANTITY_LABEL}</th>
+                    <th style="font-size: 1.3rem; line-height: 2.3; vertical-align: inherit; text-align: right; color: rgb(17, 24, 39) ;
+border-color: rgba(0, 0, 0, 0.12);   
+font-weight: 500;
+border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+white-space: nowrap; padding-right: 0!important;">{TRANSLATE_TOTAL_COST_LABEL}</th>
+                </tr>
+            </thead>
+            <tbody style="display: table-row-group;">
+                {VALUE_ROWS}
+            </tbody>
+        </table>
+    </div>
+</div>
+
