@@ -44,13 +44,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var customers = await customerRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
-            {
-                e.Name,
-                e.Address,
-                e.Phone
-            }), new List<QueryOrder<Customer>> { new QueryOrder<Customer>(e => e.Name, true) });
-            return PageData<CustomerDto>.ConvertFromOtherPageData(customers, e => new CustomerDto
+            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id, e => new CustomerDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -60,7 +54,13 @@ namespace HardwareShop.Business.Implementations
                 PhoneCountryId = e.PhoneCountryId,
                 Phone = e.Phone,
                 Debt = e.Debt?.Amount ?? 0,
-            });
+            }, string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
+            {
+                e.Name,
+                e.Address,
+                e.Phone
+            }), new List<QueryOrder<Customer>> { new QueryOrder<Customer>(e => e.Name, true) });
+            return customers;
         }
         public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
@@ -70,16 +70,23 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var customers = await customerRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0), string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
+            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0),e => new CustomerDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Address = e.Address,
+                IsFamiliar = e.IsFamiliar,
+                PhonePrefix = e.PhoneCountry?.PhonePrefix,
+                PhoneCountryId = e.PhoneCountryId,
+                Phone = e.Phone,
+                Debt = e.Debt?.Amount ?? 0,
+            }, string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
             {
                 e.Name,
                 e.Address,
                 e.Phone
             }), new List<QueryOrder<Customer>> { new QueryOrder<Customer>(e => e.Name, true) });
-            return PageData<CustomerDto>.ConvertFromOtherPageData(customers, e => new CustomerDto
-            {
-                Id = e.Id
-            });
+            return customers;
         }
 
         public async Task<CreatedCustomerDto?> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar, int? phoneCountryId)
