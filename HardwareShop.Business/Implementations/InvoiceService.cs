@@ -328,7 +328,7 @@ namespace HardwareShop.Business.Implementations
                 {"VALUE_DEPOSIT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.Deposit)},
                 {"VALUE_REST", cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
                 {"VALUE_OLD_DEBT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
-                {"VALUE_INVOICE_CODE",invoice.Code}
+                {"VALUE_INVOICE_CODE",$"{invoice.Id:0000}"}
             });
             return htmlStr;
         }
