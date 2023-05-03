@@ -265,20 +265,21 @@ namespace HardwareShop.WebApi.Extensions
 
                 _ = db.Shops.Add(shop);
                 _ = db.SaveChanges();
-
-                Product product = new()
+                if (env.IsDevelopment())
                 {
-                    Name = "H13x26",
-                    Mass = 2.5,
-                    Unit = unit,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                    ProductAssets = new ProductAsset[]{
+                    Product product = new()
+                    {
+                        Name = "H13x26",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        ShopId = shop.Id,
+                        OriginalPrice = 10000,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
                         new ProductAsset
                         {
                             Bytes = productAssetBytes,
@@ -287,20 +288,20 @@ namespace HardwareShop.WebApi.Extensions
                             ContentType= ContentTypeConstants.JpegContentType
                         }
                     }
-                };
-                Product product2 = new()
-                {
-                    Name = "H20x40",
-                    Mass = 2.5,
-                    Unit = unit,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                    ProductAssets = new ProductAsset[]{
+                    };
+                    Product product2 = new()
+                    {
+                        Name = "H20x40",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        ShopId = shop.Id,
+                        OriginalPrice = 10000,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
                                                     Bytes = productAssetBytes,
@@ -309,20 +310,20 @@ namespace HardwareShop.WebApi.Extensions
                                                     ContentType= ContentTypeConstants.JpegContentType
                                                 }
                                             }
-                };
-                Product product3 = new()
-                {
-                    Name = "H30x60",
-                    Mass = 2.5,
-                    Unit = unit,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                    ProductAssets = new ProductAsset[]{
+                    };
+                    Product product3 = new()
+                    {
+                        Name = "H30x60",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        ShopId = shop.Id,
+                        OriginalPrice = 10000,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
                                                     Bytes = productAssetBytes,
@@ -331,20 +332,20 @@ namespace HardwareShop.WebApi.Extensions
                                                     ContentType= ContentTypeConstants.JpegContentType
                                                 }
                                             }
-                };
-                Product product4 = new()
-                {
-                    Name = "V4",
-                    Mass = 2.5,
-                    Unit = unit,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                    ProductAssets = new ProductAsset[]{
+                    };
+                    Product product4 = new()
+                    {
+                        Name = "V4",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        ShopId = shop.Id,
+                        OriginalPrice = 10000,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
                                                     Bytes = productAssetBytes,
@@ -353,20 +354,20 @@ namespace HardwareShop.WebApi.Extensions
                                                     ContentType= ContentTypeConstants.JpegContentType
                                                 }
                                             }
-                };
-                Product product5 = new()
-                {
-                    Name = "V6",
-                    Mass = 2.5,
-                    Unit = unit,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    OriginalPrice = 10000,
-                    ShopId = shop.Id,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                    ProductAssets = new ProductAsset[]{
+                    };
+                    Product product5 = new()
+                    {
+                        Name = "V6",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        OriginalPrice = 10000,
+                        ShopId = shop.Id,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
                                                     Bytes = productAssetBytes,
@@ -375,20 +376,20 @@ namespace HardwareShop.WebApi.Extensions
                                                     ContentType= ContentTypeConstants.JpegContentType
                                                 }
                                             }
-                };
-                Product product6 = new()
-                {
-                    Name = "V3",
-                    Mass = 2.5,
-                    Unit = unit,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    OriginalPrice = 10000,
-                    ShopId = shop.Id,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                    ProductAssets = new ProductAsset[]{
+                    };
+                    Product product6 = new()
+                    {
+                        Name = "V3",
+                        Mass = 2.5,
+                        Unit = unit,
+                        PercentForCustomer = 8,
+                        PriceForCustomer = 12000,
+                        OriginalPrice = 10000,
+                        ShopId = shop.Id,
+                        PercentForFamiliarCustomer = 6,
+                        PriceForFamiliarCustomer = 11000,
+                        PricePerMass = 600,
+                        ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
                                                     Bytes = productAssetBytes,
@@ -397,22 +398,22 @@ namespace HardwareShop.WebApi.Extensions
                                                     ContentType= ContentTypeConstants.JpegContentType
                                                 }
                                             }
-                };
-                _ = db.Products.Add(product);
-                _ = db.Products.Add(product2);
-                _ = db.Products.Add(product3);
-                _ = db.Products.Add(product4);
-                _ = db.Products.Add(product5);
-                _ = db.Products.Add(product6);
-                _ = db.SaveChanges();
+                    };
+                    _ = db.Products.Add(product);
+                    _ = db.Products.Add(product2);
+                    _ = db.Products.Add(product3);
+                    _ = db.Products.Add(product4);
+                    _ = db.Products.Add(product5);
+                    _ = db.Products.Add(product6);
+                    _ = db.SaveChanges();
 
 
-                Warehouse warehouse1 = new()
-                {
-                    Name = "Kho 1",
-                    Address = "Châu Đức, BRVT",
-                    ShopId = shop.Id,
-                    WarehouseProducts = new WarehouseProduct[]{
+                    Warehouse warehouse1 = new()
+                    {
+                        Name = "Kho 1",
+                        Address = "Châu Đức, BRVT",
+                        ShopId = shop.Id,
+                        WarehouseProducts = new WarehouseProduct[]{
                         new WarehouseProduct(){
                             ProductId = product.Id,
                             Quantity = 200,
@@ -434,40 +435,41 @@ namespace HardwareShop.WebApi.Extensions
                             Quantity = 32.1
                         }
                     }
-                };
+                    };
 
-                _ = db.Warehouses.Add(warehouse1);
-                _ = db.SaveChanges();
+                    _ = db.Warehouses.Add(warehouse1);
+                    _ = db.SaveChanges();
 
 
-                ProductCategory productCategory = new()
-                {
-                    Name = "Hoa Sen",
-                    Description = "Hoa Sen",
-                    ShopId = shop.Id,
-                };
-                ProductCategory productCategory2 = new()
-                {
-                    Name = "Tôn",
-                    Description = "Tôn",
-                    ShopId = shop.Id,
-                };
-                _ = db.ProductCategories.Add(productCategory);
-                _ = db.ProductCategories.Add(productCategory2);
-                _ = db.SaveChanges();
-                ProductCategoryProduct productCategoryProduct = new()
-                {
-                    Product = product,
-                    ProductCategory = productCategory,
-                };
-                ProductCategoryProduct productCategoryProduct2 = new()
-                {
-                    Product = product,
-                    ProductCategory = productCategory2,
-                };
-                _ = db.ProductCategoryProducts.Add(productCategoryProduct);
-                _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
-                _ = db.SaveChanges();
+                    ProductCategory productCategory = new()
+                    {
+                        Name = "Hoa Sen",
+                        Description = "Hoa Sen",
+                        ShopId = shop.Id,
+                    };
+                    ProductCategory productCategory2 = new()
+                    {
+                        Name = "Tôn",
+                        Description = "Tôn",
+                        ShopId = shop.Id,
+                    };
+                    _ = db.ProductCategories.Add(productCategory);
+                    _ = db.ProductCategories.Add(productCategory2);
+                    _ = db.SaveChanges();
+                    ProductCategoryProduct productCategoryProduct = new()
+                    {
+                        Product = product,
+                        ProductCategory = productCategory,
+                    };
+                    ProductCategoryProduct productCategoryProduct2 = new()
+                    {
+                        Product = product,
+                        ProductCategory = productCategory2,
+                    };
+                    _ = db.ProductCategoryProducts.Add(productCategoryProduct);
+                    _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
+                    _ = db.SaveChanges();
+                }
             }
         }
     }

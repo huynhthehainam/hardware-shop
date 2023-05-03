@@ -241,7 +241,13 @@ namespace HardwareShop.WebApi.Controllers
                         responseResultBuilder.AddInvalidFieldError($"Products[{index}].Unit");
                         continue;
                     }
-                    Warehouse? warehouse = await warehouseRepository.GetItemByQueryAsync(e => e.ShopId == command.ShopId.Value);
+
+                    var createWarehouseIfNotExistResponse = await warehouseRepository.CreateIfNotExistsAsync(new Warehouse()
+                    {
+                        Name = "Kho 1",
+                        Address = "Châu Đức, BRVT",
+                        ShopId = command.ShopId.Value,
+                    }, e => new { e.ShopId, e.Name, e.Address });
                     CreateIfNotExistResponse<Product> createIfNotExistResponse = await productRepository.CreateIfNotExistsAsync(new Product()
                     {
                         Name = name,
@@ -264,12 +270,12 @@ namespace HardwareShop.WebApi.Controllers
                                 ContentType= ContentTypeConstants.JpegContentType
                             }
                         },
-                        WarehouseProducts = warehouse != null ? new WarehouseProduct[]{
+                        WarehouseProducts = new WarehouseProduct[]{
                             new WarehouseProduct(){
-                                WarehouseId = warehouse.Id,
+                                WarehouseId = createWarehouseIfNotExistResponse.Entity.Id,
                                 Quantity = Math.Max(0,quantity),
                             }
-                        } : Array.Empty<WarehouseProduct>(),
+                        },
                     }, e => new { e.ShopId, e.Name });
                     products.Add(createIfNotExistResponse.Entity);
 
