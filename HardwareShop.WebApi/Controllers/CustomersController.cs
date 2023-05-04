@@ -30,9 +30,16 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpGet("AllDebtsPdf")]
-        public Task<IActionResult> GetAllDebtsPdf()
+        public async Task<IActionResult> GetAllDebtsPdf()
         {
-            return Task.FromResult(responseResultBuilder.Build());
+            byte[]? bytes = await customerService.GetAllDebtsPdfAsync();
+            if (bytes == null)
+            {
+                return responseResultBuilder.Build();
+            }
+
+            responseResultBuilder.SetFile(bytes, "application/pdf", "debt.pdf");
+            return responseResultBuilder.Build();
         }
 
         [HttpPost]
