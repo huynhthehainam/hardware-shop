@@ -29,6 +29,11 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetPageData(customers);
             return responseResultBuilder.Build();
         }
+        [HttpGet("AllDebtsPdf")]
+        public Task<IActionResult> GetAllDebtsPdf()
+        {
+            return Task.FromResult(responseResultBuilder.Build());
+        }
 
         [HttpPost]
         public async Task<IActionResult> CreateCustomerOfCurrentUserShop([FromBody] CreateCustomerCommand command)

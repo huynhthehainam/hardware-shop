@@ -1,7 +1,3 @@
-
-
-
-using System.Reflection.Metadata;
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
@@ -13,7 +9,6 @@ using iText.Html2pdf;
 using iText.Html2pdf.Resolver.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
-using iText.Layout;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -70,7 +65,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0),e => new CustomerDto
+            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0), e => new CustomerDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -238,6 +233,19 @@ namespace HardwareShop.Business.Implementations
 
             var bytes = ms.ToArray();
             return bytes;
+        }
+
+        public async Task<byte[]?> GetAllDebtsPdfAsync()
+        {
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var customerPageData = await customerRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ShopId == shop.Id, null, new List<QueryOrder<Customer>>() { new QueryOrder<Customer>(e => e.Name, true) });
+            var customers = customerPageData.Items;
+            return null;
         }
     }
 }
