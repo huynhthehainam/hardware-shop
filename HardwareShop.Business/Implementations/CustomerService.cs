@@ -1,11 +1,8 @@
-
-
-
-using System.Reflection.Metadata;
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Helpers;
+using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
@@ -24,13 +21,15 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
         private readonly IRepository<Invoice> invoiceRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
+        private readonly ILanguageService languageService;
         private readonly ICustomerDebtService customerDebtService;
         private readonly IInvoiceService invoiceService;
-        public CustomerService(IRepository<Invoice> invoiceRepository, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
+        public CustomerService(IRepository<Invoice> invoiceRepository, ILanguageService languageService, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
         {
             this.responseResultBuilder = responseResultBuilder;
             this.customerRepository = customerRepository;
             this.shopService = shopService;
+            this.languageService = languageService;
             this.invoiceService = invoiceService;
             this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.customerDebtService = customerDebtService;
@@ -70,7 +69,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0),e => new CustomerDto
+            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0), e => new CustomerDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -234,6 +233,125 @@ namespace HardwareShop.Business.Implementations
             properties.SetFontProvider(new DefaultFontProvider(true, true, true));
             PdfDocument pdf = new(new PdfWriter(ms));
             iText.Layout.Document document = new(pdf, PageSize.A4);
+            HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
+
+            var bytes = ms.ToArray();
+            return bytes;
+        }
+
+        public async Task<byte[]?> GetAllDebtsPdfAsync()
+        {
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+
+            var customerPageData = await customerRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ShopId == shop.Id && e.Debt != null && e.Debt.Amount > 0, null, new List<QueryOrder<Customer>>() { new QueryOrder<Customer>(e => e.Name, true) });
+            var customers = customerPageData.Items;
+            var rows = new List<string>();
+            var rowHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_SingleRow.html");
+            var halfIndex = customers.Count / 2;
+
+            for (var i = 0; i < halfIndex + 1; i++)
+            {
+                var customer = customers[i];
+                var informationListString = new List<string>();
+                if (!string.IsNullOrEmpty(customer.Name))
+                {
+                    informationListString.Add(customer.Name);
+                }
+                if (!string.IsNullOrEmpty(customer.Phone))
+                {
+                    informationListString.Add($"{customer.PhoneCountry?.PhonePrefix ?? ""}{customer.Phone ?? ""}");
+                }
+                if (!string.IsNullOrEmpty(customer.Address))
+                {
+                    informationListString.Add(customer.Address);
+                }
+                var information = string.Join(" | ", informationListString);
+                var row = HtmlHelper.ReplaceKeyWithValue(rowHtml, new Dictionary<string, string>(){
+                    {"VALUE_NAME", information},
+                    {"VALUE_DEBT", customer.Debt?.Amount.ToString() ?? "0"}
+                });
+                rows.Add(row);
+            }
+            var tableHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_SingleTable.html");
+            var rowsStr = string.Join("", rows);
+            var table1Str = HtmlHelper.ReplaceKeyWithValue(tableHtml, new Dictionary<string, string>(){
+                {"VALUE_ROWS", rowsStr}
+            });
+
+            table1Str = languageService.Translate(table1Str, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
+    {"NAME", new Dictionary<SupportedLanguage, string>(){{
+        SupportedLanguage.English, "Name"
+    },{
+         SupportedLanguage.Vietnamese, "Tên"
+    }}},
+     {"DEBT", new Dictionary<SupportedLanguage, string>(){{
+        SupportedLanguage.English, "Debt"
+    },{
+         SupportedLanguage.Vietnamese, "Nợ"
+    }}}
+});
+            rows.Clear();
+            for (var i = halfIndex + 1; i < customers.Count; i++)
+            {
+                var customer = customers[i];
+                var informationListString = new List<string>();
+                if (!string.IsNullOrEmpty(customer.Name))
+                {
+                    informationListString.Add(customer.Name);
+                }
+                if (!string.IsNullOrEmpty(customer.Phone))
+                {
+                    informationListString.Add($"{customer.PhoneCountry?.PhonePrefix ?? ""}{customer.Phone ?? ""}");
+                }
+                if (!string.IsNullOrEmpty(customer.Address))
+                {
+                    informationListString.Add(customer.Address);
+                }
+                var information = string.Join(" | ", informationListString);
+                var row = HtmlHelper.ReplaceKeyWithValue(rowHtml, new Dictionary<string, string>(){
+                    {"VALUE_NAME", information},
+                    {"VALUE_DEBT", customer.Debt?.Amount.ToString() ?? "0"}
+                });
+                rows.Add(row);
+            }
+            rowsStr = string.Join("", rows);
+            var table2Str = HtmlHelper.ReplaceKeyWithValue(tableHtml, new Dictionary<string, string>(){
+                {"VALUE_ROWS", rowsStr}
+            });
+
+            table2Str = languageService.Translate(table2Str, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
+    {"NAME", new Dictionary<SupportedLanguage, string>(){{
+        SupportedLanguage.English, "Name"
+    },{
+         SupportedLanguage.Vietnamese, "Tên"
+    }}},
+     {"DEBT", new Dictionary<SupportedLanguage, string>(){{
+        SupportedLanguage.English, "Debt"
+    },{
+         SupportedLanguage.Vietnamese, "Nợ"
+    }}}
+});
+
+            var debtHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_FullDebt.html");
+            var htmlStr = HtmlHelper.ReplaceKeyWithValue(debtHtml, new Dictionary<string, string>(){
+                {"VALUE_TABLE_1", table1Str},
+                {"VALUE_TABLE_2", table2Str},
+            });
+            var wrapper = File.ReadAllText("HtmlTemplates/PdfWrapper.html");
+
+            htmlStr = HtmlHelper.ReplaceKeyWithValue(wrapper, new Dictionary<string, string>(){
+                {"VALUE_BODY",htmlStr}
+            });
+            using MemoryStream ms = new();
+            ConverterProperties properties = new();
+            properties.SetFontProvider(new DefaultFontProvider(true, true, true));
+            PdfDocument pdf = new(new PdfWriter(ms));
+            Document document = new(pdf, PageSize.A4);
             HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
 
             var bytes = ms.ToArray();

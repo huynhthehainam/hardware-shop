@@ -239,11 +239,11 @@ namespace HardwareShop.Business.Implementations
         }
         public string GenerateSingleInvoice(Invoice invoice)
         {
-            var invoiceHtmlFileName = "HtmlTemplates/_SingleInvoice.html";
+            var invoiceHtmlFileName = "HtmlTemplates/Invoice/_SingleInvoice.html";
             var htmlStr = System.IO.File.ReadAllText(invoiceHtmlFileName);
             if (invoice.CurrentDebtHistory != null)
             {
-                var oldDebtHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/_OldDebt.html");
+                var oldDebtHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_OldDebt.html");
                 htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>{
                     {"VALUE_DEBT_STRING", oldDebtHtmlStr}
                 });
@@ -297,7 +297,7 @@ namespace HardwareShop.Business.Implementations
             htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>() {
                 { "VALUE_SHOP_LOGO", imgSrc }
             });
-            var rowHtmlStr = File.ReadAllText("HtmlTemplates/_InvoiceRow.html");
+            var rowHtmlStr = File.ReadAllText("HtmlTemplates/Invoice/_InvoiceRow.html");
             var rows = new List<string>();
             var cashUnit = invoice.Shop?.CashUnit;
 
