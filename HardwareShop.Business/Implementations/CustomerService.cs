@@ -241,7 +241,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<byte[]?> GetAllDebtsPdfAsync()
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
@@ -253,7 +253,7 @@ namespace HardwareShop.Business.Implementations
             var rows = new List<string>();
             var rowHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_SingleRow.html");
             var halfIndex = customers.Count / 2;
-
+            var cashUnit = shop.CashUnit;
             for (var i = 0; i < halfIndex + 1; i++)
             {
                 var customer = customers[i];
@@ -273,7 +273,7 @@ namespace HardwareShop.Business.Implementations
                 var information = string.Join(" | ", informationListString);
                 var row = HtmlHelper.ReplaceKeyWithValue(rowHtml, new Dictionary<string, string>(){
                     {"VALUE_NAME", information},
-                    {"VALUE_DEBT", customer.Debt?.Amount.ToString() ?? "0"}
+                    {"VALUE_DEBT",cashUnit == null ?"0" : ( cashUnit.ConvertValueToString(customer.Debt?.Amount ?? 0))}
                 });
                 rows.Add(row);
             }

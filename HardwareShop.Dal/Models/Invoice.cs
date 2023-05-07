@@ -24,6 +24,7 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref customer) : customer;
             set => customer = value;
         }
+        public string CustomerInformation { get; set; } = string.Empty;
 
         public int ShopId { get; set; }
         private Shop? shop;

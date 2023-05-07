@@ -84,6 +84,7 @@ namespace HardwareShop.Business.Implementations
                 Deposit = deposit,
                 OrderId = orderId,
                 ShopId = shop.Id,
+                CustomerInformation = $"{customer.Name} {customer.Address} {customer.Phone}",
                 Details = details.Select(e =>
                 {
                     return new InvoiceDetail
@@ -183,6 +184,7 @@ namespace HardwareShop.Business.Implementations
 
             {
                 e.Code,
+                e.CustomerInformation,
             }), orderQuery);
             return PageData<InvoiceDto>.ConvertFromOtherPageData(invoices, invoice => new InvoiceDto
             {
@@ -197,6 +199,7 @@ namespace HardwareShop.Business.Implementations
                 TotalCost = invoice.GetTotalCost(),
                 Debt = invoice.CurrentDebtHistory?.OldDebt ?? 0,
                 Rest = invoice.CurrentDebtHistory?.NewDebt ?? 0,
+                CustomerPhonePrefix = invoice.Customer?.PhoneCountry?.PhonePrefix,
             });
         }
 

@@ -120,9 +120,17 @@ namespace HardwareShop.WebApi.Extensions
                     CompareWithPrimaryUnit = 1,
                     IsPrimary = true,
                 };
+                Unit unit6 = new()
+                {
+                    Name = "Bar",
+                    UnitCategory = singleCategory,
+                    CompareWithPrimaryUnit = 1,
+                    IsPrimary = false,
+                    StepNumber = 1,
+                };
 
                 db.Units.AddRange(new Unit[]{
-                    unit, unit1, unit2,unit3, unit4, unit5
+                    unit, unit1, unit2,unit3, unit4, unit5,unit6
                 });
 
                 _ = db.SaveChanges();
@@ -271,7 +279,7 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         Name = "H13x26",
                         Mass = 2.5,
-                        Unit = unit,
+                        Unit = unit6,
                         PercentForCustomer = 8,
                         PriceForCustomer = 12000,
                         ShopId = shop.Id,
@@ -293,7 +301,7 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         Name = "H20x40",
                         Mass = 2.5,
-                        Unit = unit,
+                        Unit = unit6,
                         PercentForCustomer = 8,
                         PriceForCustomer = 12000,
                         ShopId = shop.Id,
@@ -315,7 +323,7 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         Name = "H30x60",
                         Mass = 2.5,
-                        Unit = unit,
+                        Unit = unit6,
                         PercentForCustomer = 8,
                         PriceForCustomer = 12000,
                         ShopId = shop.Id,
@@ -337,7 +345,7 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         Name = "V4",
                         Mass = 2.5,
-                        Unit = unit,
+                        Unit = unit6,
                         PercentForCustomer = 8,
                         PriceForCustomer = 12000,
                         ShopId = shop.Id,
@@ -359,7 +367,7 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         Name = "V6",
                         Mass = 2.5,
-                        Unit = unit,
+                        Unit = unit6,
                         PercentForCustomer = 8,
                         PriceForCustomer = 12000,
                         OriginalPrice = 10000,
@@ -381,7 +389,7 @@ namespace HardwareShop.WebApi.Extensions
                     {
                         Name = "V3",
                         Mass = 2.5,
-                        Unit = unit,
+                        Unit = unit6,
                         PercentForCustomer = 8,
                         PriceForCustomer = 12000,
                         OriginalPrice = 10000,
