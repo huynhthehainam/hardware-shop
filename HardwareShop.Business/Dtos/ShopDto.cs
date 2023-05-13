@@ -20,6 +20,6 @@ namespace HardwareShop.Business.Dtos
         public string? Name { get; set; }
         public string? Address { get; set; }
         public string[]? Emails { get; set; }
-        public ShopPhoneDto[] Phones { get; set; } = Array.Empty<ShopPhoneDto>();
+        public ShopPhoneDto[]? Phones { get; set; } = Array.Empty<ShopPhoneDto>();
     }
 }

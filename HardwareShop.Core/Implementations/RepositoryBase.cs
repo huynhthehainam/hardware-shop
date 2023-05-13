@@ -57,63 +57,8 @@ namespace HardwareShop.Core.Implementations
 
         public async Task<PageData<T1>> GetDtoPageDataByQueryAsync<T1>(PagingModel pagingModel, Expression<Func<T, bool>> expression, Func<T, T1> convertor, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null) where T1 : class
         {
-            int? pageIndex = pagingModel.PageIndex;
-            int? pageSize = pagingModel.PageSize;
-
-            IQueryable<T> filteredDbSet = DbSet.Where(expression);
-            if (searchQuery != null)
-            {
-                Expression<Func<T, bool>> searchExpression = searchQuery.BuildSearchExpression();
-                filteredDbSet = filteredDbSet.Where(searchExpression);
-            }
-
-            int count = await filteredDbSet.CountAsync();
-
-
-            IQueryable<T> data = filteredDbSet;
-            if (pageIndex.HasValue && pageSize.HasValue)
-            {
-
-                if (orders is not null && orders.Count > 0)
-                {
-                    IOrderedEnumerable<T>? orderedData = null;
-                    for (int i = 0; i < orders.Count; i++)
-                    {
-                        QueryOrder<T> order = orders[i];
-                        orderedData = i == 0
-                            ? order.IsAscending ? data.OrderBy(order.Order) : data.OrderByDescending(order.Order)
-                            : order.IsAscending ? orderedData!.ThenBy(order.Order) : orderedData!.ThenByDescending(order.Order);
-                    }
-                    List<T1> finalData = orderedData!.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
-                    return new PageData<T1> { Items = finalData, TotalRecords = count };
-                }
-                else
-                {
-                    List<T1> finalData = data.Skip(pageIndex.Value * pageSize.Value).Take(pageSize.Value).Select(convertor).ToList();
-                    return new PageData<T1> { Items = finalData, TotalRecords = count };
-                }
-            }
-            else
-            {
-                if (orders is not null && orders.Count > 0)
-                {
-                    IOrderedEnumerable<T>? orderedData = null;
-                    for (int i = 0; i < orders.Count; i++)
-                    {
-                        QueryOrder<T> order = orders[i];
-                        orderedData = i == 0
-                            ? order.IsAscending ? data.OrderBy(order.Order) : data.OrderByDescending(order.Order)
-                            : order.IsAscending ? orderedData!.ThenBy(order.Order) : orderedData!.ThenByDescending(order.Order);
-                    }
-                    List<T1> finalData = orderedData!.Select(convertor).ToList();
-                    return new PageData<T1> { Items = finalData, TotalRecords = count };
-                }
-                else
-                {
-                    List<T1> finalData = data.Select(convertor).ToList();
-                    return new PageData<T1> { Items = finalData, TotalRecords = count };
-                }
-            }
+            var entityPageData = await GetPageDataByQueryAsync(pagingModel, expression, searchQuery, orders);
+            return PageData<T1>.ConvertFromOtherPageData(entityPageData, convertor);
         }
         public async Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, SearchQuery<T>? searchQuery, List<QueryOrder<T>>? orders)
         {
