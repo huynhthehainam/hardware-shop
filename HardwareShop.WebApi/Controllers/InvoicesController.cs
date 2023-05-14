@@ -68,9 +68,9 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpGet("{id:int}/Pdf")]
-        public async Task<IActionResult> GetPdf([FromRoute] int id)
+        public async Task<IActionResult> GetPdf([FromRoute] int id, [FromQuery] bool? isAllowedToShowCustomerInformation, [FromQuery] bool? isAllowedToShowCustomerDeposit, [FromQuery] bool? isAllowedToShowShopInformation )
         {
-            var bytes = await invoiceService.GetPdfBytesOfInvoiceOfCurrentUserShopAsync(id);
+            var bytes = await invoiceService.GetPdfBytesOfInvoiceOfCurrentUserShopAsync(id, isAllowedToShowCustomerInformation.GetValueOrDefault(false), isAllowedToShowCustomerDeposit.GetValueOrDefault(false), isAllowedToShowShopInformation.GetValueOrDefault(false));
             if (bytes == null) return responseResultBuilder.Build();
             responseResultBuilder.SetFile(bytes, "application/pdf", "invoice.pdf");
             return responseResultBuilder.Build();

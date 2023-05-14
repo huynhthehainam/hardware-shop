@@ -5,39 +5,14 @@
                     line-height: 1.6; margin: 0;">
                 {TRANSLATE_INVOICE_LABEL} {VALUE_INVOICE_CODE}
             </h6>
-            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{VALUE_CUSTOMER_PHONE}</p>
-            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{VALUE_CUSTOMER_ADDRESS}</p>
+           {VALUE_CUSTOMER_INFORMATION_STRING}
             <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">
                 {TRANSLATE_TOTAL_COST_LABEL}: {VALUE_TOTAL_COST} {VALUE_CASH_UNIT}</p>
             {VALUE_DEBT_STRING}
-            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{TRANSLATE_DEPOSIT_LABEL}:
-                {VALUE_DEPOSIT}
-                {VALUE_CASH_UNIT}</p>
-            <p style="font-size: 1.3rem;line-height: 1.5; font-weight: 400; margin: 0;">{TRANSLATE_REST_LABEL}:
-                {VALUE_REST}
-                {VALUE_CASH_UNIT}</p>
+            {VALUE_DEPOSIT_STRING}
 
         </div>
-        <div style="display: flex;padding: 1.6rem; align-items: center;    
-        background-color: #003737;
-        color: #fff;
-        width: 400px;">
-            <img style="border-style: solid; display: block; max-width: 100%; height: auto; width: 8rem;"
-                src="{VALUE_SHOP_LOGO}" alt="logo" />
-            <div
-                style="margin-left: 0.8rem; margin-right: 0.8rem; width: 1px; height: 90px; background-color: #fff; opacity: 0.5;">
-            </div>
-            <div style="padding-left: 0.8rem; padding-right: 0.8rem;">
-                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">Admin
-                    shop</p>
-                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">850 Xa
-                    lộ Hà Nội, Thủ Đức, HCM</p>
-                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">
-                    +84909933033 (C. Hải)</p>
-                <p style="margin: 0; font-size: 1.3rem; font-weight: 400;line-height: 1.5; color: inherit;">
-                    +84933933033 (A. Cường)</p>
-            </div>
-        </div>
+        {VALUE_SHOP_INFORMATION_STRING}
     </div>
     <div style="margin-top: 0.6rem;">
         <table style="text-indent: 0; border-collapse: collapse; display: table;

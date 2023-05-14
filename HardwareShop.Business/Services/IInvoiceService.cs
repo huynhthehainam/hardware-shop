@@ -11,7 +11,7 @@ namespace HardwareShop.Business.Services
         Task<InvoiceDto?> GetInvoiceDtoOfCurrentUserShopByIdAsync(int invoiceId);
         Task<PageData<InvoiceDto>?> GetInvoiceDtoPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search, SortingModel sortingModel);
         Task<bool> RestoreInvoiceOfCurrentUserSHopAsync(int id);
-        Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId);
-        string GenerateSingleInvoice(Invoice invoice);
+        Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId, bool isAllowedToShowCustomerInformation = false, bool isAllowedToShowCustomerDeposit = false, bool isAllowedToShowShopInformation = true);
+        string GenerateSingleInvoice(Invoice invoice, bool isAllowedToShowCustomerInformation = true, bool isAllowedToShowCustomerDeposit = true, bool isAllowedToShowShopInformation = true);
     }
 }

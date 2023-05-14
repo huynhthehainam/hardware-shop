@@ -102,7 +102,7 @@ namespace HardwareShop.Business.Implementations
                      Phone = e.Phone,
                      PhonePrefix = e.Country?.PhonePrefix ?? ""
                  }) ?? Array.Empty<ShopPhoneDto>(), userShop.Shop?.Emails, userShop.Shop?.Address
-                 )), tokens.SessionId);
+                , userShop.Shop?.ShopSetting?.IsAllowedToShowInvoiceDownloadOptions ?? false)), tokens.SessionId);
         }
         public async Task<LoginDto?> LoginByTokenAsync(string token)
         {

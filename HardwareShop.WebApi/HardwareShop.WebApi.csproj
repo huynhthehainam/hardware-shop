@@ -24,7 +24,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HardwareShop.Business\HardwareShop.Business.csproj" />
-    <ProjectReference Include="..\HardwareShop.Core\HardwareShop.Core.csproj" />
   </ItemGroup>
 
 </Project>

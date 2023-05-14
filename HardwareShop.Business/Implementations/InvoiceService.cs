@@ -240,15 +240,105 @@ namespace HardwareShop.Business.Implementations
             }
             return await invoiceRepository.DeleteAsync(invoice);
         }
-        public string GenerateSingleInvoice(Invoice invoice)
+        public string GenerateSingleInvoice(Invoice invoice, bool isAllowedToShowCustomerInformation = true, bool isAllowedToShowCustomerDeposit = true, bool isAllowedToShowShopInformation = true)
         {
             var invoiceHtmlFileName = "HtmlTemplates/Invoice/_SingleInvoice.html";
             var htmlStr = System.IO.File.ReadAllText(invoiceHtmlFileName);
+            var cashUnit = invoice.Shop?.CashUnit;
+            var shop = invoice.Shop;
+            var logo = (invoice.Shop?.Assets ?? new List<ShopAsset>()).FirstOrDefault(e => e.AssetType == ShopAssetConstants.LogoAssetType);
             if (invoice.CurrentDebtHistory != null)
             {
                 var oldDebtHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_OldDebt.html");
                 htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>{
                     {"VALUE_DEBT_STRING", oldDebtHtmlStr}
+                });
+            }
+            else
+            {
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>{
+                    {"VALUE_DEBT_STRING", ""}
+                });
+            }
+
+            if (isAllowedToShowCustomerDeposit)
+            {
+                var depositHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_Deposit.html");
+                depositHtmlStr = languageService.Translate(depositHtmlStr, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
+                    {"DEPOSIT_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Deposit"},
+                   {SupportedLanguage.Vietnamese,  "Trả trước"}
+                }},
+                {"REST_LABEL", new Dictionary<SupportedLanguage, string>(){
+                     { SupportedLanguage.English, "Rest"},
+                   {SupportedLanguage.Vietnamese,  "Còn lại"}
+                }},
+                });
+                depositHtmlStr = HtmlHelper.ReplaceKeyWithValue(depositHtmlStr, new Dictionary<string, string>(){
+                      {"VALUE_DEPOSIT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.Deposit)},
+                {"VALUE_REST", cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
+                });
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                     {"VALUE_DEPOSIT_STRING", depositHtmlStr}
+                });
+            }
+            else
+            {
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                     {"VALUE_DEPOSIT_STRING", ""}
+                });
+            }
+            if (isAllowedToShowCustomerInformation)
+            {
+                var customerInformationHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_CustomerInformation.html");
+                customerInformationHtmlStr = HtmlHelper.ReplaceKeyWithValue(customerInformationHtmlStr, new Dictionary<string, string>
+                {
+     {"VALUE_CUSTOMER_PHONE", invoice.Customer?.Name ?? ""},
+                {"VALUE_CUSTOMER_ADDRESS", invoice.Customer?.Address ?? ""},
+                });
+
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                     {"VALUE_CUSTOMER_INFORMATION_STRING", customerInformationHtmlStr}
+                });
+            }
+            else
+            {
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                     {"VALUE_CUSTOMER_INFORMATION_STRING", ""}
+                });
+            }
+
+            if (isAllowedToShowShopInformation && shop != null)
+            {
+                var shopPhoneHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_ShopPhone.html");
+                var phoneListString = new List<string>();
+                foreach (var phone in shop.Phones ?? Array.Empty<ShopPhone>())
+                {
+                    phoneListString.Add(HtmlHelper.ReplaceKeyWithValue(shopPhoneHtmlStr, new Dictionary<string, string>(){
+                       { "VALUE_PHONE_PREFIX",phone.Country?.PhonePrefix ?? ""},
+                       { "VALUE_PHONE", phone.Phone},
+                       { "VALUE_PHONE_OWNER",phone.OwnerName}
+
+                    }));
+                }
+
+
+                var shopInformationHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_ShopInformation.html");
+                var imgSrc = logo == null ? "" : logo.ConvertToImgSrc();
+                shopInformationHtmlStr = HtmlHelper.ReplaceKeyWithValue(shopInformationHtmlStr, new Dictionary<string, string>() {
+                { "VALUE_SHOP_LOGO", imgSrc },
+                {"VALUE_SHOP_NAME" , shop.Name   ?? ""},
+                     {"VALUE_SHOP_ADDRESS" , shop.Address   ?? ""},
+                     {"VALUE_PHONE_STRING",string.Join("", phoneListString) }
+            });
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                     {"VALUE_SHOP_INFORMATION_STRING", shopInformationHtmlStr}
+                });
+            }
+            else
+            {
+                htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
+                     {"VALUE_SHOP_INFORMATION_STRING", ""}
                 });
             }
 
@@ -271,14 +361,7 @@ namespace HardwareShop.Business.Implementations
                      { SupportedLanguage.English, "Total"},
                    {SupportedLanguage.Vietnamese,  "Thành tiền"}
                 }},
-                  {"DEPOSIT_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Deposit"},
-                   {SupportedLanguage.Vietnamese,  "Trả trước"}
-                }},
-                {"REST_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Rest"},
-                   {SupportedLanguage.Vietnamese,  "Còn lại"}
-                }},
+
                  {"PRODUCT_LABEL", new Dictionary<SupportedLanguage, string>(){
                      { SupportedLanguage.English, "Product"},
                    {SupportedLanguage.Vietnamese,  "Sản phẩm"}
@@ -293,16 +376,12 @@ namespace HardwareShop.Business.Implementations
                 }},
             });
 
-            var logo = (invoice.Shop?.Assets ?? new List<ShopAsset>()).FirstOrDefault(e => e.AssetType == ShopAssetConstants.LogoAssetType);
 
 
-            var imgSrc = logo == null ? "" : logo.ConvertToImgSrc();
-            htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>() {
-                { "VALUE_SHOP_LOGO", imgSrc }
-            });
+
+
             var rowHtmlStr = File.ReadAllText("HtmlTemplates/Invoice/_InvoiceRow.html");
             var rows = new List<string>();
-            var cashUnit = invoice.Shop?.CashUnit;
 
             foreach (var detail in invoice.Details ?? new List<InvoiceDetail>())
             {
@@ -324,25 +403,21 @@ namespace HardwareShop.Business.Implementations
 
             htmlStr = HtmlHelper.ReplaceKeyWithValue(htmlStr, new Dictionary<string, string>(){
                 {"VALUE_ROWS", rowsStr},
-                {"VALUE_CUSTOMER_PHONE", invoice.Customer?.Name ?? ""},
-                {"VALUE_CUSTOMER_ADDRESS", invoice.Customer?.Address ?? ""},
                 {"VALUE_TOTAL_COST",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.GetTotalCost())},
                 {"VALUE_CASH_UNIT", cashUnit == null ? "":cashUnit.Name},
-                {"VALUE_DEPOSIT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.Deposit)},
-                {"VALUE_REST", cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
                 {"VALUE_OLD_DEBT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.OldDebt ?? 0)},
                 {"VALUE_INVOICE_CODE",$"{invoice.Id:0000}"}
             });
             return htmlStr;
         }
-        public async Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId)
+        public async Task<byte[]?> GetPdfBytesOfInvoiceOfCurrentUserShopAsync(int invoiceId, bool isAllowedToShowCustomerInformation, bool isAllowedToShowCustomerDeposit, bool isAllowedToShowShopInformation = true)
         {
             var invoice = await GetInvoiceOfCurrentUserShopAsync(invoiceId);
             if (invoice == null)
             {
                 return null;
             }
-            var htmlStr = GenerateSingleInvoice(invoice);
+            var htmlStr = GenerateSingleInvoice(invoice, isAllowedToShowCustomerInformation, isAllowedToShowCustomerDeposit, isAllowedToShowShopInformation);
             var wrapper = File.ReadAllText("HtmlTemplates/PdfWrapper.html");
             htmlStr = HtmlHelper.ReplaceKeyWithValue(wrapper, new Dictionary<string, string>(){
                 {"VALUE_BODY",htmlStr}
