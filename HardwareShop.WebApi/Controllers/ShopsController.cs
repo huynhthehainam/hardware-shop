@@ -87,6 +87,18 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetUpdatedMessage();
             return responseResultBuilder.Build();
         }
+        [HttpPost("{id:int}/UpdateSetting")]
+        public async Task<IActionResult> UpdateShopSettings([FromRoute] int id, [FromBody] UpdateShopSettingCommand command)
+        {
+            var isSuccess = await shopService.UpdateShopSettingAsync(id, command.IsAllowedToShowInvoiceDownloadOptions);
+            if (!isSuccess)
+            {
+                return responseResultBuilder.Build();
+            }
+
+            responseResultBuilder.SetUpdatedMessage();
+            return responseResultBuilder.Build();
+        }
 
         [HttpGet("YourShop/Logo")]
         public async Task<IActionResult> GetYourShopLogo()
@@ -142,9 +154,7 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-
             CreatedUserDto? user = await shopService.CreateAdminUserAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
-
             responseResultBuilder.SetData(user);
             return responseResultBuilder.Build();
         }

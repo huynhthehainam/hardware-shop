@@ -10,6 +10,8 @@ namespace HardwareShop.WebApi.Commands
         [Required]
         public double? StepNumber { get; set; }
         [Required]
+        public double? CompareWithPrimaryUnit { get; set; }
+        [Required]
         public int? UnitCategoryId { get; set; }
     }
 }

@@ -9,7 +9,7 @@ namespace HardwareShop.Business.Services
     {
         Task<double?> RoundValue(int unitId, double value);
         Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId);
-        Task<CreatedUnitDto?> CreateUnit(string name, double stepNumber, int unitCategoryId);
+        Task<CreatedUnitDto?> CreateUnitAsync(CreateUnitDto model);
 
     }
 }

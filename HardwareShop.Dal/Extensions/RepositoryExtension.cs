@@ -31,6 +31,7 @@ namespace HardwareShop.Dal.Extensions
             services.AddScoped<IRepository<ProductCategoryProduct>, RepositoryBase<ProductCategoryProduct>>();
             services.AddScoped<IRepository<Notification>, RepositoryBase<Notification>>();
             services.AddScoped<IRepository<Country>, RepositoryBase<Country>>();
+            services.AddScoped<IRepository<ShopSetting>, RepositoryBase<ShopSetting>>();
         }
     }
 }

@@ -13,6 +13,7 @@ namespace HardwareShop.Business.Services
         Task<CreatedShopDto?> CreateShopAsync(string name, string? address);
         Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file);
         Task<bool> DeleteShopSoftlyAsync(int shopId);
+        Task<bool> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions);
         Task<CreatedUserDto?> CreateAdminUserAsync(int id, string v1, string v2, string? email);
         Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
         Task<ShopAssetDto?> UpdateYourShopLogoAsync(IFormFile logo);

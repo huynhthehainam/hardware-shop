@@ -18,8 +18,9 @@ namespace HardwareShop.Business.Implementations
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly IRepository<UserShop> userShopRepository;
         private readonly IRepository<ShopAsset> shopAssetRepository;
+        private readonly IRepository<ShopSetting> shopSettingRepository;
 
-        public ShopService(IRepository<Shop> shopRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository)
+        public ShopService(IRepository<Shop> shopRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository, IRepository<ShopSetting> shopSettingRepository)
         {
             this.shopRepository = shopRepository;
             this.currentUserService = currentUserService;
@@ -27,6 +28,7 @@ namespace HardwareShop.Business.Implementations
             this.userRepository = userRepository;
             this.hashingPasswordService = hashingPasswordService;
             this.userShopRepository = userShopRepository;
+            this.shopSettingRepository = shopSettingRepository;
             this.shopAssetRepository = shopAssetRepository;
         }
 
@@ -219,6 +221,22 @@ namespace HardwareShop.Business.Implementations
                 e.Name
             }));
             return shopDtoPageData;
+        }
+
+        public async Task<bool> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions)
+        {
+            var shopSetting = await shopSettingRepository.GetItemByQueryAsync(e => e.ShopId == shopId && e.Shop != null && e.Shop.UserShops != null && e.Shop.UserShops.Any(e => e.UserId == currentUserService.GetUserId() && e.Role == UserShopRole.Admin));
+            if (shopSetting == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return false;
+            }
+            if (isAllowedToShowInvoiceDownloadOptions.HasValue)
+            {
+                shopSetting.IsAllowedToShowInvoiceDownloadOptions = isAllowedToShowInvoiceDownloadOptions.HasValue;
+            }
+            await shopSettingRepository.UpdateAsync(shopSetting);
+            return true;
         }
     }
 }

@@ -20,7 +20,13 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUnit([FromBody] CreateUnitCommand command)
         {
-            Business.Dtos.CreatedUnitDto? unit = await unitService.CreateUnit(command.Name ?? "", command.StepNumber ?? 0, command.UnitCategoryId ?? 0);
+            Business.Dtos.CreatedUnitDto? unit = await unitService.CreateUnitAsync(new Business.Dtos.CreateUnitDto
+            {
+                Name = command.Name ?? "",
+                StepNumber = command.StepNumber ?? 0,
+                CompareWithPrimaryUnit = command.CompareWithPrimaryUnit ?? 0,
+                UnitCategoryId = command.UnitCategoryId ?? 0,
+            });
             if (unit == null)
             {
                 return responseResultBuilder.Build();

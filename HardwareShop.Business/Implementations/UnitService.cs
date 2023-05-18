@@ -12,16 +12,18 @@ namespace HardwareShop.Business.Implementations
     public class UnitService : IUnitService
     {
         private readonly IRepository<Unit> unitRepository;
+        private readonly IRepository<UnitCategory> unitCategoryRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ICurrentUserService currentUserService;
-        public UnitService(IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService)
+        public UnitService(IRepository<Unit> unitRepository, IRepository<UnitCategory> unitCategoryRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService)
         {
             this.responseResultBuilder = responseResultBuilder;
             this.unitRepository = unitRepository;
             this.currentUserService = currentUserService;
+            this.unitCategoryRepository = unitCategoryRepository;
         }
 
-        public async Task<CreatedUnitDto?> CreateUnit(string name, double stepNumber, int unitCategoryId)
+        public async Task<CreatedUnitDto?> CreateUnitAsync(CreateUnitDto model)
         {
             bool isAdmin = currentUserService.IsSystemAdmin();
             if (!isAdmin)
@@ -29,7 +31,19 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotPermittedError();
                 return null;
             }
-            CreateIfNotExistResponse<Unit> createIfNotExistResponse = await unitRepository.CreateIfNotExistsAsync(new Unit { Name = name, StepNumber = stepNumber, UnitCategoryId = unitCategoryId }, e => new { e.Name, e.UnitCategoryId });
+            var unitCategory = await unitCategoryRepository.GetItemByQueryAsync(e => e.Id == model.UnitCategoryId);
+            if (unitCategory == null)
+            {
+                responseResultBuilder.AddInvalidFieldError("UnitCategoryId");
+                return null;
+            }
+            CreateIfNotExistResponse<Unit> createIfNotExistResponse = await unitRepository.CreateIfNotExistsAsync(new Unit
+            {
+                Name = model.Name,
+                CompareWithPrimaryUnit = model.CompareWithPrimaryUnit,
+                IsPrimary = false,
+                UnitCategoryId = unitCategory.Id,
+            }, e => new { e.Name, e.UnitCategoryId });
             if (createIfNotExistResponse.IsExist)
             {
                 responseResultBuilder.AddExistedEntityError("Unit");
