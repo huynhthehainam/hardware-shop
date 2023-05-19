@@ -12,7 +12,8 @@ namespace HardwareShop.Core.Models
         {
             if (SortFieldName == null || IsSortAscending == null) return new List<QueryOrder<T>>();
             var properties = typeof(T).GetProperties();
-            var selectedProperty = properties.FirstOrDefault(e => e.Name.ToLower() == SortFieldName.ToLower() && (e.PropertyType.IsPrimitive || e.PropertyType == typeof(string)));
+            var allowedTypes = new Type[] { typeof(string), typeof(DateTime) };
+            var selectedProperty = properties.FirstOrDefault(e => e.Name.ToLower() == SortFieldName.ToLower() && (e.PropertyType.IsPrimitive || allowedTypes.Contains(e.PropertyType)));
 
             if (selectedProperty == null)
             {
