@@ -1,6 +1,7 @@
 ﻿using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using HardwareShop.Dal.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -32,6 +33,7 @@ namespace HardwareShop.Dal.Extensions
             services.AddScoped<IRepository<Notification>, RepositoryBase<Notification>>();
             services.AddScoped<IRepository<Country>, RepositoryBase<Country>>();
             services.AddScoped<IRepository<ShopSetting>, RepositoryBase<ShopSetting>>();
+            services.AddScoped<IAssetRepository, AssetRepository>();
         }
     }
 }

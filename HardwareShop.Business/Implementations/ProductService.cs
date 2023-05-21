@@ -1,10 +1,10 @@
 ﻿using HardwareShop.Business.Dtos;
-using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
 using HardwareShop.Dal.Models;
+using HardwareShop.Dal.Repositories;
 using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Business.Implementations
@@ -20,8 +20,9 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<ProductCategoryProduct> productCategoryProductRepository;
         private readonly IRepository<Warehouse> warehouseRepository;
         private readonly IRepository<WarehouseProduct> warehouseProductRepository;
+        private readonly IAssetRepository assetRepository;
 
-        public ProductService(IRepository<WarehouseProduct> warehouseProductRepository, IRepository<ProductCategoryProduct> productCategoryProductRepository, IRepository<Warehouse> warehouseRepository, IRepository<ProductCategory> productCategoryRepository, IRepository<Unit> unitRepository, IShopService shopService, IRepository<Product> productRepository, IResponseResultBuilder responseResultBuilder, IRepository<ProductAsset> productAssetRepository)
+        public ProductService(IRepository<WarehouseProduct> warehouseProductRepository, IAssetRepository assetRepository, IRepository<ProductCategoryProduct> productCategoryProductRepository, IRepository<Warehouse> warehouseRepository, IRepository<ProductCategory> productCategoryRepository, IRepository<Unit> unitRepository, IShopService shopService, IRepository<Product> productRepository, IResponseResultBuilder responseResultBuilder, IRepository<ProductAsset> productAssetRepository)
         {
             this.warehouseProductRepository = warehouseProductRepository;
             this.unitRepository = unitRepository;
@@ -32,6 +33,7 @@ namespace HardwareShop.Business.Implementations
             this.productCategoryRepository = productCategoryRepository;
             this.warehouseRepository = warehouseRepository;
             this.productCategoryProductRepository = productCategoryProductRepository;
+            this.assetRepository = assetRepository;
         }
 
         public async Task<CreatedProductDto?> CreateProductOfShopAsync(string name, int unitId, double? mass, double? pricePerMass, double? percentForFamiliarCustomer, double? percentForCustomer, double? priceForFamiliarCustomer, double priceForCustomer, bool hasAutoCalculatePermission, List<int>? categoryIds,
@@ -110,7 +112,7 @@ namespace HardwareShop.Business.Implementations
             return new CreatedProductDto { Id = createIfNotExistResponse.Entity.Id };
         }
 
-        public async Task<IAssetTable?> GetProductAssetByIdAsync(int productId, int assetId)
+        public async Task<CachedAsset?> GetProductAssetByIdAsync(int productId, int assetId)
         {
             ShopDto? shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
             if (shop == null)
@@ -126,12 +128,31 @@ namespace HardwareShop.Business.Implementations
             }
 
             ProductAsset? asset = await productAssetRepository.GetItemByQueryAsync(e => e.Id == assetId && e.ProductId == product.Id);
-            return asset;
+            if (asset == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Asset");
+                return null;
+            }
+            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(asset);
         }
 
         public async Task<bool> RemoveProductAssetByIdAsync(int productId, int assetId)
         {
-            if (await GetProductAssetByIdAsync(productId, assetId) is not ProductAsset asset)
+            ShopDto? shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return false;
+            }
+            Product? product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == productId);
+            if (product == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Product");
+                return false;
+            }
+
+            ProductAsset? asset = await productAssetRepository.GetItemByQueryAsync(e => e.Id == assetId && e.ProductId == product.Id);
+            if (asset == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return false;
@@ -215,16 +236,16 @@ namespace HardwareShop.Business.Implementations
 
         }
 
-        public async Task<IAssetTable?> GetProductThumbnailAsync(int productId)
+        public async Task<CachedAsset?> GetProductThumbnailAsync(int productId)
         {
 
-            ProductAsset? productAsset = await productAssetRepository.GetItemByQueryAsync(e => e.ProductId == productId && (e.Product != null) && e.AssetType == ProductAssetConstants.ThumbnailAssetType);
-            if (productAsset == null)
+            ProductAsset? asset = await productAssetRepository.GetItemByQueryAsync(e => e.ProductId == productId && (e.Product != null) && e.AssetType == ProductAssetConstants.ThumbnailAssetType);
+            if (asset == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return null;
             }
-            return productAsset;
+            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(asset);
         }
 
         public async Task<int?> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file)
@@ -245,13 +266,11 @@ namespace HardwareShop.Business.Implementations
             ProductAsset productAsset = new ProductAsset()
             {
                 AssetType = assetType,
-                CreatedDate = DateTime.UtcNow,
-                LastModifiedDate = DateTime.UtcNow,
                 ProductId = product.Id,
             };
             productAsset = file.ConvertToAsset(productAsset);
-            productAsset = await productAssetRepository.CreateAsync(productAsset);
-            return productAsset.Id;
+            var createOrUpdateAssetResponse = await productAssetRepository.CreateOrUpdateAssetAsync(productAsset, e => new { }, e => new { });
+            return createOrUpdateAssetResponse.Entity.Id;
         }
         private async Task<Product?> GetProductOfCurrentUserShop(int productId)
         {

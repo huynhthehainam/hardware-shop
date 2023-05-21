@@ -2,10 +2,10 @@
 
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using HardwareShop.Dal.Repositories;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -13,13 +13,15 @@ namespace HardwareShop.Business.Implementations
     {
         private readonly IRepository<Country> countryRepository;
         private readonly IResponseResultBuilder responseResultBuilder;
-        public CountryService(IRepository<Country> countryRepository, IResponseResultBuilder responseResultBuilder)
+        private readonly IAssetRepository assetRepository;
+        public CountryService(IRepository<Country> countryRepository, IResponseResultBuilder responseResultBuilder, IAssetRepository assetRepository)
         {
             this.countryRepository = countryRepository;
             this.responseResultBuilder = responseResultBuilder;
+            this.assetRepository = assetRepository;
         }
 
-        public async Task<IAssetTable?> GetCountryIconByIdAsync(int id)
+        public async Task<CachedAsset?> GetCountryIconByIdAsync(int id)
         {
             var country = await countryRepository.GetItemByQueryAsync(e => e.Id == id);
             if (country == null)
@@ -34,7 +36,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return null;
             }
-            return asset;
+            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(asset);
         }
 
         public async Task<PageData<CountryDto>> GetCountryPageData(PagingModel pagingModel, string? search)

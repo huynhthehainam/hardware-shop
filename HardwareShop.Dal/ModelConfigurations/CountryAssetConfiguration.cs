@@ -14,6 +14,7 @@ namespace HardwareShop.Dal.ModelConfigurations
             {
                 _ = e.HasKey(e => e.CountryId);
                 _ = e.HasOne(e => e.Country).WithOne(e => e.Asset).HasForeignKey<CountryAsset>(e => e.CountryId).OnDelete(DeleteBehavior.Cascade);
+                _ = e.HasOne(e => e.Asset).WithMany(e => e.CountryAssets).HasForeignKey(e => e.AssetId).OnDelete(DeleteBehavior.Cascade);
             };
         }
     }

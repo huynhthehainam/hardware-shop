@@ -164,11 +164,6 @@ namespace HardwareShop.Core.Implementations
         {
             statusCode = 403;
         }
-
-        public void SetAsset(IAssetTable asset)
-        {
-            SetFile(asset.Bytes, asset.ContentType, asset.Filename);
-        }
         public void SetPageData<T>(PageData<T> pageData)
         {
             SetData(pageData.Items);

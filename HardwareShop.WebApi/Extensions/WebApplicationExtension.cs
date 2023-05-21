@@ -1,4 +1,3 @@
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
@@ -47,6 +46,41 @@ namespace HardwareShop.WebApi.Extensions
 
                 string countryAsset2Path = Path.Join(assetFolder, countryAsset2File);
                 byte[] countryAsset2Bytes = File.ReadAllBytes(countryAsset2Path);
+
+                var productAsset = new Asset()
+                {
+
+                    Bytes = productAssetBytes,
+                    Filename = productAssetFile,
+                    ContentType = ContentTypeConstants.PngContentType
+                };
+                var shopAsset = new Asset()
+                {
+                    Bytes = shopAssetBytes,
+                    Filename = shopAssetFile,
+                    ContentType = ContentTypeConstants.PngContentType
+                };
+                var userAsset = new Asset()
+                {
+                    Bytes = userAssetBytes,
+                    Filename = userAssetFile,
+                    ContentType = ContentTypeConstants.PngContentType
+                };
+                var countryAsset = new Asset()
+                {
+                    Bytes = countryAssetBytes,
+                    Filename = countryAssetFile,
+                    ContentType = ContentTypeConstants.PngContentType
+                };
+                var country2Asset = new Asset()
+                {
+                    Bytes = countryAsset2Bytes,
+                    Filename = countryAsset2File,
+                    ContentType = ContentTypeConstants.PngContentType
+                };
+
+                db.Assets.AddRange(new Asset[] { productAsset, shopAsset, userAsset, countryAsset, country2Asset });
+                db.SaveChanges();
 
 
                 UnitCategory massCategory = new()
@@ -143,9 +177,7 @@ namespace HardwareShop.WebApi.Extensions
                     Asset = new CountryAsset()
                     {
                         AssetType = CountryAssetConstants.IconType,
-                        Bytes = countryAssetBytes,
-                        Filename = countryAssetFile,
-                        ContentType = ContentTypeConstants.PngContentType
+                        Asset = countryAsset
                     }
                 };
 
@@ -156,9 +188,7 @@ namespace HardwareShop.WebApi.Extensions
                     Asset = new CountryAsset()
                     {
                         AssetType = CountryAssetConstants.IconType,
-                        Bytes = countryAsset2Bytes,
-                        Filename = countryAsset2File,
-                        ContentType = ContentTypeConstants.PngContentType
+                        Asset = country2Asset
                     }
                 };
                 _ = db.Countries.Add(country);
@@ -182,9 +212,7 @@ namespace HardwareShop.WebApi.Extensions
                             new UserAsset
                             {
                                 AssetType = UserAssetConstants.AvatarAssetType,
-                                Filename = userAssetFile,
-                                Bytes =  userAssetBytes,
-                                ContentType = ContentTypeConstants.JpegContentType
+                               Asset =userAsset,
                             }
                     }
                 };
@@ -202,9 +230,7 @@ namespace HardwareShop.WebApi.Extensions
                             new UserAsset
                             {
                                 AssetType = UserAssetConstants.AvatarAssetType,
-                                Filename = userAssetFile,
-                                Bytes =  userAssetBytes,
-                                ContentType = ContentTypeConstants.JpegContentType
+                            Asset = userAsset,
                             }
                     }
                 };
@@ -240,9 +266,7 @@ namespace HardwareShop.WebApi.Extensions
                             new ShopAsset
                             {
                                 AssetType = ShopAssetConstants.LogoAssetType,
-                                Bytes = shopAssetBytes,
-                                Filename = productAssetFile,
-                                ContentType = ContentTypeConstants.JpegContentType
+                               Asset =shopAsset,
                             }
                     },
                     UserShops = new UserShop[]
@@ -290,10 +314,9 @@ namespace HardwareShop.WebApi.Extensions
                         ProductAssets = new ProductAsset[]{
                         new ProductAsset
                         {
-                            Bytes = productAssetBytes,
+
                             AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                            Filename = productAssetFile,
-                            ContentType= ContentTypeConstants.JpegContentType
+                           Asset =productAsset,
                         }
                     }
                     };
@@ -312,10 +335,9 @@ namespace HardwareShop.WebApi.Extensions
                         ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
-                                                    Bytes = productAssetBytes,
+
                                                     AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                    Filename = productAssetFile,
-                                                    ContentType= ContentTypeConstants.JpegContentType
+                                               Asset =productAsset,
                                                 }
                                             }
                     };
@@ -334,10 +356,9 @@ namespace HardwareShop.WebApi.Extensions
                         ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
-                                                    Bytes = productAssetBytes,
+
                                                     AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                    Filename = productAssetFile,
-                                                    ContentType= ContentTypeConstants.JpegContentType
+                                               Asset =productAsset,
                                                 }
                                             }
                     };
@@ -356,10 +377,9 @@ namespace HardwareShop.WebApi.Extensions
                         ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
-                                                    Bytes = productAssetBytes,
+
                                                     AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                    Filename = productAssetFile,
-                                                    ContentType= ContentTypeConstants.JpegContentType
+                                                   Asset =productAsset,
                                                 }
                                             }
                     };
@@ -378,10 +398,9 @@ namespace HardwareShop.WebApi.Extensions
                         ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
-                                                    Bytes = productAssetBytes,
+
                                                     AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                    Filename = productAssetFile,
-                                                    ContentType= ContentTypeConstants.JpegContentType
+                                                 Asset =productAsset,
                                                 }
                                             }
                     };
@@ -400,10 +419,9 @@ namespace HardwareShop.WebApi.Extensions
                         ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
-                                                    Bytes = productAssetBytes,
+
                                                     AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                                    Filename = productAssetFile,
-                                                    ContentType= ContentTypeConstants.JpegContentType
+                                                  Asset =productAsset,
                                                 }
                                             }
                     };

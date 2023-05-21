@@ -3,6 +3,7 @@ using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +25,6 @@ namespace HardwareShop.WebApi.Controllers
             var asset = await userService.GetCurrentUserAvatarAsync();
             if (asset == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Avatar");
                 return responseResultBuilder.Build();
             }
             responseResultBuilder.SetAsset(asset);

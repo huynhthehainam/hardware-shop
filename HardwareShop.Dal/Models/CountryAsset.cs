@@ -1,6 +1,3 @@
-
-
-using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
@@ -10,7 +7,7 @@ namespace HardwareShop.Dal.Models
     {
         public const string IconType = "icon";
     }
-    public class CountryAsset : EntityBase, IAssetTable
+    public class CountryAsset : AssetEntityBase
     {
         public CountryAsset()
         {
@@ -26,12 +23,5 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader.Load(this, ref country);
             set => country = value;
         }
-        public byte[] Bytes { get; set; } = Array.Empty<byte>();
-        public string Filename { get; set; } = string.Empty;
-        public string AssetType { get; set; } = string.Empty;
-        public string ContentType { get; set; } = string.Empty;
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        public DateTime? LastModifiedDate { get; set; }
-
     }
 }

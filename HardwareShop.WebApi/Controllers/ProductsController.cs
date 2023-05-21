@@ -3,7 +3,9 @@ using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.Dal.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -43,7 +45,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}/Thumbnail")]
         public async Task<IActionResult> GetProductThumbnail([FromRoute] int id)
         {
-            IAssetTable? asset = await productService.GetProductThumbnailAsync(id);
+            CachedAsset? asset = await productService.GetProductThumbnailAsync(id);
             if (asset == null)
             {
                 return responseResultBuilder.Build();
@@ -67,7 +69,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:int}/Assets/{assetId:int}")]
         public async Task<IActionResult> GetProductAssetById([FromRoute] int id, [FromRoute] int assetId)
         {
-            IAssetTable? asset = await productService.GetProductAssetByIdAsync(id, assetId);
+            CachedAsset? asset = await productService.GetProductAssetByIdAsync(id, assetId);
             if (asset == null)
             {
                 return responseResultBuilder.Build();

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230417140004_Initial")]
+    [Migration("20230521043808_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,37 @@ namespace HardwareShop.WebApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Asset", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<byte[]>("Bytes")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Filename")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Assets");
+                });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>
                 {
@@ -51,29 +82,16 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<int>("CountryId")
                         .HasColumnType("integer");
 
+                    b.Property<long>("AssetId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("AssetType")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<byte[]>("Bytes")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Filename")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.HasKey("CountryId");
+
+                    b.HasIndex("AssetId");
 
                     b.ToTable("CountryAssets");
                 });
@@ -185,6 +203,10 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Property<int>("CustomerId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("CustomerInformation")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<double>("Deposit")
                         .HasColumnType("double precision");
@@ -403,32 +425,19 @@ namespace HardwareShop.WebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<long>("AssetId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("AssetType")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<byte[]>("Bytes")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Filename")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
 
                     b.HasIndex("ProductId");
 
@@ -522,32 +531,19 @@ namespace HardwareShop.WebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<long>("AssetId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("AssetType")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<byte[]>("Bytes")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Filename")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("ShopId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
 
                     b.HasIndex("ShopId");
 
@@ -707,32 +703,19 @@ namespace HardwareShop.WebApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<long>("AssetId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("AssetType")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<byte[]>("Bytes")
-                        .IsRequired()
-                        .HasColumnType("bytea");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Filename")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
 
                     b.HasIndex("UserId");
 
@@ -802,11 +785,19 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.CountryAsset", b =>
                 {
+                    b.HasOne("HardwareShop.Dal.Models.Asset", "Asset")
+                        .WithMany("CountryAssets")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HardwareShop.Dal.Models.Country", "Country")
                         .WithOne("Asset")
                         .HasForeignKey("HardwareShop.Dal.Models.CountryAsset", "CountryId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Asset");
 
                     b.Navigation("Country");
                 });
@@ -973,11 +964,19 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ProductAsset", b =>
                 {
+                    b.HasOne("HardwareShop.Dal.Models.Asset", "Asset")
+                        .WithMany("ProductAssets")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HardwareShop.Dal.Models.Product", "Product")
                         .WithMany("ProductAssets")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Asset");
 
                     b.Navigation("Product");
                 });
@@ -1025,11 +1024,19 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.ShopAsset", b =>
                 {
+                    b.HasOne("HardwareShop.Dal.Models.Asset", "Asset")
+                        .WithMany("ShopAssets")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HardwareShop.Dal.Models.Shop", "Shop")
                         .WithMany("Assets")
                         .HasForeignKey("ShopId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Asset");
 
                     b.Navigation("Shop");
                 });
@@ -1087,11 +1094,19 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.UserAsset", b =>
                 {
+                    b.HasOne("HardwareShop.Dal.Models.Asset", "Asset")
+                        .WithMany("UserAssets")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("HardwareShop.Dal.Models.User", "User")
                         .WithMany("Assets")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Asset");
 
                     b.Navigation("User");
                 });
@@ -1143,6 +1158,17 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Warehouse");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.Asset", b =>
+                {
+                    b.Navigation("CountryAssets");
+
+                    b.Navigation("ProductAssets");
+
+                    b.Navigation("ShopAssets");
+
+                    b.Navigation("UserAssets");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>

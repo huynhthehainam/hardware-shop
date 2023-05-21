@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Constants;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using HardwareShop.Dal.Repositories;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -20,8 +20,9 @@ namespace HardwareShop.Business.Implementations
         private readonly ICurrentUserService currentUserService;
         private readonly ILanguageService languageService;
         private readonly IShopService shopService;
+        private readonly IAssetRepository assetRepository;
 
-        public UserService(IRepository<Notification> notificationRepository, IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService)
+        public UserService(IRepository<Notification> notificationRepository, IAssetRepository assetRepository, IRepository<User> userRepository, IJwtService jwtService, ICurrentUserService currentUserService, IRepository<UserAsset> userAssetRepository, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService)
         {
             this.userRepository = userRepository;
             this.jwtService = jwtService;
@@ -31,6 +32,7 @@ namespace HardwareShop.Business.Implementations
             this.languageService = languageService;
             this.hashingPasswordService = hashingPasswordService;
             this.shopService = shopService;
+            this.assetRepository = assetRepository;
             this.notificationRepository = notificationRepository;
         }
 
@@ -39,7 +41,7 @@ namespace HardwareShop.Business.Implementations
             return Task.FromResult(new CreatedUserDto { Id = 1 });
         }
 
-        private async Task<IAssetTable?> GetUserAvatarByUserId(int userId)
+        private async Task<AssetEntityBase?> GetUserAvatarByUserId(int userId)
         {
             User? user = await userRepository.GetItemByQueryAsync(e => e.Id == userId);
             if (user == null)
@@ -51,10 +53,16 @@ namespace HardwareShop.Business.Implementations
 && e.AssetType == UserAssetConstants.AvatarAssetType);
             return userAsset;
         }
-        public Task<IAssetTable?> GetCurrentUserAvatarAsync()
+        public async Task<CachedAsset?> GetCurrentUserAvatarAsync()
         {
             int userId = currentUserService.GetUserId();
-            return GetUserAvatarByUserId(userId);
+            var avatar = await GetUserAvatarByUserId(userId);
+            if (avatar == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Avatar");
+                return null;
+            }
+            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(avatar);
         }
 
         public async Task<List<UserDto>> GetUserDtosAsync()

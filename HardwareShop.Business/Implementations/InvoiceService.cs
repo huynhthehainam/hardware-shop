@@ -1,11 +1,11 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
 using HardwareShop.Dal.Models;
 using iText.Html2pdf;
 using iText.Html2pdf.Resolver.Font;

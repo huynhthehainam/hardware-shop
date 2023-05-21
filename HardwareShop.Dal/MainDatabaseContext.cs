@@ -10,6 +10,7 @@ namespace HardwareShop.Dal
             DbContextOptions<MainDatabaseContext> options) : base(options)
         {
         }
+        public DbSet<Asset> Assets => Set<Asset>();
         public DbSet<UserAsset> UserAssets => Set<UserAsset>();
         public DbSet<UserShop> UserShops => Set<UserShop>();
         public DbSet<Customer> Customers => Set<Customer>();
@@ -40,7 +41,7 @@ namespace HardwareShop.Dal
         {
             const string configurationNamespace = "HardwareShop.Dal.ModelConfigurations";
             const string buildModelMethodName = "BuildModel";
-            List<Type> configurations = Assembly.GetExecutingAssembly().GetTypes().Where(e => e.IsClass && e.Namespace == configurationNamespace && e.BaseType?.GetGenericArguments().FirstOrDefault()?.BaseType == typeof(EntityBase)).ToList();
+            List<Type> configurations = Assembly.GetExecutingAssembly().GetTypes().Where(e => e.IsClass && e.Namespace == configurationNamespace && (e.BaseType?.GetGenericArguments().FirstOrDefault()?.BaseType == typeof(EntityBase) || e.BaseType?.GetGenericArguments().FirstOrDefault()?.BaseType == typeof(AssetEntityBase))).ToList();
             foreach (Type configuration in configurations)
             {
                 object? instance = Activator.CreateInstance(configuration, modelBuilder);

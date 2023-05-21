@@ -12,6 +12,23 @@ namespace HardwareShop.WebApi.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Assets",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
+                    Filename = table.Column<string>(type: "text", nullable: false),
+                    ContentType = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Assets", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Countries",
                 columns: table => new
                 {
@@ -43,16 +60,18 @@ namespace HardwareShop.WebApi.Migrations
                 columns: table => new
                 {
                     CountryId = table.Column<int>(type: "integer", nullable: false),
-                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Filename = table.Column<string>(type: "text", nullable: false),
                     AssetType = table.Column<string>(type: "text", nullable: false),
-                    ContentType = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    AssetId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_CountryAssets", x => x.CountryId);
+                    table.ForeignKey(
+                        name: "FK_CountryAssets_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CountryAssets_Countries_CountryId",
                         column: x => x.CountryId,
@@ -144,16 +163,18 @@ namespace HardwareShop.WebApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     UserId = table.Column<int>(type: "integer", nullable: false),
-                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Filename = table.Column<string>(type: "text", nullable: false),
                     AssetType = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ContentType = table.Column<string>(type: "text", nullable: false)
+                    AssetId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_UserAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserAssets_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserAssets_Users_UserId",
                         column: x => x.UserId,
@@ -282,16 +303,18 @@ namespace HardwareShop.WebApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ShopId = table.Column<int>(type: "integer", nullable: false),
-                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Filename = table.Column<string>(type: "text", nullable: false),
                     AssetType = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ContentType = table.Column<string>(type: "text", nullable: false)
+                    AssetId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ShopAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShopAssets_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ShopAssets_Shops_ShopId",
                         column: x => x.ShopId,
@@ -445,16 +468,18 @@ namespace HardwareShop.WebApi.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     ProductId = table.Column<int>(type: "integer", nullable: false),
-                    Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Filename = table.Column<string>(type: "text", nullable: false),
                     AssetType = table.Column<string>(type: "text", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ContentType = table.Column<string>(type: "text", nullable: false)
+                    AssetId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProductAssets_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ProductAssets_Products_ProductId",
                         column: x => x.ProductId,
@@ -574,6 +599,7 @@ namespace HardwareShop.WebApi.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Code = table.Column<string>(type: "text", nullable: false),
                     CustomerId = table.Column<int>(type: "integer", nullable: false),
+                    CustomerInformation = table.Column<string>(type: "text", nullable: false),
                     ShopId = table.Column<int>(type: "integer", nullable: false),
                     OrderId = table.Column<int>(type: "integer", nullable: true),
                     Deposit = table.Column<double>(type: "double precision", nullable: false),
@@ -639,6 +665,11 @@ namespace HardwareShop.WebApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CountryAssets_AssetId",
+                table: "CountryAssets",
+                column: "AssetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_CustomerDebtHistories_CustomerDebtId",
@@ -711,6 +742,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ProductAssets_AssetId",
+                table: "ProductAssets",
+                column: "AssetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProductAssets_ProductId",
                 table: "ProductAssets",
                 column: "ProductId");
@@ -736,6 +772,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ShopAssets_AssetId",
+                table: "ShopAssets",
+                column: "AssetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ShopAssets_ShopId",
                 table: "ShopAssets",
                 column: "ShopId");
@@ -759,6 +800,11 @@ namespace HardwareShop.WebApi.Migrations
                 name: "IX_Units_UnitCategoryId",
                 table: "Units",
                 column: "UnitCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserAssets_AssetId",
+                table: "UserAssets",
+                column: "AssetId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserAssets_UserId",
@@ -835,6 +881,9 @@ namespace HardwareShop.WebApi.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProductCategories");
+
+            migrationBuilder.DropTable(
+                name: "Assets");
 
             migrationBuilder.DropTable(
                 name: "Users");

@@ -1,10 +1,10 @@
 ﻿using HardwareShop.Business.Dtos;
-using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
 using HardwareShop.Dal.Models;
+using HardwareShop.Dal.Repositories;
 using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Business.Implementations
@@ -19,9 +19,11 @@ namespace HardwareShop.Business.Implementations
         private readonly IRepository<UserShop> userShopRepository;
         private readonly IRepository<ShopAsset> shopAssetRepository;
         private readonly IRepository<ShopSetting> shopSettingRepository;
+        private readonly IAssetRepository assetRepository;
 
-        public ShopService(IRepository<Shop> shopRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository, IRepository<ShopSetting> shopSettingRepository)
+        public ShopService(IRepository<Shop> shopRepository, IAssetRepository assetRepository, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IRepository<User> userRepository, IHashingPasswordService hashingPasswordService, IRepository<UserShop> userShopRepository, IRepository<ShopAsset> shopAssetRepository, IRepository<ShopSetting> shopSettingRepository)
         {
+            this.assetRepository = assetRepository;
             this.shopRepository = shopRepository;
             this.currentUserService = currentUserService;
             this.responseResultBuilder = responseResultBuilder;
@@ -152,12 +154,14 @@ namespace HardwareShop.Business.Implementations
             ShopAsset shopAsset = new()
             {
                 AssetType = ShopAssetConstants.LogoAssetType,
-                CreatedDate = DateTime.UtcNow,
-                LastModifiedDate = DateTime.UtcNow,
                 ShopId = shop.Id,
             };
             shopAsset = file.ConvertToAsset(shopAsset);
-            var createOrUpdateResponse = await shopAssetRepository.CreateOrUpdateAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new { e.Bytes, e.ContentType, e.Filename, e.LastModifiedDate });
+            var createOrUpdateResponse = await shopAssetRepository.CreateOrUpdateAssetAsync(shopAsset, e => new { e.ShopId, e.AssetType }, e => new
+            {
+                e.ShopId,
+                e.AssetType,
+            });
 
             return new ShopAssetDto { Id = createOrUpdateResponse.Entity.Id };
         }
@@ -183,7 +187,7 @@ namespace HardwareShop.Business.Implementations
             return await UpdateShopLogo(shop, file);
         }
 
-        public async Task<IAssetTable?> GetCurrentUserShopLogo()
+        public async Task<CachedAsset?> GetCurrentUserShopLogo()
         {
             var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
@@ -197,7 +201,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Logo");
                 return null;
             }
-            return logo;
+            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(logo);
         }
 
         public async Task<PageData<ShopItemDto>> GetShopDtoPageDataAsync(PagingModel pagingModel, string? search)

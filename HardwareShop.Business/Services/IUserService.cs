@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using HardwareShop.Business.Dtos;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
+using HardwareShop.Dal.Models;
 
 namespace HardwareShop.Business.Services
 {
@@ -11,7 +11,7 @@ namespace HardwareShop.Business.Services
         Task<List<UserDto>> GetUserDtosAsync();
         Task<LoginDto?> LoginAsync(string username, string password);
         Task<LoginDto?> LoginByTokenAsync(string token);
-        Task<IAssetTable?> GetCurrentUserAvatarAsync();
+        Task<CachedAsset?> GetCurrentUserAvatarAsync();
         Task<PageData<UserDto>?> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search);
         Task<PageData<UserDto>> GetUserPageDataAsync(PagingModel pagingModel, string? search);
         Task<bool> UpdateCurrentUserInterfaceSettings(JsonDocument settings);

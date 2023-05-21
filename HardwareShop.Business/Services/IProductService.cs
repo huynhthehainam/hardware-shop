@@ -1,6 +1,6 @@
 ﻿using HardwareShop.Business.Dtos;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
+using HardwareShop.Dal.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Business.Services
@@ -19,8 +19,8 @@ namespace HardwareShop.Business.Services
          List<int>? categoryIds,
          List<Tuple<int, double>>? warehouses
          );
-        Task<IAssetTable?> GetProductThumbnailAsync(int productId);
-        Task<IAssetTable?> GetProductAssetByIdAsync(int productId, int assetId);
+        Task<CachedAsset?> GetProductThumbnailAsync(int productId);
+        Task<CachedAsset?> GetProductAssetByIdAsync(int productId, int assetId);
         Task<int?> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file);
         Task<ProductDto?> GetProductDtoOfCurrentUserShopAsync(int productId);
         Task<bool> RemoveProductAssetByIdAsync(int productId, int assetId);

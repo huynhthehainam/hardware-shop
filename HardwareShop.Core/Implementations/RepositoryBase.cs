@@ -21,6 +21,7 @@ namespace HardwareShop.Core.Implementations
             return entity;
         }
 
+
         public async Task<bool> DeleteAsync(T entity)
         {
             _ = DbSet.Remove(entity);
@@ -179,7 +180,7 @@ namespace HardwareShop.Core.Implementations
             return new CreateIfNotExistResponse<T>(true, existingEntity); ;
         }
 
-        public async Task<CreateOrUpdateResponse<T>> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
+        public virtual async Task<CreateOrUpdateResponse<T>> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector)
         {
             System.Reflection.PropertyInfo[] searchProperties = searchSelector.Body.Type.GetProperties();
             System.Reflection.PropertyInfo[] entityProperties = typeof(T).GetProperties();
@@ -235,6 +236,9 @@ namespace HardwareShop.Core.Implementations
 
         }
 
-
+        public DbSet<T> GetDbSet()
+        {
+            return DbSet;
+        }
     }
 }

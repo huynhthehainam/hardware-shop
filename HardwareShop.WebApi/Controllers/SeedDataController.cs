@@ -9,6 +9,7 @@ using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using HardwareShop.Dal.Repositories;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -143,8 +144,10 @@ namespace HardwareShop.WebApi.Controllers
         private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
         private readonly IRepository<Warehouse> warehouseRepository;
         private readonly IWebHostEnvironment environment;
-        public SeedDataController(IWebHostEnvironment environment, IRepository<Customer> customerRepository, IRepository<Warehouse> warehouseRepository, IRepository<Product> productRepository, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<Invoice> invoiceRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly IAssetRepository assetRepository;
+        public SeedDataController(IWebHostEnvironment environment, IAssetRepository assetRepository, IRepository<Customer> customerRepository, IRepository<Warehouse> warehouseRepository, IRepository<Product> productRepository, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<Invoice> invoiceRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
+            this.assetRepository = assetRepository;
             this.unitRepository = unitRepository;
             this.productRepository = productRepository;
             this.customerRepository = customerRepository;
@@ -157,6 +160,11 @@ namespace HardwareShop.WebApi.Controllers
         public async Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
         {
             if (command.DbFile == null || command.ShopId == null)
+            {
+                return responseResultBuilder.Build();
+            }
+            var productAsset = await assetRepository.GetItemByQueryAsync(e => e.Filename == "ProductAsset.jpg");
+            if (productAsset == null)
             {
                 return responseResultBuilder.Build();
             }
@@ -248,6 +256,7 @@ namespace HardwareShop.WebApi.Controllers
                         Address = "Châu Đức, BRVT",
                         ShopId = command.ShopId.Value,
                     }, e => new { e.ShopId, e.Name, e.Address });
+
                     CreateIfNotExistResponse<Product> createIfNotExistResponse = await productRepository.CreateIfNotExistsAsync(new Product()
                     {
                         Name = name,
@@ -264,10 +273,9 @@ namespace HardwareShop.WebApi.Controllers
                         ProductAssets = new ProductAsset[] {
                              new ProductAsset
                             {
-                                Bytes = productAssetBytes,
+
                                 AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                                Filename = productAssetFile,
-                                ContentType= ContentTypeConstants.JpegContentType
+                               Asset = productAsset
                             }
                         },
                         WarehouseProducts = new WarehouseProduct[]{
@@ -347,81 +355,7 @@ namespace HardwareShop.WebApi.Controllers
                 }
                 #endregion
 
-                #region SeedInvoice
-                // SqliteCommand getAllInvoiceCommand = connection.CreateCommand();
-                // getAllInvoiceCommand.CommandText = "SELECT * from Invoices i ";
 
-                // SqliteDataReader getAllInvoiceReader = getAllInvoiceCommand.ExecuteReader();
-                // List<DbInvoiceModel> dbInvoices = new();
-                // while (getAllInvoiceReader.Read())
-                // {
-
-                //     int oldId = getAllInvoiceReader.GetInt32(0);
-                //     DateTime createdDate = getAllInvoiceReader.GetDateTime(1);
-                //     createdDate = TimeZoneInfo.ConvertTimeToUtc(createdDate, timeZoneInfo);
-                //     double newDebt = getAllInvoiceReader.GetDouble(2);
-                //     double deposit = getAllInvoiceReader.GetDouble(3);
-                //     double oldDebt = getAllInvoiceReader.GetDouble(4);
-                //     int oldCustomerId = getAllInvoiceReader.GetInt32(5);
-                //     SqliteCommand getAllInvoiceDetailCommand = connection.CreateCommand();
-                //     getAllInvoiceDetailCommand.CommandText = $"SELECT * from InvoiceDetails id where id.invoice_id = {oldId}";
-                //     SqliteDataReader getAllInvoiceDetailReader = getAllInvoiceDetailCommand.ExecuteReader();
-                //     bool isAllDetailValid = true;
-                //     List<DbInvoiceDetailModel> details = new();
-                //     int? customerId = dbCustomers.FirstOrDefault(e => e.OldId == oldCustomerId)?.Id;
-                //     while (getAllInvoiceDetailReader.Read())
-                //     {
-                //         string productName = getAllInvoiceDetailReader.GetString(1);
-                //         productName = productName.Trim();
-                //         double quantity = getAllInvoiceDetailReader.GetDouble(2);
-                //         string unitName = getAllInvoiceDetailReader.GetString(3);
-                //         double price = getAllInvoiceDetailReader.GetDouble(4);
-                //         double originalPrice = getAllInvoiceDetailReader.GetDouble(5);
-                //         string description = getAllInvoiceDetailReader.GetString(8);
-                //         int? productId = products.FirstOrDefault(e => e.Name == productName)?.Id;
-                //         int? unitId = dbUnits.FirstOrDefault(e => e.Variants.Contains(unitName))?.Id;
-                //         if (productId == null || unitId == null)
-                //         {
-                //             isAllDetailValid = false;
-                //             Console.WriteLine($"ProductName: {productName}, UnitId: {unitId}");
-                //             break;
-                //         }
-                //         details.Add(new DbInvoiceDetailModel(productId.Value, quantity, unitId.Value, price, originalPrice, description));
-                //     }
-
-                //     if (!isAllDetailValid || customerId == null)
-                //     {
-                //         Console.WriteLine("Invoice is invalid");
-                //         continue;
-                //     }
-                //     dbInvoices.Add(new DbInvoiceModel(deposit, createdDate, newDebt, oldDebt, customerId.Value, $"OLD_{oldId}", details));
-                // }
-                // foreach (DbInvoiceModel dbInvoice in dbInvoices)
-                // {
-                //     Task<CustomerDebtHistory?> history = customerDebtHistoryRepository.GetItemByQueryAsync(e => e.OldDebt == dbInvoice.OldDebt && e.NewDebt == dbInvoice.NewDebt);
-                //     CreateIfNotExistResponse<Invoice> createIfNotExistResponse = await invoiceRepository.CreateIfNotExistsAsync(new Invoice()
-                //     {
-
-                //         CreatedDate = dbInvoice.CreatedDate,
-                //         Code = dbInvoice.Code,
-                //         CustomerId = dbInvoice.CustomerId,
-                //         ShopId = command.ShopId.Value,
-                //         Deposit = dbInvoice.Deposit,
-                //         CurrentDebtHistoryId = history?.Id,
-                //         Details = dbInvoice.Details.Select(e => new InvoiceDetail
-                //         {
-                //             Description = e.Description,
-                //             OriginalPrice = e.OriginalPrice,
-                //             Price = e.Price,
-                //             ProductId = e.ProductId,
-                //             Quantity = e.Quantity,
-
-                //         }).ToList(),
-
-                //     }, e => new { e.Code });
-                // }
-
-                #endregion
 
             }
 

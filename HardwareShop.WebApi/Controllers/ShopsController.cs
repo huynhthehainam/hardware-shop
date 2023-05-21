@@ -3,6 +3,9 @@ using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
+
+using HardwareShop.Dal.Models;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 
@@ -103,7 +106,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("YourShop/Logo")]
         public async Task<IActionResult> GetYourShopLogo()
         {
-            IAssetTable? asset = await shopService.GetCurrentUserShopLogo();
+            CachedAsset? asset = await shopService.GetCurrentUserShopLogo();
             if (asset == null)
             {
                 return responseResultBuilder.Build();

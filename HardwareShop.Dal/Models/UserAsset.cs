@@ -1,5 +1,4 @@
-﻿using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace HardwareShop.Dal.Models
@@ -8,7 +7,7 @@ namespace HardwareShop.Dal.Models
     {
         public const string AvatarAssetType = "avatar";
     }
-    public sealed class UserAsset : EntityBase, IAssetTable
+    public sealed class UserAsset : AssetEntityBase
     {
         public UserAsset()
         {
@@ -25,14 +24,5 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader is not null ? lazyLoader.Load(this, ref user) : user;
             set => user = value;
         }
-
-        public byte[] Bytes { get; set; } = Array.Empty<byte>();
-        public string Filename { get; set; } = string.Empty;
-        public string AssetType { get; set; } = string.Empty;
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        public DateTime? LastModifiedDate { get; set; }
-        public string ContentType { get; set; } = string.Empty;
-
-
     }
 }

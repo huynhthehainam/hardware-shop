@@ -5,6 +5,7 @@ using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
