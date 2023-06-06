@@ -1,6 +1,7 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
@@ -12,6 +13,7 @@ using iText.Html2pdf.Resolver.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Business.Implementations
 {
@@ -19,25 +21,17 @@ namespace HardwareShop.Business.Implementations
     {
         private readonly IShopService shopService;
         private readonly IResponseResultBuilder responseResultBuilder;
-        private readonly IRepository<Order> orderRepository;
-        private readonly IRepository<Customer> customerRepository;
-        private readonly IRepository<Product> productRepository;
         private readonly ICustomerDebtService customerDebtService;
-        private readonly IRepository<Invoice> invoiceRepository;
-
-        private readonly IRepository<WarehouseProduct> warehouseProductRepository;
         private readonly ILanguageService languageService;
-        public InvoiceService(ILanguageService languageService, IShopService shopService, IRepository<WarehouseProduct> warehouseProductRepository, IRepository<Product> productRepository, IRepository<Invoice> invoiceRepository, IResponseResultBuilder responseResultBuilder, IRepository<Customer> customerRepository, IRepository<Order> orderRepository, ICustomerDebtService customerDebtService)
+        private readonly DbContext db;
+        public InvoiceService(IShopService shopService, IResponseResultBuilder responseResultBuilder, ICustomerDebtService customerDebtService, ILanguageService languageService, DbContext context)
         {
+            this.shopService = shopService;
             this.responseResultBuilder = responseResultBuilder;
             this.customerDebtService = customerDebtService;
-            this.shopService = shopService;
-            this.customerRepository = customerRepository;
-            this.orderRepository = orderRepository;
-            this.productRepository = productRepository;
-            this.invoiceRepository = invoiceRepository;
             this.languageService = languageService;
-            this.warehouseProductRepository = warehouseProductRepository;
+            this.db = context;
+
         }
         public async Task<CreatedInvoiceDto?> CreateInvoiceOfCurrentUserShopAsync(int customerId, double deposit, int? orderId, List<CreateInvoiceDetailDto> details)
         {
@@ -47,7 +41,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var customer = await customerRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == customerId);
+            var customer = await db.Set<Customer>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == customerId);
             if (customer == null)
             {
                 responseResultBuilder.AddInvalidFieldError("CustomerId");
@@ -55,7 +49,7 @@ namespace HardwareShop.Business.Implementations
             }
             if (orderId != null)
             {
-                Order? order = await orderRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == orderId);
+                Order? order = await db.Set<Order>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == orderId);
                 if (order == null)
                 {
                     responseResultBuilder.AddInvalidFieldError("OrderId");
@@ -65,7 +59,7 @@ namespace HardwareShop.Business.Implementations
             for (int i = 0; i < details.Count; i++)
             {
                 var detail = details[i];
-                var product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == detail.ProductId);
+                var product = await db.Set<Product>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == detail.ProductId);
                 if (product == null)
                 {
                     responseResultBuilder.AddInvalidFieldError($"Details[{i}].ProductId");
@@ -77,7 +71,7 @@ namespace HardwareShop.Business.Implementations
                     return null;
                 }
             }
-            Invoice invoice = await invoiceRepository.CreateAsync(new Invoice
+            Invoice invoice = new Invoice
             {
                 CustomerId = customer.Id,
                 CreatedDate = DateTime.UtcNow,
@@ -96,18 +90,21 @@ namespace HardwareShop.Business.Implementations
                         Quantity = e.Quantity,
                     };
                 }).ToList(),
-            });
+            };
+            db.Add(invoice);
+            db.SaveChanges();
             foreach (var detail in invoice.Details ?? Array.Empty<InvoiceDetail>())
             {
                 var remainingQuantity = detail.Quantity;
-                var warehouseProductPageData = await warehouseProductRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ProductId == detail.ProductId);
-                foreach (var warehouseProduct in warehouseProductPageData.Items)
+                var warehouseProducts = db.Set<WarehouseProduct>().Where(e => e.ProductId == detail.ProductId).ToArray();
+                foreach (var warehouseProduct in warehouseProducts)
                 {
                     warehouseProduct.Quantity -= Math.Min(remainingQuantity, warehouseProduct.Quantity);
                     remainingQuantity -= Math.Min(remainingQuantity, warehouseProduct.Quantity);
-                    await warehouseProductRepository.UpdateAsync(warehouseProduct);
+                    db.Entry(warehouseProduct).State = EntityState.Modified;
                 }
             }
+
 
             var totalCost = details.Sum(e => e.Quantity * e.Price);
             var roundedTotalCost = shop.CashUnit == null ? totalCost : shop.CashUnit.RoundValue(totalCost);
@@ -118,8 +115,9 @@ namespace HardwareShop.Business.Implementations
                 var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenBuying(invoice.Code);
                 CustomerDebtHistory history = await customerDebtService.AddDebtToCustomerAsync(customer, changeOfCash, reason);
                 invoice.CurrentDebtHistory = history;
-                invoice = await invoiceRepository.UpdateAsync(invoice);
+                db.Entry(invoice).State = EntityState.Modified;
             }
+            db.SaveChanges();
             return new CreatedInvoiceDto { Id = invoice.Id };
 
         }
@@ -132,7 +130,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var invoice = await invoiceRepository.GetItemByQueryAsync(e => e.Id == invoiceId && e.ShopId == shop.Id);
+            var invoice = await db.Set<Invoice>().FirstOrDefaultAsync(e => e.Id == invoiceId && e.ShopId == shop.Id);
             if (invoice == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Invoice");
@@ -178,15 +176,16 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var orderQuery = sortingModel.ToOrderQueries<Invoice>();
-            orderQuery.AddRange(new List<QueryOrder<Invoice>>() { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
-            var invoices = await invoiceRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, string.IsNullOrEmpty(search) ? null : new SearchQuery<Invoice>(search, e => new
+            var orderQueries = sortingModel.ToOrderQueries<Invoice>();
+            orderQueries.ToList().AddRange(new List<OrderQuery<Invoice>>() { new OrderQuery<Invoice>(e => e.CreatedDate, false) });
+            var invoicePageData = await db.Set<Invoice>().Where(e => e.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Invoice>(search, e => new
 
             {
                 e.Code,
                 e.CustomerInformation,
-            }), orderQuery);
-            return PageData<InvoiceDto>.ConvertFromOtherPageData(invoices, invoice => new InvoiceDto
+            })).GetPageDataAsync(pagingModel, orderQueries.ToArray());
+
+            return invoicePageData.ConvertToOtherPageData(invoice => new InvoiceDto
             {
                 Id = invoice.Id,
                 CustomerName = invoice.Customer?.Name,
@@ -211,7 +210,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var invoice = await invoiceRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == invoiceId);
+            var invoice = await db.Set<Invoice>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == invoiceId);
             if (invoice == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Invoice");
@@ -235,10 +234,11 @@ namespace HardwareShop.Business.Implementations
                 {
                     var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenRestoringInvoice(invoice.Code);
                     await customerDebtService.AddDebtToCustomerAsync(customer, -debtHistory.ChangeOfDebt, reason);
-                    return await invoiceRepository.DeleteAsync(invoice);
                 }
             }
-            return await invoiceRepository.DeleteAsync(invoice);
+            db.Remove(invoice);
+            db.SaveChanges();
+            return true;
         }
         public string GenerateSingleInvoice(Invoice invoice, bool isAllowedToShowCustomerInformation = true, bool isAllowedToShowCustomerDeposit = true, bool isAllowedToShowShopInformation = true)
         {

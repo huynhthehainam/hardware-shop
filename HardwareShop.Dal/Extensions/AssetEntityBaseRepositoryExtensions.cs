@@ -1,7 +1,7 @@
 
 using System.Linq.Expressions;
-using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Dal.Extensions
 {
@@ -23,9 +23,10 @@ namespace HardwareShop.Dal.Extensions
     }
     public static class AssetEntityBaseRepositoryExtensions
     {
-        public static async Task<CreateOrUpdateAssetResponse<T>> CreateOrUpdateAssetAsync<T>(this IRepository<T> repository, T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector) where T : AssetEntityBase
+        public static CreateOrUpdateAssetResponse<T> CreateOrUpdateAsset<T>(this DbContext db, T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector) where T : AssetEntityBase
         {
             var asset = entity.Asset;
+            var dbSet = db.Set<T>();
             if (asset == null)
             {
                 return new CreateOrUpdateAssetResponse<T>(CreateOrUpdateAssetStatus.Invalid, entity);
@@ -49,16 +50,18 @@ namespace HardwareShop.Dal.Extensions
                         : (Expression)Expression.AndAlso(body, Expression.Equal(Expression.Property(parameterExpression, property.Name), valueExpression));
                 }
             }
+
             if (body == null)
             {
 
-                entity = await repository.CreateAsync(entity);
+                dbSet.Add(entity);
+                db.SaveChanges();
                 return new CreateOrUpdateAssetResponse<T>(CreateOrUpdateAssetStatus.Created, entity);
             }
             else
             {
                 Expression<Func<T, bool>> existQuery = Expression.Lambda<Func<T, bool>>(body, parameterExpression);
-                item = repository.GetDbSet().Where(existQuery).FirstOrDefault();
+                item = db.Set<T>().Where(existQuery).FirstOrDefault();
                 if (item != null)
                 {
                     // Parse item
@@ -73,12 +76,14 @@ namespace HardwareShop.Dal.Extensions
                         }
                     }
                     item.Asset = asset;
-                    entity = await repository.UpdateAsync(item);
+                    dbSet.Update(entity);
+                    db.SaveChanges();
                     return new CreateOrUpdateAssetResponse<T>(CreateOrUpdateAssetStatus.Updated, entity);
                 }
                 else
                 {
-                    entity = await repository.CreateAsync(entity);
+                    dbSet.Add(entity);
+                    db.SaveChanges();
                     return new CreateOrUpdateAssetResponse<T>(CreateOrUpdateAssetStatus.Created, entity);
                 }
             }

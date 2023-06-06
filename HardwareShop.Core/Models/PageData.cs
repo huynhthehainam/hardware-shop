@@ -1,22 +1,21 @@
-﻿using HardwareShop.Core.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HardwareShop.Core.Models
+﻿namespace HardwareShop.Core.Models
 {
     public class PageData<T>
     {
-        public List<T> Items { get; set; } = new List<T>();
-        public int TotalRecords { get; set; } = 0;
-        public PageData() { }
-        public static PageData<T> ConvertFromOtherPageData<TFrom>(PageData<TFrom> pageData, Func<TFrom, T> selector)
+        public T[] Items { get; set; }
+        public int TotalRecords { get; set; }
+        public PageData(T[] items, int count)
         {
-            List<T> newItems = pageData.Items.Select(selector).ToList();
-            return new PageData<T> { Items = newItems, TotalRecords = pageData.TotalRecords };
+            Items = items;
+            TotalRecords = count;
+        }
+    }
+    public static class PageDataExtensions
+    {
+        public static PageData<T> ConvertToOtherPageData<T, TFrom>(this PageData<TFrom> pageData, Func<TFrom, T> selector)
+        {
+            T[] newItems = pageData.Items.Select(selector).ToArray();
+            return new PageData<T>(newItems, pageData.TotalRecords);
         }
     }
 }

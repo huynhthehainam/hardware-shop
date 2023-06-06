@@ -1,39 +1,30 @@
 ﻿using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Extensions;
 using HardwareShop.Dal.Models;
-using HardwareShop.Dal.Repositories;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace HardwareShop.Business.Implementations
 {
     public class ProductService : IProductService
     {
         private readonly IShopService shopService;
-        private readonly IRepository<Product> productRepository;
-        private readonly IRepository<ProductAsset> productAssetRepository;
-        private readonly IResponseResultBuilder responseResultBuilder;
-        private readonly IRepository<Unit> unitRepository;
-        private readonly IRepository<ProductCategory> productCategoryRepository;
-        private readonly IRepository<ProductCategoryProduct> productCategoryProductRepository;
-        private readonly IRepository<Warehouse> warehouseRepository;
-        private readonly IRepository<WarehouseProduct> warehouseProductRepository;
-        private readonly IAssetRepository assetRepository;
 
-        public ProductService(IRepository<WarehouseProduct> warehouseProductRepository, IAssetRepository assetRepository, IRepository<ProductCategoryProduct> productCategoryProductRepository, IRepository<Warehouse> warehouseRepository, IRepository<ProductCategory> productCategoryRepository, IRepository<Unit> unitRepository, IShopService shopService, IRepository<Product> productRepository, IResponseResultBuilder responseResultBuilder, IRepository<ProductAsset> productAssetRepository)
+        private readonly IResponseResultBuilder responseResultBuilder;
+        private readonly DbContext db;
+        private readonly IDistributedCache distributedCache;
+
+        public ProductService(IShopService shopService, IDistributedCache distributedCache, IResponseResultBuilder responseResultBuilder, DbContext context)
         {
-            this.warehouseProductRepository = warehouseProductRepository;
-            this.unitRepository = unitRepository;
             this.shopService = shopService;
-            this.productRepository = productRepository;
+            this.distributedCache = distributedCache;
             this.responseResultBuilder = responseResultBuilder;
-            this.productAssetRepository = productAssetRepository;
-            this.productCategoryRepository = productCategoryRepository;
-            this.warehouseRepository = warehouseRepository;
-            this.productCategoryProductRepository = productCategoryProductRepository;
-            this.assetRepository = assetRepository;
+            this.db = context;
         }
 
         public async Task<CreatedProductDto?> CreateProductOfShopAsync(string name, int unitId, double? mass, double? pricePerMass, double? percentForFamiliarCustomer, double? percentForCustomer, double? priceForFamiliarCustomer, double priceForCustomer, bool hasAutoCalculatePermission, List<int>? categoryIds,
@@ -45,7 +36,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            Unit? unit = await unitRepository.GetItemByQueryAsync(e => e.Id == unitId);
+            Unit? unit = await db.Set<Unit>().FirstOrDefaultAsync(e => e.Id == unitId);
             if (unit == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Unit");
@@ -57,7 +48,7 @@ namespace HardwareShop.Business.Implementations
                 for (int i = 0; i < categoryIds.Count; i++)
                 {
                     int categoryId = categoryIds[i];
-                    bool isExist = await productCategoryRepository.AnyAsync(e => e.Id == categoryId && e.ShopId == shop.Id);
+                    bool isExist = await db.Set<ProductCategory>().AnyAsync(e => e.Id == categoryId && e.ShopId == shop.Id);
                     if (!isExist)
                     {
                         responseResultBuilder.AddNotFoundEntityError($"CategoryIds[{i}]");
@@ -73,7 +64,7 @@ namespace HardwareShop.Business.Implementations
                 {
 
                     Tuple<int, double> warehouse = warehouses[i];
-                    bool isExist = await warehouseRepository.AnyAsync(e => e.Id == warehouse.Item1 && e.ShopId == shop.Id);
+                    bool isExist = await db.Set<Warehouse>().AnyAsync(e => e.Id == warehouse.Item1 && e.ShopId == shop.Id);
                     if (!isExist)
                     {
                         responseResultBuilder.AddNotFoundEntityError($"Warehouses[{i}].Id");
@@ -82,7 +73,7 @@ namespace HardwareShop.Business.Implementations
                     validatedWarehouses.Add(new Tuple<int, double>(warehouse.Item1, warehouse.Item2));
                 }
             }
-            CreateIfNotExistResponse<Product> createIfNotExistResponse = await productRepository.CreateIfNotExistsAsync(new Product
+            CreateIfNotExistResponse<Product> createIfNotExistResponse = db.CreateIfNotExists(new Product
             {
                 Name = name,
                 PricePerMass = pricePerMass,
@@ -120,20 +111,20 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            Product? product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == productId);
+            Product? product = await db.Set<Product>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == productId);
             if (product == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Product");
                 return null;
             }
 
-            ProductAsset? asset = await productAssetRepository.GetItemByQueryAsync(e => e.Id == assetId && e.ProductId == product.Id);
+            ProductAsset? asset = await db.Set<ProductAsset>().FirstOrDefaultAsync(e => e.Id == assetId && e.ProductId == product.Id);
             if (asset == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return null;
             }
-            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(asset);
+            return db.GetCachedAssetById(distributedCache, asset.AssetId);
         }
 
         public async Task<bool> RemoveProductAssetByIdAsync(int productId, int assetId)
@@ -144,20 +135,21 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return false;
             }
-            Product? product = await productRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == productId);
+            Product? product = await db.Set<Product>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == productId);
             if (product == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Product");
                 return false;
             }
 
-            ProductAsset? asset = await productAssetRepository.GetItemByQueryAsync(e => e.Id == assetId && e.ProductId == product.Id);
+            ProductAsset? asset = await db.Set<ProductAsset>().FirstOrDefaultAsync(e => e.Id == assetId && e.ProductId == product.Id);
             if (asset == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return false;
             }
-            _ = await productAssetRepository.DeleteAsync(asset);
+            _ = db.Remove(asset);
+            db.SaveChanges();
             return true;
         }
 
@@ -169,7 +161,6 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
 
-            PageData<SimpleAssetDto> assets = await productAssetRepository.GetDtoPageDataByQueryAsync(new PagingModel(), e => e.ProductId == product.Id, e => new SimpleAssetDto { Id = e.Id, AssetType = e.AssetType });
             return new ProductDto
             {
                 HasAutoCalculatePermission = product.HasAutoCalculatePermission,
@@ -199,7 +190,8 @@ namespace HardwareShop.Business.Implementations
                     WarehouseName = e.Warehouse?.Name
 
                 }).ToList(),
-                Assets = assets.Items.Select(e => new SimpleAssetDto { Id = e.Id, AssetType = e.AssetType }).ToList(),
+                Assets = product.ProductAssets?.Select(e => new SimpleAssetDto { Id = e.Id, AssetType = e.AssetType }).ToList(),
+
             };
         }
 
@@ -211,12 +203,13 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            PageData<Product> productPageData = await productRepository.GetPageDataByQueryAsync(pagingModel, e => e.ShopId == shop.Id, string.IsNullOrEmpty(search) ? null : new SearchQuery<Product>(search, e => new
+            var productPageData = db.Set<Product>().Include(e => e.ProductCategoryProducts).Include(e => e.ProductAssets).Include(e=>e.WarehouseProducts).Include(e=>e.Unit)
+            .Where(e => e.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Product>(search, e => new
             {
                 e.Name
-            }), sortingModel.ToOrderQueries<Product>());
+            })).GetPageData(pagingModel, sortingModel.ToOrderQueries<Product>());
 
-            return PageData<ProductDto>.ConvertFromOtherPageData(productPageData, e => new ProductDto
+            return productPageData.ConvertToOtherPageData(e => new ProductDto
             {
                 Name = e.Name,
                 Id = e.Id,
@@ -231,21 +224,22 @@ namespace HardwareShop.Business.Implementations
                 UnitId = e.UnitId,
                 UnitName = e.Unit?.Name,
                 InventoryNumber = e.InventoryNumber,
-
+                ThumbnailAssetId = e.ProductAssets?.FirstOrDefault(e => e.AssetType == ProductAssetConstants.ThumbnailAssetType)?.AssetId,
             });
+
 
         }
 
         public async Task<CachedAsset?> GetProductThumbnailAsync(int productId)
         {
 
-            ProductAsset? asset = await productAssetRepository.GetItemByQueryAsync(e => e.ProductId == productId && (e.Product != null) && e.AssetType == ProductAssetConstants.ThumbnailAssetType);
+            ProductAsset? asset = await db.Set<ProductAsset>().FirstOrDefaultAsync(e => e.ProductId == productId && (e.Product != null) && e.AssetType == ProductAssetConstants.ThumbnailAssetType);
             if (asset == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return null;
             }
-            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(asset);
+            return db.GetCachedAssetById(distributedCache, asset.AssetId);
         }
 
         public async Task<int?> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file)
@@ -256,7 +250,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            Product? product = await productRepository.GetItemByQueryAsync(e => e.Id == productId && e.ShopId == shop.Id);
+            Product? product = await db.Set<Product>().FirstOrDefaultAsync(e => e.Id == productId && e.ShopId == shop.Id);
             if (product == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Product");
@@ -269,7 +263,7 @@ namespace HardwareShop.Business.Implementations
                 ProductId = product.Id,
             };
             productAsset = file.ConvertToAsset(productAsset);
-            var createOrUpdateAssetResponse = await productAssetRepository.CreateOrUpdateAssetAsync(productAsset, e => new { }, e => new { });
+            var createOrUpdateAssetResponse = db.CreateOrUpdateAsset(productAsset, e => new { }, e => new { });
             return createOrUpdateAssetResponse.Entity.Id;
         }
         private async Task<Product?> GetProductOfCurrentUserShop(int productId)
@@ -280,7 +274,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            Product? product = await productRepository.GetItemByQueryAsync(e => e.Id == productId && e.ShopId == shop.Id);
+            Product? product = await db.Set<Product>().FirstOrDefaultAsync(e => e.Id == productId && e.ShopId == shop.Id);
             if (product == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Product");
@@ -314,7 +308,8 @@ namespace HardwareShop.Business.Implementations
                 ProductAsset item = assets.ElementAt(i);
                 item.AssetType = item.Id == asset.Id ? ProductAssetConstants.ThumbnailAssetType : ProductAssetConstants.SlideAssetType;
             }
-            _ = await productRepository.UpdateAsync(product);
+            db.Update(product);
+            db.SaveChanges();
             return true;
         }
         public async Task<bool> UpdateProductOfCurrentUserShopAsync(int productId, string? name,
@@ -345,7 +340,7 @@ namespace HardwareShop.Business.Implementations
                 for (int i = 0; i < categoryIds.Count; i++)
                 {
                     int categoryId = categoryIds[i];
-                    bool isExist = await productCategoryRepository.AnyAsync(e => e.ShopId == product.ShopId && e.Id == categoryId);
+                    bool isExist = await db.Set<ProductCategory>().AnyAsync(e => e.ShopId == product.ShopId && e.Id == categoryId);
                     if (!isExist)
                     {
                         responseResultBuilder.AddInvalidFieldError($"CategoryIds[{i}]");
@@ -355,19 +350,18 @@ namespace HardwareShop.Business.Implementations
                 }
                 if (isAllCategoryIdsValid)
                 {
-                    _ = await productCategoryProductRepository.DeleteRangeByQueryAsync(e => e.ProductId == product.Id);
+                    var productCategoryProducts = await db.Set<ProductCategoryProduct>().Where(e => e.ProductId == product.Id).ToListAsync();
+                    db.RemoveRange(productCategoryProducts);
+                    db.SaveChanges();
                     foreach (int categoryId in categoryIds)
                     {
-                        _ = await productCategoryProductRepository.CreateIfNotExistsAsync(new ProductCategoryProduct
+                        db.Set<ProductCategoryProduct>().Add(new ProductCategoryProduct
                         {
                             ProductId = product.Id,
                             ProductCategoryId = categoryId
-                        }, e => new
-                        {
-                            e.ProductCategoryId,
-                            e.ProductId,
                         });
                     }
+                    db.SaveChanges();
                 }
 
             }
@@ -377,7 +371,7 @@ namespace HardwareShop.Business.Implementations
                 for (int i = 0; i < warehouses.Count; i++)
                 {
                     int warehouseId = warehouses[i].Item1;
-                    bool isExist = await warehouseRepository.AnyAsync(e => e.ShopId == product.ShopId && e.Id == warehouseId);
+                    bool isExist = await db.Set<Warehouse>().AnyAsync(e => e.ShopId == product.ShopId && e.Id == warehouseId);
                     if (!isExist)
                     {
                         responseResultBuilder.AddInvalidFieldError($"Warehouses[{i}].WarehouseId");
@@ -389,7 +383,7 @@ namespace HardwareShop.Business.Implementations
                 {
                     foreach (Tuple<int, double> tuple in warehouses)
                     {
-                        _ = await warehouseProductRepository.CreateOrUpdateAsync(new WarehouseProduct
+                        db.CreateOrUpdate(new WarehouseProduct
                         {
                             ProductId = product.Id,
                             WarehouseId = tuple.Item1,
@@ -406,7 +400,8 @@ namespace HardwareShop.Business.Implementations
                 }
 
             }
-            _ = await productRepository.UpdateAsync(product);
+            db.Update(product);
+            db.SaveChanges();
             return true;
         }
 
@@ -424,8 +419,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return false;
             }
-            PageData<Product> productPageData = await productRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ShopId == shop.Id && e.HasAutoCalculatePermission && e.ProductCategoryProducts != null && e.ProductCategoryProducts.Any(c => categoryIds.Contains(c.ProductCategoryId)));
-            List<Product> products = productPageData.Items;
+            var products = db.Set<Product>().Where(e => e.ShopId == shop.Id && e.HasAutoCalculatePermission && e.ProductCategoryProducts != null && e.ProductCategoryProducts.Any(c => categoryIds.Contains(c.ProductCategoryId))).ToList();
             foreach (Product product in products)
             {
                 if (product.HasAutoCalculatePermission)
@@ -454,15 +448,16 @@ namespace HardwareShop.Business.Implementations
                         product.PricePerMass += amountOfCash;
                     }
                 }
-                _ = await productRepository.UpdateAsync(product);
+                db.Update(product);
             }
+            db.SaveChanges();
             return true;
         }
 
         public async Task<bool> SoftlyDeleteProductOfCurrentUserShopAsync(int id)
         {
             Product? product = await GetProductOfCurrentUserShop(id);
-            return product == null ? false : await productRepository.DeleteSoftlyAsync(product);
+            return product == null ? false : db.SoftDelete(product);
         }
     }
 }

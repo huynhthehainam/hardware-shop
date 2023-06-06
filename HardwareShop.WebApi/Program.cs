@@ -4,7 +4,6 @@ using HardwareShop.Business.Extensions;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal;
-using HardwareShop.Dal.Extensions;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -131,7 +130,7 @@ public class Program
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
-        builder.Services.ConfigureRepository();
+
         builder.Services.ConfigureBusiness();
 
 

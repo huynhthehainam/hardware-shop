@@ -3,24 +3,25 @@
 
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Business.Implementations
 {
     public class UnitService : IUnitService
     {
-        private readonly IRepository<Unit> unitRepository;
-        private readonly IRepository<UnitCategory> unitCategoryRepository;
+
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ICurrentUserService currentUserService;
-        public UnitService(IRepository<Unit> unitRepository, IRepository<UnitCategory> unitCategoryRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService)
+        private readonly DbContext db;
+        public UnitService(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService, DbContext db)
         {
             this.responseResultBuilder = responseResultBuilder;
-            this.unitRepository = unitRepository;
             this.currentUserService = currentUserService;
-            this.unitCategoryRepository = unitCategoryRepository;
+            this.db = db;
         }
 
         public async Task<CreatedUnitDto?> CreateUnitAsync(CreateUnitDto model)
@@ -31,13 +32,13 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotPermittedError();
                 return null;
             }
-            var unitCategory = await unitCategoryRepository.GetItemByQueryAsync(e => e.Id == model.UnitCategoryId);
+            var unitCategory = await db.Set<UnitCategory>().FirstOrDefaultAsync(e => e.Id == model.UnitCategoryId);
             if (unitCategory == null)
             {
                 responseResultBuilder.AddInvalidFieldError("UnitCategoryId");
                 return null;
             }
-            CreateIfNotExistResponse<Unit> createIfNotExistResponse = await unitRepository.CreateIfNotExistsAsync(new Unit
+            CreateIfNotExistResponse<Unit> createIfNotExistResponse = db.CreateIfNotExists(new Unit
             {
                 Name = model.Name,
                 CompareWithPrimaryUnit = model.CompareWithPrimaryUnit,
@@ -58,8 +59,9 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId)
         {
-            PageData<Unit> units = await unitRepository.GetPageDataByQueryAsync(pagingModel, e => categoryId == null || e.UnitCategoryId == categoryId, string.IsNullOrEmpty(search) ? null : new SearchQuery<Unit>(search, e => new { e.Name }));
-            return PageData<UnitDto>.ConvertFromOtherPageData(units, e => new UnitDto
+            var unitPageData = await db.Set<Unit>().Where(e => categoryId == null || e.UnitCategoryId == categoryId).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Unit>(search, e => new { e.Name })).GetPageDataAsync(pagingModel);
+
+            return unitPageData.ConvertToOtherPageData(e => new UnitDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -69,7 +71,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<double?> RoundValue(int unitId, double value)
         {
-            Unit? unit = await unitRepository.GetItemByQueryAsync(e => e.Id == unitId);
+            Unit? unit = await db.Set<Unit>().Where(e => e.Id == unitId).FirstOrDefaultAsync();
             if (unit == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Unit");

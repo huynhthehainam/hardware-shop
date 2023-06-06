@@ -4,22 +4,25 @@
 
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Business.Implementations
 {
     public class ProductCategoryService : IProductCategoryService
     {
-        private readonly IRepository<ProductCategory> productCategoryRepository;
         private readonly IShopService shopService;
         private readonly IResponseResultBuilder responseResultBuilder;
-        public ProductCategoryService(IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<ProductCategory> productCategoryRepository)
+        private readonly DbContext db;
+        public ProductCategoryService(IResponseResultBuilder responseResultBuilder, IShopService shopService, DbContext db)
         {
             this.responseResultBuilder = responseResultBuilder;
-            this.productCategoryRepository = productCategoryRepository;
+
             this.shopService = shopService;
+            this.db = db;
         }
 
         public async Task<ProductCategoryDto?> CreateCategoryOfCurrentUserShopAsync(string name, string? description)
@@ -30,7 +33,9 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            ProductCategory category = await productCategoryRepository.CreateAsync(new ProductCategory { ShopId = shop.Id, Name = name, Description = description });
+            ProductCategory category = new ProductCategory { ShopId = shop.Id, Name = name, Description = description };
+            db.Add(category);
+            db.SaveChanges();
             return new ProductCategoryDto { Id = category.Id, Name = category.Name };
         }
 
@@ -42,9 +47,10 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            PageData<ProductCategory> categories = await productCategoryRepository.GetPageDataByQueryAsync(pagingModel,
-            e => e.ShopId == shop.Id, string.IsNullOrEmpty(search) ? null : new SearchQuery<ProductCategory>(search, e => new { e.Name }), new List<QueryOrder<ProductCategory>> { new QueryOrder<ProductCategory>(e => e.Name, true) });
-            return PageData<ProductCategoryDto>.ConvertFromOtherPageData(categories, e => new ProductCategoryDto
+            var categoryPageData = db.Set<ProductCategory>().Where(e => e.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<ProductCategory>(search, e => new { e.Name })).GetPageData(pagingModel);
+
+
+            return categoryPageData.ConvertToOtherPageData(e => new ProductCategoryDto
             {
                 Id = e.Id,
                 Name = e.Name

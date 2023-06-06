@@ -6,13 +6,14 @@
 using System.Text.Json;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Core.Bases;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
-using HardwareShop.Dal.Repositories;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.WebApi.Controllers
 {
@@ -137,36 +138,25 @@ namespace HardwareShop.WebApi.Controllers
             }
         }
         #endregion
-        private readonly IRepository<Unit> unitRepository;
-        private readonly IRepository<Product> productRepository;
-        private readonly IRepository<Customer> customerRepository;
-        private readonly IRepository<Invoice> invoiceRepository;
-        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
-        private readonly IRepository<Warehouse> warehouseRepository;
+
         private readonly IWebHostEnvironment environment;
-        private readonly IAssetRepository assetRepository;
-        public SeedDataController(IWebHostEnvironment environment, IAssetRepository assetRepository, IRepository<Customer> customerRepository, IRepository<Warehouse> warehouseRepository, IRepository<Product> productRepository, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IRepository<Invoice> invoiceRepository, IRepository<Unit> unitRepository, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly DbContext db;
+        public SeedDataController(IWebHostEnvironment environment, DbContext db, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
-            this.assetRepository = assetRepository;
-            this.unitRepository = unitRepository;
-            this.productRepository = productRepository;
-            this.customerRepository = customerRepository;
-            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
-            this.invoiceRepository = invoiceRepository;
-            this.warehouseRepository = warehouseRepository;
+            this.db = db;
             this.environment = environment;
         }
         [HttpPost("SeedFromDbFile")]
-        public async Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
+        public Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
         {
             if (command.DbFile == null || command.ShopId == null)
             {
-                return responseResultBuilder.Build();
+                return Task.FromResult(responseResultBuilder.Build());
             }
-            var productAsset = await assetRepository.GetItemByQueryAsync(e => e.Filename == "ProductAsset.jpg");
+            var productAsset = db.Set<Asset>().FirstOrDefault(e => e.Filename == "ProductAsset.jpg");
             if (productAsset == null)
             {
-                return responseResultBuilder.Build();
+                return Task.FromResult(responseResultBuilder.Build());
             }
             string dbFilePath = Path.Combine("UploadedDb");
             _ = Directory.CreateDirectory(dbFilePath);
@@ -204,7 +194,7 @@ namespace HardwareShop.WebApi.Controllers
                 };
                 foreach (DbUnitModel dbUnit in dbUnits)
                 {
-                    CreateOrUpdateResponse<Unit> unit = await unitRepository.CreateOrUpdateAsync(new Unit()
+                    CreateOrUpdateResponse<Unit> unit = db.CreateOrUpdate(new Unit()
                     {
                         CompareWithPrimaryUnit = dbUnit.CompareWithPrimaryUnit,
                         IsPrimary = false,
@@ -250,14 +240,14 @@ namespace HardwareShop.WebApi.Controllers
                         continue;
                     }
 
-                    var createWarehouseIfNotExistResponse = await warehouseRepository.CreateIfNotExistsAsync(new Warehouse()
+                    var createWarehouseIfNotExistResponse = db.CreateIfNotExists(new Warehouse()
                     {
                         Name = "Kho 1",
                         Address = "Châu Đức, BRVT",
                         ShopId = command.ShopId.Value,
                     }, e => new { e.ShopId, e.Name, e.Address });
 
-                    CreateIfNotExistResponse<Product> createIfNotExistResponse = await productRepository.CreateIfNotExistsAsync(new Product()
+                    CreateIfNotExistResponse<Product> createIfNotExistResponse = db.CreateIfNotExists(new Product()
                     {
                         Name = name,
                         HasAutoCalculatePermission = true,
@@ -323,14 +313,17 @@ namespace HardwareShop.WebApi.Controllers
                             debt = debtHistory.OldDebt;
                             debtHistories.Add(debtHistory);
                         }
-                        dbCustomers.Add(new DbCustomerModel(oldId, name, address, currentDebt, debtHistories));
+                        if (!string.IsNullOrEmpty(name))
+                        {
+                            dbCustomers.Add(new DbCustomerModel(oldId, name, address, currentDebt, debtHistories));
+                        }
 
                     }
                     foreach (DbCustomerModel dbCustomer in dbCustomers)
                     {
 
 
-                        CreateIfNotExistResponse<Customer> createIfNotExistResponse = await customerRepository.CreateIfNotExistsAsync(new Customer
+                        CreateIfNotExistResponse<Customer> createIfNotExistResponse = db.CreateIfNotExists(new Customer
                         {
                             Address = dbCustomer.Address,
                             Name = dbCustomer.Name,
@@ -369,7 +362,7 @@ namespace HardwareShop.WebApi.Controllers
                 SqliteConnection.ClearAllPools();
                 System.IO.File.Delete(dbFilePath);
             }
-            return responseResultBuilder.Build();
+            return Task.FromResult(responseResultBuilder.Build());
         }
 
     }

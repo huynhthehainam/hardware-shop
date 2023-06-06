@@ -106,7 +106,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("YourShop/Logo")]
         public async Task<IActionResult> GetYourShopLogo()
         {
-            CachedAsset? asset = await shopService.GetCurrentUserShopLogo();
+            CachedAsset? asset = await shopService.GetCurrentUserShopLogoAsync();
             if (asset == null)
             {
                 return responseResultBuilder.Build();

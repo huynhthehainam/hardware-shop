@@ -8,5 +8,6 @@ namespace HardwareShop.Business.Dtos
     {
         public int Id { get; set; }
         public string AssetType { get; set; } = string.Empty;
+        public long AssetId { get; set; }
     }
 }

@@ -1,29 +1,31 @@
-
-
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.Dal.Extensions;
 using HardwareShop.Dal.Models;
-using HardwareShop.Dal.Repositories;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace HardwareShop.Business.Implementations
 {
     public class CountryService : ICountryService
     {
-        private readonly IRepository<Country> countryRepository;
+
         private readonly IResponseResultBuilder responseResultBuilder;
-        private readonly IAssetRepository assetRepository;
-        public CountryService(IRepository<Country> countryRepository, IResponseResultBuilder responseResultBuilder, IAssetRepository assetRepository)
+        private readonly DbContext db;
+        private readonly IDistributedCache distributedCache;
+        public CountryService(IResponseResultBuilder responseResultBuilder, IDistributedCache distributedCache, DbContext db)
         {
-            this.countryRepository = countryRepository;
             this.responseResultBuilder = responseResultBuilder;
-            this.assetRepository = assetRepository;
+            this.db = db;
+            this.distributedCache = distributedCache;
         }
 
         public async Task<CachedAsset?> GetCountryIconByIdAsync(int id)
         {
-            var country = await countryRepository.GetItemByQueryAsync(e => e.Id == id);
+            var country = await db.Set<Country>().FirstOrDefaultAsync(e => e.Id == id);
             if (country == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Country");
@@ -36,17 +38,19 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Asset");
                 return null;
             }
-            return await assetRepository.GetCachedAssetFromAssetEntityBaseAsync(asset);
+            return db.GetCachedAssetById(distributedCache, asset.AssetId);
         }
 
         public async Task<PageData<CountryDto>> GetCountryPageData(PagingModel pagingModel, string? search)
         {
-            return await countryRepository.GetDtoPageDataByQueryAsync<CountryDto>(pagingModel, e => true, e => new CountryDto
+
+            var countryPageData = await db.Set<Country>().Where(e => true).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Country>(search, e => new { e.Name, e.PhonePrefix })).GetPageDataAsync(pagingModel);
+            return countryPageData.ConvertToOtherPageData(e => new CountryDto
             {
                 Id = e.Id,
                 Name = e.Name,
                 PhonePrefix = e.PhonePrefix,
-            }, string.IsNullOrEmpty(search) ? null : new SearchQuery<Country>(search, e => new { e.Name, e.PhonePrefix }));
+            });
         }
     }
 }

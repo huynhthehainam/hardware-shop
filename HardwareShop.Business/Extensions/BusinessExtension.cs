@@ -1,5 +1,6 @@
 ﻿using HardwareShop.Business.Implementations;
 using HardwareShop.Business.Services;
+using HardwareShop.Dal.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace HardwareShop.Business.Extensions
@@ -8,6 +9,7 @@ namespace HardwareShop.Business.Extensions
     {
         public static void ConfigureBusiness(this IServiceCollection services)
         {
+            services.ConfigureRepository();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();
             services.AddScoped<IWarehouseService, WarehouseService>();
@@ -19,6 +21,7 @@ namespace HardwareShop.Business.Extensions
             services.AddScoped<IUnitCategoryService, UnitCategoryService>();
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<ICountryService, CountryService>();
+            services.AddScoped<IAssetService, AssetService>();
         }
     }
 }

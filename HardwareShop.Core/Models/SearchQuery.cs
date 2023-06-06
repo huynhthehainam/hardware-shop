@@ -1,9 +1,9 @@
-﻿using System.Linq.Expressions;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Core.Services
+
+using System.Linq.Expressions;
+using HardwareShop.Core.Bases;
+
+namespace HardwareShop.Core.Models
 {
     public class SearchQuery<T> where T : EntityBase
     {
@@ -52,34 +52,5 @@ namespace HardwareShop.Core.Services
 
             return Expression.Lambda<Func<T, bool>>(body, parameterExpression);
         }
-    }
-    public class QueryOrder<T> where T : EntityBase
-    {
-        public Func<T, object?> Order { get; set; }
-        public bool IsAscending { get; set; }
-        public QueryOrder(Func<T, object?> order, bool isAscending)
-        {
-            Order = order;
-            IsAscending = isAscending;
-        }
-    }
-
-
-    public interface IRepository<T> where T : EntityBase
-    {
-        DbSet<T> GetDbSet();
-        Task<PageData<T>> GetPageDataByQueryAsync(PagingModel pagingModel, Expression<Func<T, bool>> expression, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null);
-        Task<PageData<T1>> GetDtoPageDataByQueryAsync<T1>(PagingModel pagingModel, Expression<Func<T, bool>> expression, Func<T, T1> convertor, SearchQuery<T>? searchQuery = null, List<QueryOrder<T>>? orders = null) where T1 : class;
-        Task<List<T>> GetDataByQueryAsync(Expression<Func<T, Boolean>> expression);
-        Task<bool> DeleteByQueryAsync(Expression<Func<T, Boolean>> expression);
-        Task<T?> GetItemByQueryAsync(Expression<Func<T, bool>> expression);
-        Task<T> CreateAsync(T entity);
-        Task<bool> DeleteSoftlyAsync<T1>(T1 entity) where T1 : T, ISoftDeletable;
-        Task<T> UpdateAsync(T entity);
-        Task<bool> DeleteAsync(T entity);
-        Task<bool> DeleteRangeByQueryAsync(Expression<Func<T, Boolean>> expression);
-        Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
-        Task<CreateIfNotExistResponse<T>> CreateIfNotExistsAsync(T entity, Expression<Func<T, object>> selector);
-        Task<CreateOrUpdateResponse<T>> CreateOrUpdateAsync(T entity, Expression<Func<T, object>> searchSelector, Expression<Func<T, object>> updateSelector);
     }
 }

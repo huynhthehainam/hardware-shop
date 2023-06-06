@@ -16,7 +16,7 @@ namespace HardwareShop.Business.Services
         Task<CreatedUserDto?> CreateAdminUserAsync(int id, string v1, string v2, string? email);
         Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
         Task<ShopAssetDto?> UpdateYourShopLogoAsync(IFormFile logo);
-        Task<CachedAsset?> GetCurrentUserShopLogo();
+        Task<CachedAsset?> GetCurrentUserShopLogoAsync();
         Task<PageData<ShopItemDto>> GetShopDtoPageDataAsync(PagingModel pagingModel, string? search);
     }
 }

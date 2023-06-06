@@ -1,6 +1,7 @@
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Helpers;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
@@ -11,82 +12,30 @@ using iText.Html2pdf.Resolver.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Business.Implementations
 {
     public class CustomerService : ICustomerService
     {
         private readonly IShopService shopService;
-        private readonly IRepository<Customer> customerRepository;
-        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
-        private readonly IRepository<Invoice> invoiceRepository;
+
         private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ILanguageService languageService;
         private readonly ICustomerDebtService customerDebtService;
         private readonly IInvoiceService invoiceService;
-        public CustomerService(IRepository<Invoice> invoiceRepository, ILanguageService languageService, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IRepository<CustomerDebtHistory> customerDebtHistoryRepository, IResponseResultBuilder responseResultBuilder, IShopService shopService, IRepository<Customer> customerRepository)
+        private readonly DbContext db;
+        public CustomerService(ILanguageService languageService, DbContext db, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IResponseResultBuilder responseResultBuilder, IShopService shopService)
         {
             this.responseResultBuilder = responseResultBuilder;
-            this.customerRepository = customerRepository;
+            this.db = db;
             this.shopService = shopService;
             this.languageService = languageService;
             this.invoiceService = invoiceService;
-            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
             this.customerDebtService = customerDebtService;
-            this.invoiceRepository = invoiceRepository;
         }
-        public async Task<PageData<CustomerDto>?> GetCustomerPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
-        {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
-            if (shop == null)
-            {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
-            }
-            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id, e => new CustomerDto
-            {
-                Id = e.Id,
-                Name = e.Name,
-                Address = e.Address,
-                IsFamiliar = e.IsFamiliar,
-                PhonePrefix = e.PhoneCountry?.PhonePrefix,
-                PhoneCountryId = e.PhoneCountryId,
-                Phone = e.Phone,
-                Debt = e.Debt?.Amount ?? 0,
-            }, string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
-            {
-                e.Name,
-                e.Address,
-                e.Phone
-            }), new List<QueryOrder<Customer>> { new QueryOrder<Customer>(e => e.Name, true) });
-            return customers;
-        }
-        public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
-        {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
-            if (shop == null)
-            {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
-            }
-            var customers = await customerRepository.GetDtoPageDataByQueryAsync<CustomerDto>(pagingModel, e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0), e => new CustomerDto
-            {
-                Id = e.Id,
-                Name = e.Name,
-                Address = e.Address,
-                IsFamiliar = e.IsFamiliar,
-                PhonePrefix = e.PhoneCountry?.PhonePrefix,
-                PhoneCountryId = e.PhoneCountryId,
-                Phone = e.Phone,
-                Debt = e.Debt?.Amount ?? 0,
-            }, string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
-            {
-                e.Name,
-                e.Address,
-                e.Phone
-            }), new List<QueryOrder<Customer>> { new QueryOrder<Customer>(e => e.Name, true) });
-            return customers;
-        }
+
+   
 
         public async Task<CreatedCustomerDto?> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar, int? phoneCountryId)
         {
@@ -97,7 +46,7 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
 
-            var createIfNotExistResponse = await customerRepository.CreateIfNotExistsAsync(new Customer
+            var createIfNotExistResponse = db.CreateIfNotExists(new Customer
             {
                 ShopId = shop.Id,
                 Name = name,
@@ -128,7 +77,8 @@ namespace HardwareShop.Business.Implementations
                 var reason = amountOfCash > 0 ? CustomerDebtHistoryHelper.GenerateDebtReasonWhenBorrowing() : CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingBack();
                 await customerDebtService.AddDebtToCustomerAsync(customer, amountOfCash.Value, reason);
             }
-            customer = await customerRepository.UpdateAsync(customer);
+            db.Update(customer);
+            db.SaveChanges();
             return new CustomerDto { Id = customer.Id };
         }
 
@@ -140,7 +90,7 @@ namespace HardwareShop.Business.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            var customer = await customerRepository.GetItemByQueryAsync(e => e.ShopId == shop.Id && e.Id == customerId);
+            var customer = await db.Set<Customer>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == customerId);
             if (customer == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Customer");
@@ -172,8 +122,8 @@ namespace HardwareShop.Business.Implementations
         {
             var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
             if (customer == null) return null;
-
-            return await customerDebtHistoryRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerDebtId == customerId, e => new CustomerDebtHistoryDto
+            var customerDebtHistoryPageData = await db.Set<CustomerDebtHistory>().Where(e => e.CustomerDebtId == customer.Id).GetPageDataAsync(pagingModel, new OrderQuery<CustomerDebtHistory>[] { new OrderQuery<CustomerDebtHistory>(e => e.CreatedDate, false) });
+            return customerDebtHistoryPageData.ConvertToOtherPageData(e => new CustomerDebtHistoryDto
             {
                 ChangeOfDebt = e.ChangeOfDebt,
                 CreatedDate = e.CreatedDate,
@@ -182,21 +132,23 @@ namespace HardwareShop.Business.Implementations
                 Id = e.Id,
                 Reason = e.Reason,
                 ReasonParams = e.ReasonParams
-            }, null, new List<QueryOrder<CustomerDebtHistory>>() { new QueryOrder<CustomerDebtHistory>(e => e.CreatedDate, false) });
+            });
         }
 
         public async Task<PageData<InvoiceDto>?> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
             var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
             if (customer == null) return null;
-            return await invoiceRepository.GetDtoPageDataByQueryAsync(pagingModel, e => e.CustomerId == customer.Id, e => new InvoiceDto
+            var invoicePageData = await db.Set<Invoice>().Where(e => e.CustomerId == customer.Id).GetPageDataAsync(pagingModel, new OrderQuery<Invoice>[] { new OrderQuery<Invoice>(e => e.CreatedDate, false) });
+            return invoicePageData.ConvertToOtherPageData(e => new InvoiceDto
             {
                 Id = e.Id,
                 Code = e.Code,
                 CreatedDate = e.CreatedDate,
                 Deposit = e.Deposit,
                 TotalCost = e.GetTotalCost(),
-            }, null, new List<QueryOrder<Invoice>> { new QueryOrder<Invoice>(e => e.CreatedDate, false) });
+            });
+
         }
 
         public async Task<bool> PayAllDebtForCustomerOfCurrentUserShopAsync(int id)
@@ -248,11 +200,14 @@ namespace HardwareShop.Business.Implementations
                 return null;
             }
 
-            var customerPageData = await customerRepository.GetPageDataByQueryAsync(new PagingModel(), e => e.ShopId == shop.Id && e.Debt != null && e.Debt.Amount > 0, null, new List<QueryOrder<Customer>>() { new QueryOrder<Customer>(e => e.Name, true) });
+            var customerPageData = await db.Set<Customer>().Where(e => e.ShopId == shop.Id && e.Debt != null && e.Debt.Amount > 0).
+            GetPageDataAsync(new PagingModel(), new OrderQuery<Customer>[] { new OrderQuery<Customer>(e => e.Name, true) });
+
+
             var customers = customerPageData.Items;
             var rows = new List<string>();
             var rowHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_SingleRow.html");
-            var halfIndex = customers.Count / 2;
+            var halfIndex = customers.Length / 2;
             var cashUnit = shop.CashUnit;
             for (var i = 0; i < halfIndex + 1; i++)
             {
@@ -296,7 +251,7 @@ namespace HardwareShop.Business.Implementations
     }}}
 });
             rows.Clear();
-            for (var i = halfIndex + 1; i < customers.Count; i++)
+            for (var i = halfIndex + 1; i < customers.Length; i++)
             {
                 var customer = customers[i];
                 var informationListString = new List<string>();
@@ -356,6 +311,60 @@ namespace HardwareShop.Business.Implementations
 
             var bytes = ms.ToArray();
             return bytes;
+        }
+
+        public async Task<PageData<CustomerDto>?> GetCustomerPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        {
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var customerPageData = await db.Set<Customer>().Where(e => e.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
+            {
+                e.Name,
+                e.Address,
+                e.Phone
+            })).GetPageDataAsync(pagingModel, new OrderQuery<Customer>[] { new OrderQuery<Customer>(e => e.Name, true) });
+            return customerPageData.ConvertToOtherPageData(e => new CustomerDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Address = e.Address,
+                IsFamiliar = e.IsFamiliar,
+                PhonePrefix = e.PhoneCountry?.PhonePrefix,
+                PhoneCountryId = e.PhoneCountryId,
+                Phone = e.Phone,
+                Debt = e.Debt?.Amount ?? 0,
+            });
+        }
+
+        public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        {
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            if (shop == null)
+            {
+                responseResultBuilder.AddNotFoundEntityError("Shop");
+                return null;
+            }
+            var customerPageData = await db.Set<Customer>().Where(e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0)).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
+            {
+                e.Name,
+                e.Address,
+                e.Phone
+            })).GetPageDataAsync(pagingModel, new OrderQuery<Customer>[] { new OrderQuery<Customer>(e => e.Name, true) });
+            return customerPageData.ConvertToOtherPageData(e => new CustomerDto
+            {
+                Id = e.Id,
+                Name = e.Name,
+                Address = e.Address,
+                IsFamiliar = e.IsFamiliar,
+                PhonePrefix = e.PhoneCountry?.PhonePrefix,
+                PhoneCountryId = e.PhoneCountryId,
+                Phone = e.Phone,
+                Debt = e.Debt?.Amount ?? 0,
+            });
         }
     }
 }

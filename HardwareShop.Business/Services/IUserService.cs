@@ -8,7 +8,6 @@ namespace HardwareShop.Business.Services
     public interface IUserService
     {
         Task<CreatedUserDto> CreateUserAsync(string username, string password);
-        Task<List<UserDto>> GetUserDtosAsync();
         Task<LoginDto?> LoginAsync(string username, string password);
         Task<LoginDto?> LoginByTokenAsync(string token);
         Task<CachedAsset?> GetCurrentUserAvatarAsync();

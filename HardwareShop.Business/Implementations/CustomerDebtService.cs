@@ -1,30 +1,29 @@
 using System.Text.Json;
 using HardwareShop.Business.Services;
+using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Business.Implementations
 {
     public class CustomerDebtService : ICustomerDebtService
     {
-        private readonly IRepository<CustomerDebt> customerDebtRepository;
-        private readonly IRepository<CustomerDebtHistory> customerDebtHistoryRepository;
-        public CustomerDebtService(IRepository<CustomerDebt> customerDebtRepository, IRepository<CustomerDebtHistory> customerDebtHistoryRepository)
+        private readonly DbContext db;
+        public CustomerDebtService(DbContext db)
         {
-            this.customerDebtHistoryRepository = customerDebtHistoryRepository;
-            this.customerDebtRepository = customerDebtRepository;
+            this.db = db;
         }
 
-        public async Task<CustomerDebtHistory> AddDebtToCustomerAsync(Customer customer, double changeOfDebt, Tuple<string, JsonDocument> reason)
+        public Task<CustomerDebtHistory> AddDebtToCustomerAsync(Customer customer, double changeOfDebt, Tuple<string, JsonDocument> reason)
         {
-            CreateOrUpdateResponse<CustomerDebt> createOrUpdateResponse = await customerDebtRepository.CreateOrUpdateAsync(new CustomerDebt
+            CreateOrUpdateResponse<CustomerDebt> createOrUpdateResponse = db.CreateOrUpdate(new CustomerDebt
             {
                 CustomerId = customer.Id,
                 Amount = 0,
             }, e => new { e.CustomerId }, e => new { e.CustomerId });
             CustomerDebt debt = createOrUpdateResponse.Entity;
-            CustomerDebtHistory history = await customerDebtHistoryRepository.CreateAsync(new CustomerDebtHistory
+            CustomerDebtHistory history = new CustomerDebtHistory
             {
                 ChangeOfDebt = changeOfDebt,
                 CustomerDebtId = debt.CustomerId,
@@ -33,11 +32,13 @@ namespace HardwareShop.Business.Implementations
                 Reason = reason.Item1,
                 CreatedDate = DateTime.UtcNow,
                 ReasonParams = reason.Item2,
-            });
+            };
+            db.Set<CustomerDebtHistory>().Add(history);
 
             debt.Amount = history.NewDebt;
-            debt = await customerDebtRepository.UpdateAsync(debt);
-            return history;
+            db.Entry(debt).State = EntityState.Modified;
+            db.SaveChanges();
+            return Task.FromResult(history);
         }
     }
 }

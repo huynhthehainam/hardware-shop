@@ -26,5 +26,6 @@
         public List<ProductWarehouseDto>? Warehouses { get; set; }
         public List<SimpleAssetDto>? Assets { get; set; }
         public double InventoryNumber { get; set; }
+        public long? ThumbnailAssetId { get; set; }
     }
 }
