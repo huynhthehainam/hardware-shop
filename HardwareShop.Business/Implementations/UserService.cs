@@ -69,6 +69,10 @@ namespace HardwareShop.Business.Implementations
         public async Task<LoginDto?> LoginAsync(string username, string password)
         {
             User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Username == username);
+            if (user != null)
+            {
+                var aa = hashingPasswordService.Verify(password, user.HashedPassword ?? "");
+            }
             return user == null
                 ? null
                 : !hashingPasswordService.Verify(password, user.HashedPassword ?? "") ? null : GenerateLoginDtoFromUser(user);
@@ -295,6 +299,6 @@ namespace HardwareShop.Business.Implementations
             return true;
         }
 
-    
+
     }
 }
