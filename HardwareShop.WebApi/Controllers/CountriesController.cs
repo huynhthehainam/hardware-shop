@@ -1,6 +1,7 @@
 
 
 
+using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
@@ -20,17 +21,23 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCountries([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            var countries = await countryService.GetCountryPageData(pagingModel, search);
-            responseResultBuilder.SetPageData(countries);
+            var countriesResponse = await countryService.GetCountryPageData(pagingModel, search);
+            responseResultBuilder.SetApplicationResponse(countriesResponse, (builder, result) =>
+            {
+                builder.SetPageData(result);
+            });
             return responseResultBuilder.Build();
         }
 
         [HttpGet("{id:int}/Icon")]
         public async Task<IActionResult> GetCountryIcon([FromRoute] int id)
         {
-            var asset = await countryService.GetCountryIconByIdAsync(id);
-            if (asset == null) return responseResultBuilder.Build();
-            responseResultBuilder.SetAsset(asset);
+            var assetResponse = await countryService.GetCountryIconByIdAsync(id);
+            responseResultBuilder.SetApplicationResponse(assetResponse, (builder, result) =>
+            {
+               
+                builder.SetAsset(result);
+            });
             return responseResultBuilder.Build();
         }
     }

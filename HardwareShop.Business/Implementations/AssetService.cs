@@ -1,4 +1,5 @@
 
+using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Services;
 using HardwareShop.Dal.Extensions;
@@ -15,16 +16,19 @@ namespace HardwareShop.Business.Implementations
         private readonly IResponseResultBuilder responseResultBuilder;
         public AssetService(DbContext dbContext, IDistributedCache distributedCache, IResponseResultBuilder responseResultBuilder) => (this.db, this.distributedCache, this.responseResultBuilder) = (dbContext, distributedCache, responseResultBuilder);
 
-        public CachedAsset? GetAssetById(long id)
+        public ApplicationResponse<CachedAsset> GetAssetById(long id)
         {
             var asset = db.GetCachedAssetById(distributedCache, id);
             if (asset == null)
             {
 
-                responseResultBuilder.AddNotFoundEntityError("Asset");
-                return null;
+                return new ApplicationResponse<CachedAsset>
+                {
+                    Error = ApplicationError.CreateNotFoundError("Asset"),
+                };
+
             }
-            return asset;
+            return new ApplicationResponse<CachedAsset> { Result = asset };
         }
     }
 }

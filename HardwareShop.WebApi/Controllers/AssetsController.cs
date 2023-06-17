@@ -1,5 +1,6 @@
 
 
+using HardwareShop.Business.Extensions;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Services;
@@ -18,9 +19,11 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:long}")]
         public IActionResult GetAssetById([FromRoute] long id)
         {
-            var asset = assetService.GetAssetById(id);
-            if (asset == null) return responseResultBuilder.Build();
-            responseResultBuilder.SetAsset(asset);
+            var assetResponse = assetService.GetAssetById(id);
+            responseResultBuilder.SetApplicationResponse(assetResponse, (builder, result) =>
+            {
+                builder.SetAsset(result);
+            });
             return responseResultBuilder.Build();
         }
     }
