@@ -32,19 +32,19 @@ namespace HardwareShop.WebApi.Extensions
             }
             if (!db.Users.Any())
             {
-                string productAssetPath = Path.Join(assetFolder, productAssetFile);
+                string productAssetPath = System.IO.Path.Join(assetFolder, productAssetFile);
                 byte[] productAssetBytes = File.ReadAllBytes(productAssetPath);
 
-                string shopAssetPath = Path.Join(assetFolder, shopAssetFile);
+                string shopAssetPath = System.IO.Path.Join(assetFolder, shopAssetFile);
                 byte[] shopAssetBytes = File.ReadAllBytes(shopAssetPath);
 
-                string userAssetPath = Path.Join(assetFolder, userAssetFile);
+                string userAssetPath = System.IO.Path.Join(assetFolder, userAssetFile);
                 byte[] userAssetBytes = File.ReadAllBytes(userAssetPath);
 
-                string countryAssetPath = Path.Join(assetFolder, countryAssetFile);
+                string countryAssetPath = System.IO.Path.Join(assetFolder, countryAssetFile);
                 byte[] countryAssetBytes = File.ReadAllBytes(countryAssetPath);
 
-                string countryAsset2Path = Path.Join(assetFolder, countryAsset2File);
+                string countryAsset2Path = System.IO.Path.Join(assetFolder, countryAsset2File);
                 byte[] countryAsset2Bytes = File.ReadAllBytes(countryAsset2Path);
 
                 var productAsset = new Asset()

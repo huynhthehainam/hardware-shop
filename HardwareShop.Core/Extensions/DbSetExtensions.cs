@@ -145,7 +145,7 @@ namespace HardwareShop.Core.Extensions
             T? existingEntity = db.Set<T>().Where(existQuery).FirstOrDefault();
             if (existingEntity == null)
             {
-                db.Add(entity);
+                db.Set<T>().Add(entity);
                 db.SaveChanges();
                 return new CreateIfNotExistResponse<T>(false, entity);
             }

@@ -6,6 +6,7 @@ using HardwareShop.Core.Services;
 using HardwareShop.Dal;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
+using HardwareShop.WebApi.GraphQL;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -35,6 +36,7 @@ public class Program
 
 
         builder.Services.AddControllers();
+        builder.Services.AddGraphQLServer().AddAuthorization().AddQueryType<Query>().AddMutationType<Mutation>();
         builder.Services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) => opt.UseNpgsql(builder.Configuration.GetConnectionString("AppConn"), b =>
         {
             b.MigrationsAssembly("HardwareShop.WebApi");
@@ -149,6 +151,7 @@ public class Program
 
         app.MapControllers();
         app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
+        app.MapGraphQL();
         app.UseAuthentication();
 
         app.UseAuthorization();

@@ -158,9 +158,9 @@ namespace HardwareShop.WebApi.Controllers
             {
                 return Task.FromResult(responseResultBuilder.Build());
             }
-            string dbFilePath = Path.Combine("UploadedDb");
+            string dbFilePath = System.IO.Path.Combine("UploadedDb");
             _ = Directory.CreateDirectory(dbFilePath);
-            dbFilePath = Path.Combine(dbFilePath, "dbab.db");
+            dbFilePath = System.IO.Path.Combine(dbFilePath, "dbab.db");
             using (FileStream fileStream = new(dbFilePath, FileMode.Create))
             {
                 command.DbFile.CopyTo(fileStream);
@@ -217,7 +217,7 @@ namespace HardwareShop.WebApi.Controllers
                 List<Product> products = new();
                 const string assetFolder = "SampleImages";
                 const string productAssetFile = "ProductAsset.jpg";
-                string productAssetPath = Path.Join(assetFolder, productAssetFile);
+                string productAssetPath = System.IO.Path.Join(assetFolder, productAssetFile);
                 byte[] productAssetBytes = System.IO.File.ReadAllBytes(productAssetPath);
                 while (getAllProductReader.Read())
                 {

@@ -10,6 +10,6 @@ namespace HardwareShop.Business.Services
         Task<double?> RoundValue(int unitId, double value);
         Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId);
         Task<CreatedUnitDto?> CreateUnitAsync(CreateUnitDto model);
-
+        bool IsCashUnitExist(int cashUnitId);
     }
 }

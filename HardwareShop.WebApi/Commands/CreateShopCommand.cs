@@ -6,6 +6,8 @@ namespace HardwareShop.WebApi.Commands
     {
         [Required]
         public string? Name { get; set; }
+        [Required]
+        public int? CashUnitId { get; set; }
         public string? Address { get; set; }
     }
 }

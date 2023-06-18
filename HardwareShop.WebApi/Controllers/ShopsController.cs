@@ -43,7 +43,7 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            CreatedShopDto? shop = await shopService.CreateShopAsync(command.Name ?? "", command.Address);
+            CreatedShopDto? shop = await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
             if (shop == null)
             {
                 return responseResultBuilder.Build();

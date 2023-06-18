@@ -9,7 +9,7 @@ namespace HardwareShop.Business.Services
     {
         Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff);
         Task<ShopDto?> GetShopDtoByCurrentUserIdAsync(UserShopRole role = UserShopRole.Staff);
-        Task<CreatedShopDto?> CreateShopAsync(string name, string? address);
+        Task<CreatedShopDto?> CreateShopAsync(string name, string? address, int cashUnitId);
         Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file);
         Task<bool> DeleteShopSoftlyAsync(int shopId);
         Task<bool> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions);

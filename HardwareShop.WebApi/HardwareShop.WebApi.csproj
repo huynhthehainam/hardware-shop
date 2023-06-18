@@ -18,6 +18,9 @@
     <PackageReference Include="itext7" Version="7.2.5" />
     <PackageReference Include="itext7.pdfhtml" Version="4.0.5" />
     <PackageReference Include="Microsoft.Data.Sqlite" Version="6.0.8" />
+    <PackageReference Include="HotChocolate.AspNetCore" Version="13.2.1" />
+    <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.2.1" />
+    <PackageReference Include="HotChocolate.AspNetCore.Playground" Version="10.5.5" />
   </ItemGroup>
   <ItemGroup>
     <None Include="SampleImages/**" CopyToOutputDirectory="PreserveNewest" />

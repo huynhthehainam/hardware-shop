@@ -19,13 +19,15 @@ namespace HardwareShop.Business.Implementations
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly DbContext db;
         private readonly IDistributedCache distributedCache;
+        private readonly IUnitService unitService;
 
-        public ShopService(DbContext db, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IHashingPasswordService hashingPasswordService, IDistributedCache distributedCache)
+        public ShopService(DbContext db, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IHashingPasswordService hashingPasswordService, IDistributedCache distributedCache, IUnitService unitService)
         {
             this.distributedCache = distributedCache;
             this.db = db;
             this.currentUserService = currentUserService;
             this.responseResultBuilder = responseResultBuilder;
+            this.unitService = unitService;
             this.hashingPasswordService = hashingPasswordService;
         }
 
@@ -66,12 +68,19 @@ namespace HardwareShop.Business.Implementations
 
         }
 
-        public Task<CreatedShopDto?> CreateShopAsync(string name, string? address)
+        public Task<CreatedShopDto?> CreateShopAsync(string name, string? address, int cashUnitId)
         {
+            var isCashUnitExist = unitService.IsCashUnitExist(cashUnitId);
+            if (!isCashUnitExist)
+            {
+                responseResultBuilder.AddInvalidFieldError("CashUnit");
+                return Task.FromResult<CreatedShopDto?>(null);
+            }
             var createIfNotExistResponse = db.CreateIfNotExists(new Shop
             {
                 Name = name,
-                Address = address
+                Address = address,
+                CashUnitId = cashUnitId,
             },
                 e => new
                 {

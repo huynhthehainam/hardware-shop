@@ -56,6 +56,10 @@ namespace HardwareShop.Business.Implementations
             };
 
         }
+        public bool IsCashUnitExist(int cashUnitId)
+        {
+            return db.Set<Unit>().Any(e => e.Id == cashUnitId && e.UnitCategory != null && e.UnitCategory.Name == UnitCategoryConstants.CurrencyCategoryName);
+        }
 
         public async Task<PageData<UnitDto>> GetUnitDtoPageDataAsync(PagingModel pagingModel, string? search, int? categoryId)
         {
