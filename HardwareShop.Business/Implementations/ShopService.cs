@@ -223,6 +223,7 @@ namespace HardwareShop.Business.Implementations
                 Address = e.Address,
                 Emails = e.Emails,
                 Name = e.Name,
+                CashUnitId = e.CashUnitId,
                 Phones = e.Phones?.Select(sp => new ShopPhoneDto()
                 {
                     Id = sp.Id,

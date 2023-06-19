@@ -17,8 +17,9 @@ namespace HardwareShop.Business.Dtos
     public class ShopItemDto
     {
         public int Id { get; set; }
-        public string? Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         public string? Address { get; set; }
+        public int CashUnitId { get; set; }
         public string[]? Emails { get; set; }
         public ShopPhoneDto[]? Phones { get; set; } = Array.Empty<ShopPhoneDto>();
     }
