@@ -10,6 +10,23 @@ namespace HardwareShop.WebApi.GraphQL
     {
         public string Name { get; set; } = string.Empty;
     }
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+    public class OrderableAttribute : Attribute
+    {
+        public OrderableAttribute(string name)
+        {
+            Console.WriteLine("Hello" + name);
+        }
+        public string CheckValue(object value)
+        {
+            ShopObjectType shop = (ShopObjectType)value;
+            return $"Shop: {shop.Name}";
+        }
+    }
+
+    // For learning
+    [Orderable("ABC")]
+    [Orderable("CBD")]
     public class ShopObjectType
     {
         public int Id { get; set; }
@@ -32,6 +49,19 @@ namespace HardwareShop.WebApi.GraphQL
 
         public async Task<PageData<ShopObjectType>> GetShops([Service] IShopService shopService, PagingModel pagingModel, string? search)
         {
+            Console.WriteLine("Before");
+            var shop = new ShopObjectType() { };
+            foreach (var attr in Attribute.GetCustomAttributes(shop.GetType(), typeof(OrderableAttribute)))
+            {
+                if (attr is OrderableAttribute)
+                {
+
+                    OrderableAttribute orderableAttr = (OrderableAttribute)attr;
+                    Console.WriteLine(orderableAttr.CheckValue(shop));
+
+                }
+            }
+            Console.WriteLine("After");
             var shopPageData = await shopService.GetShopDtoPageDataAsync(pagingModel, search);
 
             return shopPageData.ConvertToOtherPageData(e => new ShopObjectType()
