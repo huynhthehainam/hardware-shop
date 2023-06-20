@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+option csharp_namespace = "HardwareShop.WebApi.Protos";
+
+service HardwareShopGrpcService {
+    rpc GetUserInfo(GetUserInfoRequest) returns (UserGrpcModel);
+}
+
+message GetUserInfoRequest {
+    int32 id=1;
+}
+
+message UserGrpcModel {
+    string email =1;
+}

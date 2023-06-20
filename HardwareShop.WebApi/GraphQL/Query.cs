@@ -1,5 +1,6 @@
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Models;
+using HardwareShop.Core.Services;
 using HardwareShop.Dal.Models;
 using HotChocolate.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -27,6 +28,7 @@ namespace HardwareShop.WebApi.GraphQL
     // For learning
     [Orderable("ABC")]
     [Orderable("CBD")]
+    [Serializable]
     public class ShopObjectType
     {
         public int Id { get; set; }
@@ -44,12 +46,11 @@ namespace HardwareShop.WebApi.GraphQL
     }
     public sealed class Query
     {
-
         [Authorize]
-
-        public async Task<PageData<ShopObjectType>> GetShops([Service] IShopService shopService, PagingModel pagingModel, string? search)
+        public async Task<PageData<ShopObjectType>> GetShops([Service] IShopService shopService, [Service] ICurrentUserService currentUserService, PagingModel pagingModel, string? search)
         {
             Console.WriteLine("Before");
+            var isAdmin = currentUserService.IsSystemAdmin();
             var shop = new ShopObjectType() { };
             foreach (var attr in Attribute.GetCustomAttributes(shop.GetType(), typeof(OrderableAttribute)))
             {
@@ -59,6 +60,10 @@ namespace HardwareShop.WebApi.GraphQL
                     OrderableAttribute orderableAttr = (OrderableAttribute)attr;
                     Console.WriteLine(orderableAttr.CheckValue(shop));
 
+                }
+                else
+                {
+                    Console.WriteLine("Not Orderable");
                 }
             }
             Console.WriteLine("After");
