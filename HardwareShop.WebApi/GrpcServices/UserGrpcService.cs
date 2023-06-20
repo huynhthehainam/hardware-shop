@@ -18,6 +18,7 @@ namespace HardwareShop.WebApi.GrpcServices
         public override Task<UserGrpcModel> GetUserInfo(GetUserInfoRequest request, ServerCallContext context)
         {
             var isAdmin = currentUserService.IsSystemAdmin();
+            var userId = currentUserService.GetUserId();
             var aa = request.Id;
             return Task<UserGrpcModel>.FromResult(new UserGrpcModel { Email = "test@mail.com" });
         }
