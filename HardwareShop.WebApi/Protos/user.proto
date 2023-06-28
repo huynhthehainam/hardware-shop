@@ -4,6 +4,7 @@ option csharp_namespace = "HardwareShop.WebApi.Protos";
 
 service HardwareShopGrpcService {
     rpc GetUserInfo(GetUserInfoRequest) returns (UserGrpcModel);
+    rpc TestStream(GetUserInfoRequest) returns (stream UserGrpcModel);
 }
 
 message GetUserInfoRequest {

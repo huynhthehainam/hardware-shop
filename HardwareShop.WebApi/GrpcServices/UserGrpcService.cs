@@ -22,5 +22,20 @@ namespace HardwareShop.WebApi.GrpcServices
             var aa = request.Id;
             return Task<UserGrpcModel>.FromResult(new UserGrpcModel { Email = "test@mail.com" });
         }
+        public override async Task TestStream(GetUserInfoRequest request, IServerStreamWriter<UserGrpcModel> responseStream, ServerCallContext context)
+        {
+            var rand = new Random();
+            var i = 0;
+            while (!context.CancellationToken.IsCancellationRequested && i < 20)
+            {
+                i += 1;
+                var index = rand.Next();
+                await responseStream.WriteAsync(new UserGrpcModel()
+                {
+                    Email = $"test{index % 10}@mail.com"
+                });
+            }
+            Console.WriteLine("Close stream");
+        }
     }
 }

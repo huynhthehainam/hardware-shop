@@ -8,6 +8,7 @@ using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
+using HardwareShop.WebApi.Hubs;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -40,6 +41,7 @@ public class Program
         builder.Services.AddGraphQLServer().AddAuthorization().AddQueryType<Query>().AddMutationType<Mutation>();
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
+        builder.Services.AddSignalR();
         builder.Services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) => opt.UseNpgsql(builder.Configuration.GetConnectionString("AppConn"), b =>
         {
             b.MigrationsAssembly("HardwareShop.WebApi");
@@ -99,8 +101,13 @@ public class Program
                {
                    OnMessageReceived = (context) =>
                {
-                   var bb = context.HttpContext.Request.Query["access_token"];
-                   context.Token = context.HttpContext.Request.Query["access_token"];
+                   var token = context.HttpContext.Request.Query["access_token"];
+                   var path = context.HttpContext.Request.Path;
+                   if (!string.IsNullOrEmpty(token) && path.StartsWithSegments(ChatHubConstants.Endpoint))
+                   {
+                       context.Token = token;
+
+                   }
                    return Task.CompletedTask;
                }
                };
@@ -160,11 +167,12 @@ public class Program
 
         app.UseAuthorization();
         app.MapGrpcService<UserGrpcService>();
-        var env = app.Environment;
-        if (env.IsDevelopment())
+        if (app.Environment.IsDevelopment())
         {
             app.MapGrpcReflectionService();
         }
+
+        app.MapHub<ChatHub>(ChatHubConstants.Endpoint);
 
         app.SeedData();
         app.Run();
