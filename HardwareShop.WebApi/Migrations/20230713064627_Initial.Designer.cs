@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230521043808_Initial")]
+    [Migration("20230713064627_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,6 +54,105 @@ namespace HardwareShop.WebApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Assets");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("SessionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("SessionId", "UserId");
+
+                    b.ToTable("ChatMessages");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatMessageStatus", b =>
+                {
+                    b.Property<long>("MessageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("SessionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("MessageId", "SessionId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("SessionId", "UserId");
+
+                    b.ToTable("ChatMessageStatuses");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatSession", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<long>("AssetId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("AssetType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsGroupChat")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssetId");
+
+                    b.ToTable("ChatSessions");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatSessionMember", b =>
+                {
+                    b.Property<int>("SessionId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("SessionId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ChatSessionMembers");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>
@@ -783,6 +882,98 @@ namespace HardwareShop.WebApi.Migrations
                     b.ToTable("WarehouseProducts");
                 });
 
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatMessage", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.ChatSession", "Session")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.User", "User")
+                        .WithMany("Messages")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.ChatSessionMember", "Member")
+                        .WithMany("Messages")
+                        .HasForeignKey("SessionId", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Session");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatMessageStatus", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.ChatMessage", "Message")
+                        .WithMany("MessageStatuses")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.ChatSession", "Session")
+                        .WithMany("MessageStatuses")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.User", "User")
+                        .WithMany("MessageStatuses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.ChatSessionMember", "Member")
+                        .WithMany("MessageStatuses")
+                        .HasForeignKey("SessionId", "UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Member");
+
+                    b.Navigation("Message");
+
+                    b.Navigation("Session");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatSession", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.Asset", "Asset")
+                        .WithMany("ChatSessions")
+                        .HasForeignKey("AssetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Asset");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatSessionMember", b =>
+                {
+                    b.HasOne("HardwareShop.Dal.Models.ChatSession", "Session")
+                        .WithMany("Members")
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Dal.Models.User", "User")
+                        .WithMany("ChatSessionMembers")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Session");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("HardwareShop.Dal.Models.CountryAsset", b =>
                 {
                     b.HasOne("HardwareShop.Dal.Models.Asset", "Asset")
@@ -1162,6 +1353,8 @@ namespace HardwareShop.WebApi.Migrations
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Asset", b =>
                 {
+                    b.Navigation("ChatSessions");
+
                     b.Navigation("CountryAssets");
 
                     b.Navigation("ProductAssets");
@@ -1169,6 +1362,27 @@ namespace HardwareShop.WebApi.Migrations
                     b.Navigation("ShopAssets");
 
                     b.Navigation("UserAssets");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatMessage", b =>
+                {
+                    b.Navigation("MessageStatuses");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatSession", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("MessageStatuses");
+
+                    b.Navigation("Messages");
+                });
+
+            modelBuilder.Entity("HardwareShop.Dal.Models.ChatSessionMember", b =>
+                {
+                    b.Navigation("MessageStatuses");
+
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("HardwareShop.Dal.Models.Country", b =>
@@ -1269,6 +1483,12 @@ namespace HardwareShop.WebApi.Migrations
             modelBuilder.Entity("HardwareShop.Dal.Models.User", b =>
                 {
                     b.Navigation("Assets");
+
+                    b.Navigation("ChatSessionMembers");
+
+                    b.Navigation("MessageStatuses");
+
+                    b.Navigation("Messages");
 
                     b.Navigation("Notifications");
 

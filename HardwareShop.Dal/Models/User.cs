@@ -13,7 +13,14 @@ namespace HardwareShop.Dal.Models
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-
+        public string DisplayName
+        {
+            get
+            {
+                return Username;
+                return $"{FirstName} {LastName}";
+            }
+        }
         public string Username { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Phone { get; set; }
@@ -58,5 +65,23 @@ namespace HardwareShop.Dal.Models
         }
 
 
+        private ICollection<ChatSessionMember>? chatSessionMembers;
+        public ICollection<ChatSessionMember>? ChatSessionMembers
+        {
+            get => lazyLoader?.Load(this, ref chatSessionMembers);
+            set => chatSessionMembers = value;
+        }
+        private ICollection<ChatMessage>? messages;
+        public ICollection<ChatMessage>? Messages
+        {
+            get => lazyLoader?.Load(this, ref messages);
+            set => messages = value;
+        }
+        private ICollection<ChatMessageStatus>? messageStatuses;
+        public ICollection<ChatMessageStatus>? MessageStatuses
+        {
+            get => lazyLoader?.Load(this, ref messageStatuses);
+            set => messageStatuses = value;
+        }
     }
 }

@@ -234,8 +234,27 @@ namespace HardwareShop.WebApi.Extensions
                             }
                     }
                 };
+                User user2 = new()
+                {
+                    Email = "huynhthehainam.mismart@gmail.com",
+                    HashedPassword = hashingPasswordService.Hash("123"),
+                    Phone = "+84967044037",
+                    FirstName = "Nam",
+                    LastName = "Huỳnh",
+                    Role = SystemUserRole.Admin,
+                    Username = "admin2",
+                    Assets = new UserAsset[]
+                   {
+                            new UserAsset
+                            {
+                                AssetType = UserAssetConstants.AvatarAssetType,
+                            Asset = userAsset,
+                            }
+                   }
+                };
                 _ = db.Users.Add(user);
                 _ = db.Users.Add(user1);
+                _ = db.Users.Add(user2);
                 _ = db.SaveChanges();
 
 
@@ -280,6 +299,12 @@ namespace HardwareShop.WebApi.Extensions
                             new UserShop
                             {
                                 UserId =  user1.Id,
+                                Role  = UserShopRole.Staff,
+
+                            },
+                               new UserShop
+                            {
+                                UserId =  user2.Id,
                                 Role  = UserShopRole.Staff,
 
                             }

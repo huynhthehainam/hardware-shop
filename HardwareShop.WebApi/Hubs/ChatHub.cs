@@ -1,5 +1,4 @@
-
-using HardwareShop.Business.Services;
+using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -12,14 +11,14 @@ namespace HardwareShop.WebApi.Hubs
     [Authorize]
     public sealed class ChatHub : Hub
     {
-        private readonly IUserService userService;
-        public ChatHub(IUserService userService)
+        private readonly ICurrentUserService currentUserService;
+        public ChatHub(ICurrentUserService currentUserService)
         {
-            this.userService = userService;
+            this.currentUserService = currentUserService;
         }
         public override async Task OnConnectedAsync()
         {
-            Console.WriteLine("Connected");
+            var userId = currentUserService.GetUserId();
             await base.OnConnectedAsync();
         }
         public async Task TestMe(string someRandomText)

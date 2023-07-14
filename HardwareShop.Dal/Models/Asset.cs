@@ -8,7 +8,7 @@ namespace HardwareShop.Dal.Models
         public const string JpegContentType = "image/jpeg";
         public const string PngContentType = "image/png";
     }
-   
+
     public abstract class AssetEntityBase : EntityBase
     {
         public AssetEntityBase(ILazyLoader lazyLoader) : base(lazyLoader) { }
@@ -83,6 +83,12 @@ namespace HardwareShop.Dal.Models
         {
             get => lazyLoader != null ? lazyLoader.Load(this, ref userAssets) : userAssets;
             set => userAssets = value;
+        }
+        private ICollection<ChatSession>? chatSessions;
+        public ICollection<ChatSession>? ChatSessions
+        {
+            get => lazyLoader?.Load(this, ref chatSessions);
+            set => chatSessions = value;
         }
     }
 }
