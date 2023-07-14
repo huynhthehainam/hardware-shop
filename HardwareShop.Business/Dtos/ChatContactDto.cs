@@ -1,8 +1,12 @@
 namespace HardwareShop.Business.Dtos
 {
 
-
-    public sealed class ChatContactDto
+    public class ContactUserDto
+    {
+        public int UserId { get; set; }
+        public long AssetId { get; set; }
+    }
+    public class ChatContactDto
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
@@ -10,5 +14,6 @@ namespace HardwareShop.Business.Dtos
         public string Status { get; set; } = "offline";
         public long AssetId { get; set; }
         public bool IsGroupChat { get; set; }
+        public ContactUserDto[] Users { get; set; } = new ContactUserDto[0];
     }
 }

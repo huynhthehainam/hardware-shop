@@ -9,6 +9,10 @@
             Items = items;
             TotalRecords = count;
         }
+        public static PageData<T> EmptyPageData()
+        {
+            return new PageData<T>(Array.Empty<T>(), 0);
+        }
     }
     public static class PageDataExtensions
     {
@@ -17,5 +21,6 @@
             T[] newItems = pageData.Items.Select(selector).ToArray();
             return new PageData<T>(newItems, pageData.TotalRecords);
         }
+
     }
 }

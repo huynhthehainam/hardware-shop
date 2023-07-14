@@ -15,6 +15,7 @@ namespace HardwareShop.Dal.Models
         public ChatSession(ILazyLoader lazyLoader) : base(lazyLoader)
         {
         }
+        public string? Name { get; set; }
 
         public DateTime CreatedTime { get; set; } = DateTime.UtcNow;
         public int Id { get; set; }

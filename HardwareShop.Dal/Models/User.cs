@@ -83,5 +83,10 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader?.Load(this, ref messageStatuses);
             set => messageStatuses = value;
         }
+
+        public long? GetAvatarAssetId()
+        {
+            return Assets?.FirstOrDefault(e => e.AssetType == UserAssetConstants.AvatarAssetType)?.AssetId;
+        }
     }
 }

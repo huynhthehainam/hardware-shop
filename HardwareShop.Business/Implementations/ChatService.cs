@@ -32,30 +32,28 @@ namespace HardwareShop.Business.Implementations
             var groupSessions = db.Set<ChatSession>().Where(e => e.IsGroupChat && e.Members != null && e.Members.Any(e => e.UserId == currentUerId)).ToList();
             var finalContacts = new List<ChatContactDto>();
             var session = groupSessions.FirstOrDefault();
-            if (session != null)
-            {
-                var count = db.Set<ChatMessage>().Count(e => e.SessionId == session.Id && e.UserId != currentUerId
-                              && e.MessageStatuses != null && !e.MessageStatuses.Any(e => e.UserId == currentUerId && e.IsRead)
-                               );
-            }
+
             finalContacts.AddRange(groupSessions.Select(group => new ChatContactDto
             {
                 Id = group.Id,
                 AssetId = group.AssetId,
                 IsGroupChat = true,
-                Name = string.Join(", ", group.Members?.Select(e => e.User?.DisplayName ?? "") ?? new string[0]),
-                Unread = db.Set<ChatMessage>().Count(e => e.SessionId == group.Id && e.UserId != currentUerId
-                              && e.MessageStatuses != null && !e.MessageStatuses.Any(e => e.UserId == currentUerId && e.IsRead)
-                               ),
+                Name = string.IsNullOrEmpty(group.Name) ? string.Join(", ", group.Members?.Select(e => e.User?.DisplayName ?? "") ?? new string[0] { }) : group.Name,
+                Unread = GetUnreadOfChatSessionByUserId(group.Id, currentUerId),
                 Status = "offline",
+                Users = group.Members?.Select(e => new ContactUserDto
+                {
+                    UserId = e.UserId,
+                    AssetId = e.User?.GetAvatarAssetId() ?? 0
+                }).ToArray() ?? new ContactUserDto[0],
             }));
 
 
 
 
-            var aa = users.Select(u => new ChatContactDto
+            var userSessions = users.Select(u => new ChatContactDto
             {
-                AssetId = u.Assets?.FirstOrDefault(e => e.AssetType == UserAssetConstants.AvatarAssetType)?.AssetId ?? 0,
+                AssetId = u.GetAvatarAssetId() ?? 0,
                 Id = u.ChatSessionMembers?.FirstOrDefault(e => e.Session != null && !e.Session.IsGroupChat && e.Session.Members != null && e.Session.Members.Any(e => e.UserId == currentUerId))?.SessionId ?? 0,
                 IsGroupChat = false,
                 Name = u.DisplayName,
@@ -63,13 +61,21 @@ namespace HardwareShop.Business.Implementations
                 Unread = db.Set<ChatMessage>().Count(e => e.Member != null && e.Member.UserId == u.Id && e.Member.Session != null && !e.Member.Session.IsGroupChat && e.Member.Session.Members != null && e.Member.Session.Members.Any(e => e.UserId == currentUerId) && e.Member.Session.Members.Any(e => e.UserId == u.Id)
                  && e.MessageStatuses != null && !e.MessageStatuses.Any(e => e.UserId == currentUerId && e.IsRead)
                               ),
+                Users = new ContactUserDto[] { new ContactUserDto { AssetId = u.GetAvatarAssetId() ?? 0, UserId = u.Id }, new ContactUserDto { UserId = currentUerId, AssetId = 0 } },
             }).ToList();
 
-            finalContacts.AddRange(aa);
+            finalContacts.AddRange(userSessions);
             return finalContacts;
         }
-        public async Task<int?> CreateChatSessionAsync(List<int> userIds)
+        private int GetUnreadOfChatSessionByUserId(int sessionId, int userId)
         {
+            return db.Set<ChatMessage>().Count(e => e.SessionId == sessionId && e.UserId != userId
+                                  && e.MessageStatuses != null && !e.MessageStatuses.Any(e => e.UserId == userId && e.IsRead)
+                                   );
+        }
+        public async Task<CreatedChatSessionDto?> CreateChatSessionAsync(List<int> userIds)
+        {
+            var affectedUserIds = userIds;
             if (userIds.Count == 0) return null;
 
             var currentUerId = currentUserService.GetUserId();
@@ -88,6 +94,7 @@ namespace HardwareShop.Business.Implementations
                 AssetId = validatedUsers.FirstOrDefault()?.Assets?.FirstOrDefault(e => e.AssetType == UserAssetConstants.AvatarAssetType)?.AssetId ?? 1,
                 AssetType = ChatSessionAssetConstants.AvatarType,
                 CreatedTime = DateTime.UtcNow,
+
                 Members = validatedUsers.Select(e => new ChatSessionMember
                 {
                     UserId = e.Id,
@@ -97,36 +104,53 @@ namespace HardwareShop.Business.Implementations
             }, e => e.Members != null && e.Members.All(m => userIds.Contains(m.UserId)));
 
 
-            return createIfNotExistResponse.Entity.Id;
+            return new CreatedChatSessionDto
+            {
+                AffectedUserIds = affectedUserIds,
+                Id = createIfNotExistResponse.Entity.Id,
+                IsCreated = !createIfNotExistResponse.IsExist,
+                IsGroupChat = createIfNotExistResponse.Entity.IsGroupChat,
+                CreatedUserId = currentUerId,
+                Status = "online",
+                Unread = 0,
+                AssetId = createIfNotExistResponse.Entity.AssetId,
+                Users = validatedUsers.Select(e => new ContactUserDto { UserId = e.Id, AssetId = e.GetAvatarAssetId() ?? 0 }).ToArray(),
+                Messages = await GetMessagesAsync(createIfNotExistResponse.Entity.Id, new PagingModel { PageIndex = 0, PageSize = 20 }),
+            };
         }
 
-        public async Task<long?> CreateChatMessage(int chatId, string message)
+        public async Task<CreatedChatMessageDto?> CreateChatMessageAsync(int chatId, string message)
         {
-            var chatSession = db.Set<ChatSession>().AsNoTracking().Where(e => e.Id == chatId).FirstOrDefault();
+            var chatSession = db.Set<ChatSession>().AsNoTracking().Include(e => e.Members).Where(e => e.Id == chatId).FirstOrDefault();
             if (chatSession == null) return null;
+            var currentUserId = currentUserService.GetUserId();
             var chatMessage = new ChatMessage()
             {
                 Content = message,
-                UserId = currentUserService.GetUserId(),
+                UserId = currentUserId,
                 SessionId = chatSession.Id,
             };
             db.Add(chatMessage);
             await db.SaveChangesAsync();
-            return chatMessage.Id;
+            return new CreatedChatMessageDto
+            {
+                AffectedUsers = chatSession.Members?.Select(e => new ChatAffectedUser { UserId = e.UserId, Unread = GetUnreadOfChatSessionByUserId(chatSession.Id, e.UserId) }).ToList() ?? new List<ChatAffectedUser>(),
+                ChatSessionId = chatSession.Id,
+                CreatedUserId = currentUserId,
+                Message = chatMessage.Content,
+            };
         }
-        public async Task<PageData<ChatMessageDto>?> GetMessagesAsync(int chatId, PagingModel pagingModel)
+        public async Task<PageData<ChatMessageDto>> GetMessagesAsync(int chatSessionId, PagingModel pagingModel)
         {
             var currentUserId = currentUserService.GetUserId();
-            var session = await db.Set<ChatSession>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == chatId && e.Members != null && e.Members.Any(e => e.UserId == currentUserId));
-            if (session == null) return null;
-            var messages = db.Set<ChatMessage>().OrderByDescending(e => e.CreatedTime).GetPageData(pagingModel);
+
+            var messages = await db.Set<ChatMessage>().Where(e => e.SessionId == chatSessionId).OrderByDescending(e => e.CreatedTime).AsNoTracking().GetPageDataAsync(pagingModel);
             return messages.ConvertToOtherPageData(e => new ChatMessageDto()
             {
                 Content = e.Content,
                 Id = e.Id,
                 UserId = e.UserId,
             });
-
         }
     }
 }

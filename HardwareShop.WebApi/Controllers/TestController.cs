@@ -39,7 +39,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("CreateMessage")]
         public async Task<IActionResult> CreateMessage([FromBody] CreateChatMessageCommand command)
         {
-            var messageId = await chatService.CreateChatMessage(command.ChatId, command.Content);
+            var messageId = await chatService.CreateChatMessageAsync(command.ChatId, command.Content);
             if (messageId != null) responseResultBuilder.SetData(messageId);
             return responseResultBuilder.Build();
         }

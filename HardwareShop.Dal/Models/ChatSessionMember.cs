@@ -43,5 +43,6 @@ namespace HardwareShop.Dal.Models
             get => lazyLoader?.Load(this, ref messageStatuses);
             set => messageStatuses = value;
         }
+       
     }
 }

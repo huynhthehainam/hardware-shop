@@ -142,6 +142,7 @@ public class Program
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
+        builder.Services.AddSingleton<IChatHubController, ChatHubController>();
 
         builder.Services.ConfigureBusiness();
 
