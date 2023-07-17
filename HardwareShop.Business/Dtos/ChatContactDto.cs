@@ -3,7 +3,7 @@ namespace HardwareShop.Business.Dtos
 
     public class ContactUserDto
     {
-        public int UserId { get; set; }
+        public Guid UserGuid { get; set; }
         public long AssetId { get; set; }
     }
     public class ChatContactDto
@@ -15,5 +15,6 @@ namespace HardwareShop.Business.Dtos
         public long AssetId { get; set; }
         public bool IsGroupChat { get; set; }
         public ContactUserDto[] Users { get; set; } = new ContactUserDto[0];
+        public List<Guid> AffectedUserIds { get; set; } = new List<Guid>();
     }
 }

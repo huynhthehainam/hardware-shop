@@ -22,6 +22,7 @@ namespace HardwareShop.Core.Implementations
         private const string jwtSubKey = "sub";
         private const string jwtUsernameKey = "username";
         private const string jwtRoleKey = "role";
+        private const string jwtGuidKey = "guid";
         private const int refreshTokenExtendedDuration = 30;
         private readonly IDistributedCache distributedCache;
         private readonly JwtConfiguration jwtConfiguration;

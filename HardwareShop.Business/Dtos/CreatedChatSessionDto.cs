@@ -9,9 +9,9 @@ namespace HardwareShop.Business.Dtos
 {
     public sealed class CreatedChatSessionDto : ChatContactDto
     {
-        public List<int> AffectedUserIds { get; set; } = new List<int>();
+
         public bool IsCreated { get; set; }
-        public int CreatedUserId { get; set; }
+        public Guid CreatedUserGuid { get; set; }
         public PageData<ChatMessageDto> Messages { get; set; } = PageData<ChatMessageDto>.EmptyPageData();
     }
 }

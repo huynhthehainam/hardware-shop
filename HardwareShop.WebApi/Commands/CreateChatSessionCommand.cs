@@ -4,7 +4,7 @@ namespace HardwareShop.WebApi.Commands
 {
     public class CreateChatSessionCommand
     {
-        public List<int> UserIds { get; set; } = new List<int>();
+        public List<Guid> UserIds { get; set; } = new List<Guid>();
     }
     public class CreateChatMessageCommand
     {

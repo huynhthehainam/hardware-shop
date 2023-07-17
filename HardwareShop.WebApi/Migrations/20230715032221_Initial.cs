@@ -61,6 +61,7 @@ namespace HardwareShop.WebApi.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: true),
                     CreatedTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     IsGroupChat = table.Column<bool>(type: "boolean", nullable: false),
                     AssetType = table.Column<string>(type: "text", nullable: false),
@@ -117,7 +118,8 @@ namespace HardwareShop.WebApi.Migrations
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    InterfaceSettings = table.Column<JsonDocument>(type: "jsonb", nullable: false)
+                    InterfaceSettings = table.Column<JsonDocument>(type: "jsonb", nullable: false),
+                    Guid = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -959,6 +961,11 @@ namespace HardwareShop.WebApi.Migrations
                 name: "IX_UserAssets_UserId",
                 table: "UserAssets",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Guid",
+                table: "Users",
+                column: "Guid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_PhoneCountryId",

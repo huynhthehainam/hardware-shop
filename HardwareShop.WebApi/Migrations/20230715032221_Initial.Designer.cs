@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace HardwareShop.WebApi.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20230713064627_Initial")]
+    [Migration("20230715032221_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -132,6 +132,9 @@ namespace HardwareShop.WebApi.Migrations
 
                     b.Property<bool>("IsGroupChat")
                         .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -756,6 +759,9 @@ namespace HardwareShop.WebApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("Guid")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("HashedPassword")
                         .IsRequired()
                         .HasColumnType("text");
@@ -785,6 +791,8 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Guid");
 
                     b.HasIndex("PhoneCountryId");
 

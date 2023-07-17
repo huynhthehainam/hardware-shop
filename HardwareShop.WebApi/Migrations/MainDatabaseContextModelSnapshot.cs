@@ -131,6 +131,9 @@ namespace HardwareShop.WebApi.Migrations
                     b.Property<bool>("IsGroupChat")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("Name")
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AssetId");
@@ -754,6 +757,9 @@ namespace HardwareShop.WebApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<Guid>("Guid")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("HashedPassword")
                         .IsRequired()
                         .HasColumnType("text");
@@ -783,6 +789,8 @@ namespace HardwareShop.WebApi.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Guid");
 
                     b.HasIndex("PhoneCountryId");
 

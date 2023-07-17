@@ -1,67 +1,80 @@
+
+using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Org.BouncyCastle.Asn1.BC;
+using System.Diagnostics;
 
 namespace HardwareShop.WebApi.Hubs
 {
     public static class ChatHubHelper
     {
-        public static string GenerateGroupNameByUserId(int userId) => $"priv@tePers0n:{userId}";
+        public static string GenerateGroupNameByUserId(Guid guid) => $"priv@tePers0n:{guid}";
         public static string GenerateGroupNameByShopId(int shopId) => $"cuRR3enTsh0P:{shopId}";
     }
+
     public static class ChatHubConstants
     {
         public const string Endpoint = "/chatHub";
     }
     public interface IChatHubController
     {
-        bool CheckStatusByUserId(int userId);
-        bool CheckStatusByUserIds(IEnumerable<int> userIds);
-        List<string> GetConnectionIdsByUserIds(IEnumerable<int> userIds);
-        string GetConnectionIdByUserId(int userId);
-        void RemoveByUserId(int userId);
-        void AddConnection(int userId, string connectionId);
+        bool CheckStatusByUserId(Guid userId);
+        bool CheckStatusByUserIds(IEnumerable<Guid> userIds);
+
+        void RemoveByUserId(Guid userId, string connectionId);
+        void AddConnection(Guid userId, string connectionId);
     }
     public class ChatHubController : IChatHubController
     {
-        private IDictionary<int, string> loggedConnections = new Dictionary<int, string>();
-        public ChatHubController() { }
+        private IDictionary<Guid, List<string>> loggedConnections = new Dictionary<Guid, List<string>>();
+        private readonly object padLock = new object();
+        public ChatHubController()
+        {
 
-        public bool CheckStatusByUserId(int userId)
+        }
+
+        public bool CheckStatusByUserId(Guid userId)
         {
             return loggedConnections.ContainsKey(userId);
         }
-        public bool CheckStatusByUserIds(IEnumerable<int> userIds)
+        public bool CheckStatusByUserIds(IEnumerable<Guid> userIds)
         {
             return userIds.Any(id => loggedConnections.ContainsKey(id));
         }
-        public List<string> GetConnectionIdsByUserIds(IEnumerable<int> userIds)
-        {
-            return loggedConnections.Where(e => userIds.Contains(e.Key)).Select(e => e.Value).ToList();
-        }
-        public string GetConnectionIdByUserId(int userId)
-        {
-            return loggedConnections[userId].ToString();
-        }
 
-        public void RemoveByUserId(int userId)
+
+        public void RemoveByUserId(Guid userId, string connectionId)
         {
-            lock (loggedConnections)
+            lock (padLock)
             {
-                loggedConnections.Remove(userId);
+                if (loggedConnections.ContainsKey(userId))
+                {
+                    loggedConnections[userId].Remove(connectionId);
+                }
             }
         }
 
-        public void AddConnection(int userId, string connectionId)
+        public void AddConnection(Guid userId, string connectionId)
         {
-            lock (loggedConnections)
+            lock (padLock)
             {
-                loggedConnections.Add(userId, connectionId);
+                if (loggedConnections.ContainsKey(userId))
+                {
+                    loggedConnections[userId].Add(connectionId);
+                }
+                else
+                {
+                    loggedConnections.Add(userId, new List<string> { connectionId });
+                }
+
             }
         }
+
+
     }
     [Authorize]
     public sealed class ChatHub : Hub
@@ -72,6 +85,7 @@ namespace HardwareShop.WebApi.Hubs
         private readonly IChatHubController chatHubController;
         public ChatHub(ICurrentUserService currentUserService, IChatService chatService, IChatHubController chatHubController, IShopService shopService)
         {
+            Debug.WriteLine("Chat hub is established");
             this.currentUserService = currentUserService;
             this.chatService = chatService;
             this.chatHubController = chatHubController;
@@ -79,50 +93,66 @@ namespace HardwareShop.WebApi.Hubs
         }
         public override async Task OnConnectedAsync()
         {
-            var currentUserId = currentUserService.GetUserId();
+            Debug.WriteLine($"Connection {Context.ConnectionId} is established");
+            var currentUserGuid = currentUserService.GetUserGuid();
             var connectionId = Context.ConnectionId;
-            chatHubController.AddConnection(currentUserId, connectionId);
+            chatHubController.AddConnection(currentUserGuid, connectionId);
 
-            await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByUserId(currentUserId));
+            await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByUserId(currentUserGuid));
+            var userGuids = new List<string>();
 
-            var chatSessions = await chatService.GetContactsOfCurrentUserAsync();
             var shop = shopService.GetShopDtoByCurrentUserIdAsync();
             if (shop != null)
             {
                 await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByShopId(shop.Id));
             }
+            var chatSessions = await chatService.GetContactsOfCurrentUserAsync();
             if (chatSessions != null)
             {
                 foreach (var session in chatSessions)
                 {
-                    session.Status = chatHubController.CheckStatusByUserIds(session.Users.Where(e => e.UserId != currentUserId).Select(e => e.UserId)) ? "online" : "offline";
+                    session.Status = chatHubController.CheckStatusByUserIds(session.Users.Where(e => e.UserGuid != currentUserGuid).Select(e => e.UserGuid)) ? "online" : "offline";
                 }
                 await Clients.Caller.SendAsync("InitContacts", chatSessions);
             }
 
-            await Clients.Others.SendAsync("SomeOneConnected", new { UserId = currentUserId });
+            await Clients.Others.SendAsync("SomeOneConnected", new { UserId = currentUserGuid });
 
             await base.OnConnectedAsync();
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var currentUserId = currentUserService.GetUserId();
-            chatHubController.RemoveByUserId(currentUserId);
-            await Clients.Others.SendAsync("SomeOneDisconnected", new { UserId = currentUserId });
+            var currentUserGuid = currentUserService.GetUserGuid();
+            Debug.WriteLine($"Connection {Context.ConnectionId} is removed");
+            chatHubController.RemoveByUserId(currentUserGuid, Context.ConnectionId);
+            await Clients.Others.SendAsync("SomeOneDisconnected", new { UserGuid = currentUserGuid });
             await base.OnDisconnectedAsync(exception);
         }
 
-
-        public async Task JoinChatSession(List<int> userIds)
+        private async Task SendMultipleUserIds(IEnumerable<Guid> userGuids, Func<IClientProxy, Task> sendAction)
         {
-            var createdChatSession = await chatService.CreateChatSessionAsync(userIds);
+            var tasks = userGuids.Select(guid => sendAction(Clients.Group(ChatHubHelper.GenerateGroupNameByUserId(guid))));
+            await Task.WhenAll(tasks);
+        }
+        public async Task JoinChatSession(List<Guid> userGuids)
+        {
+            var createdChatSession = await chatService.CreateChatSessionAsync(userGuids);
             if (createdChatSession != null)
             {
                 if (createdChatSession.IsCreated)
                 {
-                    var connectionIds = chatHubController.GetConnectionIdsByUserIds(createdChatSession.AffectedUserIds);
-                    var tasks = connectionIds.Select(connectionId => Clients.Client(connectionId).SendAsync("SomeoneCreatedChatSession", createdChatSession)).ToArray();
-                    Task.WaitAll(tasks);
+                    await SendMultipleUserIds(createdChatSession.AffectedUserIds, client => client.SendAsync("SomeoneCreatedChatSession", createdChatSession));
+                }
+                else
+                {
+                    var isSuccess = await chatService.MarkAsReadForCurrentUserAsync(createdChatSession.Id);
+                    if (isSuccess)
+                    {
+                        await SendMultipleUserIds(new List<Guid> { createdChatSession.CreatedUserGuid }, client =>
+                            client.SendAsync("OtherDeviceReadAllMessage", new { ChatSessionId = createdChatSession.Id })
+                        );
+                    }
+                    await Clients.Caller.SendAsync("SuccessfullyCreatedChatSession", createdChatSession);
                 }
             }
             else
@@ -136,15 +166,13 @@ namespace HardwareShop.WebApi.Hubs
             await Clients.Caller.SendAsync("GetMoreMessages", await chatService.GetMessagesAsync(sessionId, pagingModel));
         }
 
-        public async Task SendChatMessage(int chatId, string msg)
+        public async Task SendChatMessage(int sessionId, string msg)
         {
-            if (chatId <= 0) return;
-            var createdChatMessage = await chatService.CreateChatMessageAsync(chatId, msg);
+            if (sessionId <= 0) return;
+            CreatedChatMessageDto? createdChatMessage = await chatService.CreateChatMessageAsync(sessionId, msg);
             if (createdChatMessage != null)
             {
-                var connectionIds = chatHubController.GetConnectionIdsByUserIds(createdChatMessage.AffectedUsers.Select(e => e.UserId));
-                var tasks = connectionIds.Select(connectionId => Clients.Client(connectionId).SendAsync("SomeoneSentMessage", createdChatMessage)).ToArray();
-                Task.WaitAll(tasks);
+                await SendMultipleUserIds(createdChatMessage.AffectedUsers.Select(e => e.UserGuid), client => client.SendAsync("SomeoneSentMessage", createdChatMessage));
             }
         }
     }

@@ -197,7 +197,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<ProductDto>?> GetProductPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search, SortingModel sortingModel)
         {
-            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");

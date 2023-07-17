@@ -88,5 +88,6 @@ namespace HardwareShop.Dal.Models
         {
             return Assets?.FirstOrDefault(e => e.AssetType == UserAssetConstants.AvatarAssetType)?.AssetId;
         }
+        public Guid Guid { get; set; } = Guid.NewGuid();
     }
 }

@@ -35,13 +35,15 @@ namespace HardwareShop.Business.Dtos
         public string DisplayName { get; set; }
         public string? Email { get; set; }
         public JsonDocument Settings { get; set; }
+        public Guid Guid { get; set; }
         public string[] Shortcuts { get; set; } = new
             string[] { "calendar", "mail", "contacts" };
-        public LoginUserDataDto(string displayName, string? email, JsonDocument settings)
+        public LoginUserDataDto(string displayName, string? email, JsonDocument settings, Guid guid)
         {
             DisplayName = displayName;
             Email = email;
             Settings = settings;
+            Guid = guid;
         }
     }
     public class LoginUserDto

@@ -45,5 +45,11 @@ namespace HardwareShop.Core.Implementations
             CacheUser user = GetCacheUserAsync().Result;
             return user.Id;
         }
+
+        public Guid GetUserGuid()
+        {
+            CacheUser user = GetCacheUserAsync().Result;
+            return user.Guid;
+        }
     }
 }

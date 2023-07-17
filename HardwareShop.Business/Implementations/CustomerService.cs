@@ -84,7 +84,7 @@ namespace HardwareShop.Business.Implementations
 
         private async Task<Customer?> GetCustomerOfCurrentUserShopByIdAsync(int customerId)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
@@ -315,7 +315,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<CustomerDto>?> GetCustomerPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
@@ -342,7 +342,7 @@ namespace HardwareShop.Business.Implementations
 
         public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Staff);
             if (shop == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");

@@ -4,5 +4,6 @@
     {
         bool IsSystemAdmin();
         int GetUserId();
+        Guid GetUserGuid();
     }
 }
