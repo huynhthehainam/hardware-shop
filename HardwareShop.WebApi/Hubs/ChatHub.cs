@@ -1,12 +1,11 @@
 
+using System.Diagnostics;
 using HardwareShop.Business.Dtos;
 using HardwareShop.Business.Services;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Org.BouncyCastle.Asn1.BC;
-using System.Diagnostics;
 
 namespace HardwareShop.WebApi.Hubs
 {
@@ -101,7 +100,7 @@ namespace HardwareShop.WebApi.Hubs
             await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByUserId(currentUserGuid));
             var userGuids = new List<string>();
 
-            var shop = shopService.GetShopDtoByCurrentUserIdAsync();
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync();
             if (shop != null)
             {
                 await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByShopId(shop.Id));

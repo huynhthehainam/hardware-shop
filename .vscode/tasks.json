@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "buildApi",
             "command": "dotnet",
             "type": "process",
             "args": [
@@ -14,28 +14,16 @@
             "problemMatcher": "$msCompile"
         },
         {
-            "label": "publish",
+            "label": "buildSocketClient",
             "command": "dotnet",
             "type": "process",
             "args": [
-                "publish",
-                "${workspaceFolder}/HardwareShop.WebApi/HardwareShop.WebApi.csproj",
+                "build",
+                "${workspaceFolder}/HardwareShop.SocketClient/HardwareShop.SocketClient.csproj",
                 "/property:GenerateFullPaths=true",
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
         },
-        {
-            "label": "watch",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "watch",
-                "run",
-                "--project",
-                "${workspaceFolder}/HardwareShop.WebApi/HardwareShop.WebApi.csproj"
-            ],
-            "problemMatcher": "$msCompile"
-        }
     ]
 }
