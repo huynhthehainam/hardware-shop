@@ -18,7 +18,7 @@ public class UserServiceTests
     private readonly IUserService userService;
     private const string dumpAccessToken = "dumpToken";
     private const string dumpRefreshToken = "dumpRefreshToken";
-    private const string dumpSessionId = "sessid";
+    private const string dumpSessionId = "sessionId";
     public UserServiceTests()
     {
 

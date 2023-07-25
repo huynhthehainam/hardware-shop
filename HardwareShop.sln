@@ -16,7 +16,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HardwareShop.WebApi", "Hard
 		{E0DD4D33-C26C-4FFA-916F-3949C88F749B} = {E0DD4D33-C26C-4FFA-916F-3949C88F749B}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardwareShop.UnitTests", "HardwareShop.UnitTests\HardwareShop.UnitTests.csproj", "{8444AE81-A95D-433F-89F0-33DCFFCEE17D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HardwareShop.UnitTests", "HardwareShop.UnitTests\HardwareShop.UnitTests.csproj", "{8444AE81-A95D-433F-89F0-33DCFFCEE17D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HardwareShop.SocketClient", "HardwareShop.SocketClient\HardwareShop.SocketClient.csproj", "{1E71FE91-CE1D-48C3-89EA-36A4EB1A5E2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -44,6 +46,10 @@ Global
 		{8444AE81-A95D-433F-89F0-33DCFFCEE17D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8444AE81-A95D-433F-89F0-33DCFFCEE17D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8444AE81-A95D-433F-89F0-33DCFFCEE17D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E71FE91-CE1D-48C3-89EA-36A4EB1A5E2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E71FE91-CE1D-48C3-89EA-36A4EB1A5E2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E71FE91-CE1D-48C3-89EA-36A4EB1A5E2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E71FE91-CE1D-48C3-89EA-36A4EB1A5E2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

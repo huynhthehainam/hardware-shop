@@ -56,6 +56,29 @@ namespace HardwareShop.WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ChatSessions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    CreatedTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IsGroupChat = table.Column<bool>(type: "boolean", nullable: false),
+                    AssetType = table.Column<string>(type: "text", nullable: false),
+                    AssetId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatSessions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChatSessions_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CountryAssets",
                 columns: table => new
                 {
@@ -95,7 +118,8 @@ namespace HardwareShop.WebApi.Migrations
                     HashedPassword = table.Column<string>(type: "text", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
                     IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    InterfaceSettings = table.Column<JsonDocument>(type: "jsonb", nullable: false)
+                    InterfaceSettings = table.Column<JsonDocument>(type: "jsonb", nullable: false),
+                    Guid = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -127,6 +151,30 @@ namespace HardwareShop.WebApi.Migrations
                         name: "FK_Units_UnitCategories_UnitCategoryId",
                         column: x => x.UnitCategoryId,
                         principalTable: "UnitCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChatSessionMembers",
+                columns: table => new
+                {
+                    SessionId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatSessionMembers", x => new { x.SessionId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_ChatSessionMembers_ChatSessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "ChatSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatSessionMembers_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -204,6 +252,40 @@ namespace HardwareShop.WebApi.Migrations
                         name: "FK_Shops_Units_CashUnitId",
                         column: x => x.CashUnitId,
                         principalTable: "Units",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChatMessages",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Content = table.Column<string>(type: "text", nullable: false),
+                    CreatedTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SessionId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatMessages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ChatMessages_ChatSessionMembers_SessionId_UserId",
+                        columns: x => new { x.SessionId, x.UserId },
+                        principalTable: "ChatSessionMembers",
+                        principalColumns: new[] { "SessionId", "UserId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatMessages_ChatSessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "ChatSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatMessages_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -411,6 +493,45 @@ namespace HardwareShop.WebApi.Migrations
                         name: "FK_Warehouses_Shops_ShopId",
                         column: x => x.ShopId,
                         principalTable: "Shops",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ChatMessageStatuses",
+                columns: table => new
+                {
+                    SessionId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false),
+                    MessageId = table.Column<long>(type: "bigint", nullable: false),
+                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
+                    CreatedTime = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ChatMessageStatuses", x => new { x.MessageId, x.SessionId, x.UserId });
+                    table.ForeignKey(
+                        name: "FK_ChatMessageStatuses_ChatMessages_MessageId",
+                        column: x => x.MessageId,
+                        principalTable: "ChatMessages",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatMessageStatuses_ChatSessionMembers_SessionId_UserId",
+                        columns: x => new { x.SessionId, x.UserId },
+                        principalTable: "ChatSessionMembers",
+                        principalColumns: new[] { "SessionId", "UserId" },
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatMessageStatuses_ChatSessions_SessionId",
+                        column: x => x.SessionId,
+                        principalTable: "ChatSessions",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ChatMessageStatuses_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -667,6 +788,36 @@ namespace HardwareShop.WebApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_SessionId_UserId",
+                table: "ChatMessages",
+                columns: new[] { "SessionId", "UserId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessages_UserId",
+                table: "ChatMessages",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessageStatuses_SessionId_UserId",
+                table: "ChatMessageStatuses",
+                columns: new[] { "SessionId", "UserId" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatMessageStatuses_UserId",
+                table: "ChatMessageStatuses",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatSessionMembers_UserId",
+                table: "ChatSessionMembers",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ChatSessions_AssetId",
+                table: "ChatSessions",
+                column: "AssetId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_CountryAssets_AssetId",
                 table: "CountryAssets",
                 column: "AssetId");
@@ -812,6 +963,11 @@ namespace HardwareShop.WebApi.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Users_Guid",
+                table: "Users",
+                column: "Guid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_PhoneCountryId",
                 table: "Users",
                 column: "PhoneCountryId");
@@ -840,6 +996,9 @@ namespace HardwareShop.WebApi.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ChatMessageStatuses");
+
             migrationBuilder.DropTable(
                 name: "CountryAssets");
 
@@ -877,16 +1036,13 @@ namespace HardwareShop.WebApi.Migrations
                 name: "WarehouseProducts");
 
             migrationBuilder.DropTable(
+                name: "ChatMessages");
+
+            migrationBuilder.DropTable(
                 name: "Invoices");
 
             migrationBuilder.DropTable(
                 name: "ProductCategories");
-
-            migrationBuilder.DropTable(
-                name: "Assets");
-
-            migrationBuilder.DropTable(
-                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Products");
@@ -895,13 +1051,25 @@ namespace HardwareShop.WebApi.Migrations
                 name: "Warehouses");
 
             migrationBuilder.DropTable(
+                name: "ChatSessionMembers");
+
+            migrationBuilder.DropTable(
                 name: "CustomerDebtHistories");
 
             migrationBuilder.DropTable(
                 name: "Orders");
 
             migrationBuilder.DropTable(
+                name: "ChatSessions");
+
+            migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "CustomerDebts");
+
+            migrationBuilder.DropTable(
+                name: "Assets");
 
             migrationBuilder.DropTable(
                 name: "Customers");

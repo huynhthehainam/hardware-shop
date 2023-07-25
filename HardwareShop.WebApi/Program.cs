@@ -9,6 +9,7 @@ using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
+using HardwareShop.WebApi.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -105,8 +106,7 @@ public class Program
                    var path = context.HttpContext.Request.Path;
                    if (!string.IsNullOrEmpty(token) && path.StartsWithSegments(ChatHubConstants.Endpoint))
                    {
-                       context.Token = token;
-
+                       context.Request.Headers["Authorization"] = $"{JwtBearerDefaults.AuthenticationScheme} {token}";
                    }
                    return Task.CompletedTask;
                }
@@ -142,6 +142,7 @@ public class Program
         builder.Services.AddScoped<IJwtService, JwtService>();
         builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
         builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
+        builder.Services.AddSingleton<IChatHubController, ChatHubController>();
 
         builder.Services.ConfigureBusiness();
 
@@ -166,6 +167,7 @@ public class Program
         app.UseAuthentication();
 
         app.UseAuthorization();
+        app.UseMiddleware<FillContextUserMiddleware>();
         app.MapGrpcService<UserGrpcService>();
         if (app.Environment.IsDevelopment())
         {

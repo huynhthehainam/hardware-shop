@@ -142,6 +142,10 @@ namespace HardwareShop.Core.Extensions
             }
 
             Expression<Func<T, bool>> existQuery = Expression.Lambda<Func<T, bool>>(body, parameterExpression);
+            return db.CreateIfNotExistsByQuery(entity, existQuery);
+        }
+        public static CreateIfNotExistResponse<T> CreateIfNotExistsByQuery<T>(this DbContext db, T entity, Expression<Func<T, bool>> existQuery) where T : EntityBase
+        {
             T? existingEntity = db.Set<T>().Where(existQuery).FirstOrDefault();
             if (existingEntity == null)
             {
@@ -152,7 +156,6 @@ namespace HardwareShop.Core.Extensions
 
             return new CreateIfNotExistResponse<T>(true, existingEntity); ;
         }
-
 
     }
 }

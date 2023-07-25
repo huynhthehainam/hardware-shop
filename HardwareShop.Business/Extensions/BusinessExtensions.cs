@@ -93,6 +93,7 @@ namespace HardwareShop.Business.Extensions
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IAssetService, AssetService>();
+            services.AddScoped<IChatService, ChatService>();
         }
     }
 }

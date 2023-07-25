@@ -15,6 +15,8 @@ namespace HardwareShop.WebApi.Extensions
             const string productAssetFile = "ProductAsset.jpg";
             const string shopAssetFile = "ShopAsset.jpg";
             const string userAssetFile = "UserAsset.jpg";
+            const string user2AssetFile = "UserAsset2.png";
+            const string user3AssetFile = "UserAsset3.png";
             const string countryAssetFile = "CountryAsset.png";
             const string countryAsset2File = "CountryAsset2.png";
             using IServiceScope scope = services.CreateScope();
@@ -41,6 +43,12 @@ namespace HardwareShop.WebApi.Extensions
                 string userAssetPath = System.IO.Path.Join(assetFolder, userAssetFile);
                 byte[] userAssetBytes = File.ReadAllBytes(userAssetPath);
 
+                string user2AssetPath = System.IO.Path.Join(assetFolder, user2AssetFile);
+                byte[] user2AssetBytes = File.ReadAllBytes(user2AssetPath);
+
+                string user3AssetPath = System.IO.Path.Join(assetFolder, user3AssetFile);
+                byte[] user3AssetBytes = File.ReadAllBytes(user3AssetPath);
+
                 string countryAssetPath = System.IO.Path.Join(assetFolder, countryAssetFile);
                 byte[] countryAssetBytes = File.ReadAllBytes(countryAssetPath);
 
@@ -64,6 +72,18 @@ namespace HardwareShop.WebApi.Extensions
                 {
                     Bytes = userAssetBytes,
                     Filename = userAssetFile,
+                    ContentType = ContentTypeConstants.JpegContentType
+                };
+                var user2Asset = new Asset()
+                {
+                    Bytes = user2AssetBytes,
+                    Filename = user2AssetFile,
+                    ContentType = ContentTypeConstants.PngContentType
+                };
+                var user3Asset = new Asset()
+                {
+                    Bytes = user3AssetBytes,
+                    Filename = user3AssetFile,
                     ContentType = ContentTypeConstants.PngContentType
                 };
                 var countryAsset = new Asset()
@@ -79,7 +99,7 @@ namespace HardwareShop.WebApi.Extensions
                     ContentType = ContentTypeConstants.PngContentType
                 };
 
-                db.Assets.AddRange(new Asset[] { productAsset, shopAsset, userAsset, countryAsset, country2Asset });
+                db.Assets.AddRange(new Asset[] { productAsset, shopAsset, userAsset, user2Asset, user3Asset, countryAsset, country2Asset });
                 db.SaveChanges();
 
 
@@ -230,12 +250,31 @@ namespace HardwareShop.WebApi.Extensions
                             new UserAsset
                             {
                                 AssetType = UserAssetConstants.AvatarAssetType,
-                            Asset = userAsset,
+                            Asset = user2Asset,
                             }
                     }
                 };
+                User user2 = new()
+                {
+                    Email = "huynhthehainam.mismart@gmail.com",
+                    HashedPassword = hashingPasswordService.Hash("123"),
+                    Phone = "+84967044037",
+                    FirstName = "Nam",
+                    LastName = "Huỳnh",
+                    Role = SystemUserRole.Admin,
+                    Username = "admin2",
+                    Assets = new UserAsset[]
+                   {
+                            new UserAsset
+                            {
+                                AssetType = UserAssetConstants.AvatarAssetType,
+                            Asset = user3Asset,
+                            }
+                   }
+                };
                 _ = db.Users.Add(user);
                 _ = db.Users.Add(user1);
+                _ = db.Users.Add(user2);
                 _ = db.SaveChanges();
 
 
@@ -280,6 +319,12 @@ namespace HardwareShop.WebApi.Extensions
                             new UserShop
                             {
                                 UserId =  user1.Id,
+                                Role  = UserShopRole.Staff,
+
+                            },
+                               new UserShop
+                            {
+                                UserId =  user2.Id,
                                 Role  = UserShopRole.Staff,
 
                             }

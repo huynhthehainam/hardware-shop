@@ -1,11 +1,7 @@
-﻿using HardwareShop.Core.Models;
+﻿using System.Text.Json;
+using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Implementations
 {
@@ -15,23 +11,22 @@ namespace HardwareShop.Core.Implementations
         private readonly IJwtService jwtService;
         private const string authPrefix = "Bearer";
         private CacheUser? cacheUser;
-        public async Task<CacheUser> GetCacheUserAsync()
+        public Task<CacheUser> GetCacheUserAsync()
         {
             if (cacheUser == null)
             {
-                string? authHeader = httpContextAccessor.HttpContext.Request.Headers["Authorization"];
-                if (authHeader != null)
+                var userClaim = httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(e => e.Type == "UserDetail");
+                if (userClaim != null)
                 {
-                    authHeader = authHeader.Replace(authPrefix, string.Empty).Trim();
-
-                    cacheUser = await jwtService.GetUserFromTokenAsync(authHeader);
+                    var valueStr = userClaim.Value;
+                    cacheUser = JsonSerializer.Deserialize<CacheUser>(userClaim.Value);
                 }
             }
             if (cacheUser == null)
             {
                 throw new Exception("Token is invalid");
             }
-            return cacheUser;
+            return Task.FromResult(cacheUser);
         }
         public CurrentUserService(
             IJwtService jwtService,
@@ -49,6 +44,12 @@ namespace HardwareShop.Core.Implementations
         {
             CacheUser user = GetCacheUserAsync().Result;
             return user.Id;
+        }
+
+        public Guid GetUserGuid()
+        {
+            CacheUser user = GetCacheUserAsync().Result;
+            return user.Guid;
         }
     }
 }
