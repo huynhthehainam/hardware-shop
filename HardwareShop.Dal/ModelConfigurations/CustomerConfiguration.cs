@@ -1,21 +1,18 @@
-
-
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public sealed class CustomerConfiguration : ModelConfigurationBase<Customer>
+    public sealed class CustomerConfiguration : IEntityTypeConfiguration<Customer>
     {
-        public CustomerConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
+
+        public void Configure(EntityTypeBuilder<Customer> e)
         {
-            buildAction = e =>
-            {
-                e.HasKey(e => e.Id);
-                e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-                e.HasOne(e => e.PhoneCountry).WithMany(e => e.Customers).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
-            };
+            e.HasKey(e => e.Id);
+            e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(e => e.PhoneCountry).WithMany(e => e.Customers).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
+
         }
     }
 }

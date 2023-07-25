@@ -1,21 +1,18 @@
-
-
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public class NotificationConfiguration : ModelConfigurationBase<Notification>
+    public class NotificationConfiguration : IEntityTypeConfiguration<Notification>
     {
-        public NotificationConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
-        {
-            buildAction = e =>
-                {
-                    _ = e.HasKey(e => e.Id);
-                    _ = e.HasOne(e => e.User).WithMany(e => e.Notifications).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
-                };
-        }
 
+
+        public void Configure(EntityTypeBuilder<Notification> e)
+        {
+            _ = e.HasKey(e => e.Id);
+            _ = e.HasOne(e => e.User).WithMany(e => e.Notifications).HasForeignKey(e => e.UserId).OnDelete(DeleteBehavior.Cascade);
+
+        }
     }
 }

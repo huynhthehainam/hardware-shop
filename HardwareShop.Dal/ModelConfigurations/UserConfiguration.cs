@@ -1,20 +1,20 @@
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public sealed class UserConfiguration : ModelConfigurationBase<User>
+    public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
-        public UserConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
+       
+
+        public void Configure(EntityTypeBuilder<User> u)
         {
-            buildAction = u =>
-            {
-                _ = u.HasKey(a => a.Id);
-                _ = u.HasIndex(e => e.Username).IsUnique();
-                _ = u.HasOne(e => e.PhoneCountry).WithMany(e => e.Users).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
-                _ = u.HasIndex(e => e.Guid);
-            };
+            _ = u.HasKey(a => a.Id);
+            _ = u.HasIndex(e => e.Username).IsUnique();
+            _ = u.HasOne(e => e.PhoneCountry).WithMany(e => e.Users).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
+            _ = u.HasIndex(e => e.Guid);
+
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
 namespace HardwareShop.Dal
@@ -43,18 +42,8 @@ namespace HardwareShop.Dal
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            const string configurationNamespace = "HardwareShop.Dal.ModelConfigurations";
-            const string buildModelMethodName = "BuildModel";
-            List<Type> configurations = Assembly.GetExecutingAssembly().GetTypes().Where(e => e.IsClass && e.Namespace == configurationNamespace && (e.BaseType?.GetGenericArguments().FirstOrDefault()?.BaseType == typeof(EntityBase) || e.BaseType?.GetGenericArguments().FirstOrDefault()?.BaseType == typeof(AssetEntityBase))).ToList();
-            foreach (Type configuration in configurations)
-            {
-                object? instance = Activator.CreateInstance(configuration, modelBuilder);
-                if (instance != null)
-                {
-                    MethodInfo? buildMethod = configuration.GetMethod(buildModelMethodName);
-                    _ = (buildMethod?.Invoke(instance, null));
-                }
-            }
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

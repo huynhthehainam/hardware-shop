@@ -1,19 +1,15 @@
-
-
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public class AssetConfiguration : ModelConfigurationBase<Asset>
+    public class AssetConfiguration : IEntityTypeConfiguration<Asset>
     {
-        public AssetConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
+
+        public void Configure(EntityTypeBuilder<Asset> e)
         {
-            buildAction = e =>
-            {
-                _ = e.HasKey(e => e.Id);
-            };
+            e.HasKey(e => e.Id);
         }
     }
 }

@@ -1,19 +1,15 @@
-
-
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public class CountryConfiguration : ModelConfigurationBase<Country>
+    public class CountryConfiguration : IEntityTypeConfiguration<Country>
     {
-        public CountryConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
+
+        public void Configure(EntityTypeBuilder<Country> e)
         {
-            buildAction = e =>
-            {
-                _ = e.HasKey(e => e.Id);
-            };
+            _ = e.HasKey(e => e.Id);
         }
     }
 }

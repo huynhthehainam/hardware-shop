@@ -1,18 +1,17 @@
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public sealed class ProductCategoryConfiguration : ModelConfigurationBase<ProductCategory>
+    public sealed class ProductCategoryConfiguration : IEntityTypeConfiguration<ProductCategory>
     {
-        public ProductCategoryConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
+    
+        public void Configure(EntityTypeBuilder<ProductCategory> e)
         {
-            buildAction = e =>
-            {
-                _ = e.HasKey(e => e.Id);
-                _ = e.HasOne(e => e.Shop).WithMany(e => e.ProductCategories).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
-            };
+            _ = e.HasKey(e => e.Id);
+            _ = e.HasOne(e => e.Shop).WithMany(e => e.ProductCategories).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

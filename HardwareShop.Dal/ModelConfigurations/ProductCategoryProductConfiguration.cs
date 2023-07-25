@@ -1,20 +1,20 @@
-using HardwareShop.Core.Bases;
 using HardwareShop.Dal.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace HardwareShop.Dal.ModelConfigurations
 {
-    public sealed class ProductCategoryProductConfiguration : ModelConfigurationBase<ProductCategoryProduct>
+    public sealed class ProductCategoryProductConfiguration : IEntityTypeConfiguration<ProductCategoryProduct>
     {
-        public ProductCategoryProductConfiguration(ModelBuilder modelBuilder) : base(modelBuilder)
+       
+
+        public void Configure(EntityTypeBuilder<ProductCategoryProduct> e)
         {
-            buildAction = e =>
-            {
-                _ = e.HasQueryFilter(e => e.Product != null && !e.Product.IsDeleted);
-                _ = e.HasKey(e => new { e.ProductId, e.ProductCategoryId });
-                _ = e.HasOne(e => e.Product).WithMany(e => e.ProductCategoryProducts).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
-                _ = e.HasOne(e => e.ProductCategory).WithMany(e => e.ProductCategoryProducts).HasForeignKey(e => e.ProductCategoryId).OnDelete(DeleteBehavior.Cascade);
-            };
+            _ = e.HasQueryFilter(e => e.Product != null && !e.Product.IsDeleted);
+            _ = e.HasKey(e => new { e.ProductId, e.ProductCategoryId });
+            _ = e.HasOne(e => e.Product).WithMany(e => e.ProductCategoryProducts).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
+            _ = e.HasOne(e => e.ProductCategory).WithMany(e => e.ProductCategoryProducts).HasForeignKey(e => e.ProductCategoryId).OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }
