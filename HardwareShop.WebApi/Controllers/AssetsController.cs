@@ -1,10 +1,10 @@
 
 
-using HardwareShop.Business.Extensions;
-using HardwareShop.Business.Services;
+using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Extensions;
+using HardwareShop.Domain.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers

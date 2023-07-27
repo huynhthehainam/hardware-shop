@@ -1,5 +1,5 @@
-﻿using HardwareShop.Business.Dtos;
-using HardwareShop.Business.Services;
+﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;

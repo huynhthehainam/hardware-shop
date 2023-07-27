@@ -4,12 +4,12 @@
 
 
 using System.Text.Json;
-using HardwareShop.Business.Helpers;
+using HardwareShop.Application.Helpers;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Models;
+using HardwareShop.Domain.Models;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;

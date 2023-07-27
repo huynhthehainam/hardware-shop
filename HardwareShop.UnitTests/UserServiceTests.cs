@@ -1,9 +1,9 @@
-using HardwareShop.Business.Implementations;
-using HardwareShop.Business.Services;
+using HardwareShop.Application.Implementations;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Models;
+using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;

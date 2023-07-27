@@ -1,14 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using System.Reflection;
-using System;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR.Client;
-using HardwareShop.Business.Dtos;
-using HardwareShop.Dal.Models;
+using HardwareShop.Application.Dtos;
 
 namespace HardwareShop.SocketClient
 {
@@ -110,7 +106,7 @@ namespace HardwareShop.SocketClient
                 }
             }
             catch (TaskCanceledException) { }
-            catch (Exception ex)
+            catch (Exception)
             {
                 Environment.Exit(1);
             }

@@ -1,7 +1,7 @@
 
 
-using HardwareShop.Business.Dtos;
-using HardwareShop.Business.Services;
+using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Commands;
 using HotChocolate.Authorization;

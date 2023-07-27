@@ -1,7 +1,7 @@
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal;
-using HardwareShop.Dal.Models;
+using HardwareShop.Domain;
+using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.WebApi.Extensions

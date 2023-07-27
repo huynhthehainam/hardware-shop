@@ -1,9 +1,9 @@
 ﻿
 using System.Text;
-using HardwareShop.Business.Extensions;
+using HardwareShop.Application.Extensions;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal;
+using HardwareShop.Domain;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
