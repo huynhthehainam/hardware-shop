@@ -107,7 +107,7 @@ namespace HardwareShop.Application.Implementations
             return db.SoftDelete(shop);
         }
 
-        public async Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff)
+        public async Task<ShopDto?> GetShopByUserIdAsync(Guid userId, UserShopRole role = UserShopRole.Staff)
         {
             var userShop = await GetUserShopByUserIdAsync(userId, role);
             if (userShop == null)
@@ -117,7 +117,7 @@ namespace HardwareShop.Application.Implementations
             return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
         }
 
-        private async Task<UserShop?> GetUserShopByUserIdAsync(int userId, UserShopRole role)
+        private async Task<UserShop?> GetUserShopByUserIdAsync(Guid userGuid, UserShopRole role)
         {
             var acceptedRoles = new List<UserShopRole>();
             switch (role)
@@ -131,13 +131,14 @@ namespace HardwareShop.Application.Implementations
                 default:
                     break;
             }
-            var userShop = await db.Set<UserShop>().Include(e => e.Shop).FirstOrDefaultAsync(e => e.UserId == userId && acceptedRoles.Contains(e.Role));
+
+            var userShop = await db.Set<UserShop>().Include(e => e.Shop).FirstOrDefaultAsync(e => e.User!.Guid == userGuid && acceptedRoles.Contains(e.Role));
 
             return userShop;
         }
         public async Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role)
         {
-            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserId(), role);
+            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserGuid(), role);
             if (userShop == null)
             {
                 return null;
@@ -146,7 +147,7 @@ namespace HardwareShop.Application.Implementations
         }
         public async Task<ShopDto?> GetShopDtoByCurrentUserIdAsync(UserShopRole role)
         {
-            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserId(), role);
+            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserGuid(), role);
             if (userShop == null)
             {
                 return null;
@@ -236,7 +237,7 @@ namespace HardwareShop.Application.Implementations
 
         public async Task<bool> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions)
         {
-            var shopSetting = await db.Set<ShopSetting>().FirstOrDefaultAsync(e => e.ShopId == shopId && e.Shop != null && e.Shop.UserShops != null && e.Shop.UserShops.Any(e => e.UserId == currentUserService.GetUserId() && e.Role == UserShopRole.Admin));
+            var shopSetting = await db.Set<ShopSetting>().FirstOrDefaultAsync(e => e.ShopId == shopId && e.Shop != null && e.Shop.UserShops != null && e.Shop.UserShops.Any(e => e.User!.Guid == currentUserService.GetUserGuid() && e.Role == UserShopRole.Admin));
             if (shopSetting == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("Shop");
@@ -249,6 +250,11 @@ namespace HardwareShop.Application.Implementations
             db.Entry(shopSetting).State = EntityState.Modified;
             db.SaveChanges();
             return true;
+        }
+
+        public Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff)
+        {
+            throw new NotImplementedException();
         }
     }
 }

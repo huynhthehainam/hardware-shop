@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using HardwareShop.Core.Models;
+﻿using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Http;
 
@@ -15,16 +14,7 @@ namespace HardwareShop.Core.Implementations
         {
             if (cacheUser == null)
             {
-                var userClaim = httpContextAccessor.HttpContext.User.Claims.FirstOrDefault(e => e.Type == "UserDetail");
-                if (userClaim != null)
-                {
-                    var valueStr = userClaim.Value;
-                    cacheUser = JsonSerializer.Deserialize<CacheUser>(userClaim.Value);
-                }
-            }
-            if (cacheUser == null)
-            {
-                throw new Exception("Token is invalid");
+                cacheUser = new CacheUser(httpContextAccessor.HttpContext.User);
             }
             return Task.FromResult(cacheUser);
         }
@@ -40,12 +30,6 @@ namespace HardwareShop.Core.Implementations
             CacheUser user = GetCacheUserAsync().Result;
             return user.Role == SystemUserRole.Admin;
         }
-        public int GetUserId()
-        {
-            CacheUser user = GetCacheUserAsync().Result;
-            return user.Id;
-        }
-
         public Guid GetUserGuid()
         {
             CacheUser user = GetCacheUserAsync().Result;

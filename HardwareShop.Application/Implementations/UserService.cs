@@ -40,9 +40,9 @@ namespace HardwareShop.Application.Implementations
             return Task.FromResult(new CreatedUserDto { Id = 1 });
         }
 
-        private async Task<AssetEntityBase?> GetUserAvatarByUserId(int userId)
+        private async Task<AssetEntityBase?> GetUserAvatarByUserId(Guid userId)
         {
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Id == userId);
+            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == userId);
             if (user == null)
             {
                 return null;
@@ -54,7 +54,7 @@ namespace HardwareShop.Application.Implementations
         }
         public async Task<CachedAsset?> GetCurrentUserAvatarAsync()
         {
-            int userId = currentUserService.GetUserId();
+            Guid userId = currentUserService.GetUserGuid();
             var avatar = await GetUserAvatarByUserId(userId);
             if (avatar == null)
             {
@@ -83,7 +83,6 @@ namespace HardwareShop.Application.Implementations
 
             CacheUser cacheUser = new()
             {
-                Id = user.Id,
                 Username = user.Username ?? "",
                 Role = user.Role,
                 Email = user.Email,
@@ -114,12 +113,12 @@ namespace HardwareShop.Application.Implementations
         }
         public async Task<LoginDto?> LoginByTokenAsync(string token)
         {
-            CacheUser? cacheUser = await jwtService.GetUserFromTokenAsync(token);
+            CacheUser? cacheUser = jwtService.GetUserFromToken(token);
             if (cacheUser == null)
             {
                 return null;
             }
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Id == cacheUser.Id);
+            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == cacheUser.Guid);
             return user == null ? null : GenerateLoginDtoFromUser(user);
         }
 
@@ -209,8 +208,8 @@ namespace HardwareShop.Application.Implementations
         }
         private async Task<User?> GetCurrentUserAsync()
         {
-            int currentUserId = currentUserService.GetUserId();
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Id == currentUserId);
+            Guid currentUserId = currentUserService.GetUserGuid();
+            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == currentUserId);
             if (user == null)
             {
                 responseResultBuilder.AddNotFoundEntityError("User");
