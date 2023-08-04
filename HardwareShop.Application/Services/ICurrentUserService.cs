@@ -1,4 +1,4 @@
-﻿namespace HardwareShop.Core.Services
+﻿namespace HardwareShop.Application.Services
 {
     public interface ICurrentUserService
     {

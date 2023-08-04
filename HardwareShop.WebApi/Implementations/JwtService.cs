@@ -1,13 +1,13 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HardwareShop.Core.Implementations
+namespace HardwareShop.WebApi.Implementations
 {
     public class JwtConfiguration
     {
@@ -46,15 +46,9 @@ namespace HardwareShop.Core.Implementations
             {
                 return null;
             }
-
-
-
-
-
-
             return new CacheUser(jwtToken.Claims);
         }
-        public LoginResponse? GenerateTokens(CacheUser cacheUser)
+        public LoginResponse GenerateTokens(CacheUser cacheUser)
         {
             var sessionId = RandomStringHelper.RandomString(10);
 

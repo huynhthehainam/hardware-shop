@@ -1,5 +1,6 @@
-using HardwareShop.Core.Bases;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers

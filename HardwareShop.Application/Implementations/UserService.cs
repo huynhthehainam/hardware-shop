@@ -78,7 +78,7 @@ namespace HardwareShop.Application.Implementations
                 : !hashingPasswordService.Verify(password, user.HashedPassword ?? "") ? null : GenerateLoginDtoFromUser(user);
         }
 
-        private LoginDto? GenerateLoginDtoFromUser(User user)
+        private LoginDto GenerateLoginDtoFromUser(User user)
         {
 
             CacheUser cacheUser = new()
@@ -91,15 +91,8 @@ namespace HardwareShop.Application.Implementations
                 Guid = user.Guid,
             };
 
-            LoginResponse? tokens = jwtService.GenerateTokens(cacheUser);
-            if (tokens == null)
-            {
-                return null;
-            }
-
+            LoginResponse tokens = jwtService.GenerateTokens(cacheUser);
             UserShop? userShop = user.UserShop;
-
-
             return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
                 languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings, user.Guid), (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
                  userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0, userShop.Shop?.Phones?.Select(e => new ShopPhoneDto()

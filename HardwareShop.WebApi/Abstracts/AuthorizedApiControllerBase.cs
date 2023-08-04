@@ -1,13 +1,8 @@
-﻿using HardwareShop.Core.Models;
+﻿using HardwareShop.Application.Services;
 using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Authorization;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HardwareShop.Core.Bases
+namespace HardwareShop.WebApi.Abstracts
 {
     [Authorize]
     public abstract class AuthorizedApiControllerBase : ApiControllerBase

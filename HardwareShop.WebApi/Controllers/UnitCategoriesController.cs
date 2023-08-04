@@ -1,9 +1,9 @@
 
 
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers

@@ -1,7 +1,7 @@
 ﻿using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HardwareShop.Core.Bases
+namespace HardwareShop.WebApi.Abstracts
 {
     [Route("api/[controller]")]
     [ApiController]

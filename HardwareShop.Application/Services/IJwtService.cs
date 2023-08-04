@@ -1,10 +1,10 @@
 ﻿using HardwareShop.Core.Models;
 
-namespace HardwareShop.Core.Services
+namespace HardwareShop.Application.Services
 {
     public interface IJwtService
     {
         CacheUser? GetUserFromToken(string token);
-        LoginResponse? GenerateTokens(CacheUser cacheUser);
+        LoginResponse GenerateTokens(CacheUser cacheUser);
     }
 }

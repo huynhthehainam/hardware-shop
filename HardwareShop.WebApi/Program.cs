@@ -1,6 +1,7 @@
 ﻿
 using System.Text;
 using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
 using HardwareShop.Domain;
@@ -9,6 +10,7 @@ using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
+using HardwareShop.WebApi.Implementations;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;

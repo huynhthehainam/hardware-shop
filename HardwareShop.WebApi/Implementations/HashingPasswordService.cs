@@ -1,13 +1,8 @@
-﻿using HardwareShop.Core.Services;
+﻿using System.Security.Cryptography;
+using HardwareShop.Application.Services;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace HardwareShop.Core.Implementations
+namespace HardwareShop.WebApi.Implementations
 {
     public class HashingConfiguration
     {

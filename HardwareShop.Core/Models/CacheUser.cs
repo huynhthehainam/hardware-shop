@@ -24,7 +24,7 @@ namespace HardwareShop.Core.Models
         }
         public CacheUser(ClaimsPrincipal claims) : this(claims.Claims)
         {
-            
+
         }
     }
 }
