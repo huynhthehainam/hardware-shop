@@ -1,9 +1,9 @@
 ﻿using System.Text.Json;
-using HardwareShop.Business.Services;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Extensions;
+using HardwareShop.Domain.Extensions;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 

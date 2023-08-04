@@ -1,15 +1,14 @@
 ﻿
 using System.Text;
-using HardwareShop.Business.Extensions;
+using HardwareShop.Application.Extensions;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal;
+using HardwareShop.Domain;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
-using HardwareShop.WebApi.Middleware;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -167,7 +166,6 @@ public class Program
         app.UseAuthentication();
 
         app.UseAuthorization();
-        app.UseMiddleware<FillContextUserMiddleware>();
         app.MapGrpcService<UserGrpcService>();
         if (app.Environment.IsDevelopment())
         {

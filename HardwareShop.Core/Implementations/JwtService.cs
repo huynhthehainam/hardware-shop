@@ -1,13 +1,11 @@
-﻿using HardwareShop.Core.Helpers;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
-using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
+﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json;
+using HardwareShop.Core.Helpers;
+using HardwareShop.Core.Models;
+using HardwareShop.Core.Services;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 
 namespace HardwareShop.Core.Implementations
 {
@@ -16,26 +14,25 @@ namespace HardwareShop.Core.Implementations
         public string SecretKey { get; set; } = string.Empty;
         public int ExpiredDuration { get; set; } = 120;
     }
+
+    public static class JwtServiceConstants
+    {
+        public const string AppName = "h@rdwareShop";
+        public const string SubKey = "sub";
+        public const int RefreshTokenExtendedDuration = 30;
+    }
     public class JwtService : IJwtService
     {
-        private const string appName = "h@rdwareShop";
-        private const string jwtSubKey = "sub";
-        private const string jwtUsernameKey = "username";
-        private const string jwtRoleKey = "role";
-        private const string jwtGuidKey = "guid";
-        private const int refreshTokenExtendedDuration = 30;
-        private readonly IDistributedCache distributedCache;
         private readonly JwtConfiguration jwtConfiguration;
-        public JwtService(IOptions<JwtConfiguration> options, IDistributedCache distributedCache)
+        public JwtService(IOptions<JwtConfiguration> options)
         {
-            this.distributedCache = distributedCache;
             this.jwtConfiguration = options.Value;
         }
         private static string GetCacheKey(string sessionId, int id)
         {
-            return $"{appName}-{id}-{sessionId}"; ;
+            return $"{JwtServiceConstants.AppName}-{id}-{sessionId}"; ;
         }
-        public async Task<CacheUser?> GetUserFromTokenAsync(string token)
+        public CacheUser? GetUserFromToken(string token)
         {
 
             var handler = new JwtSecurityTokenHandler();
@@ -44,36 +41,32 @@ namespace HardwareShop.Core.Implementations
             {
                 return null;
             }
-            var subClaim = jwtToken.Claims.FirstOrDefault(e => e.Type == jwtSubKey);
+            var subClaim = jwtToken.Claims.FirstOrDefault(e => e.Type == JwtServiceConstants.SubKey);
             if (subClaim == null)
             {
                 return null;
             }
-            var issuer = jwtToken.Issuer;
-            var userId = Convert.ToInt32(subClaim.Value);
-            var cacheKey = GetCacheKey(issuer, userId);
 
-            var cacheContent = await distributedCache.GetStringAsync(cacheKey);
-            if (cacheContent == null)
-            {
-                return null;
-            }
 
-            var cacheUser = JsonSerializer.Deserialize<CacheUser>(cacheContent);
-            return cacheUser;
+
+
+
+
+            return new CacheUser(jwtToken.Claims);
         }
         public LoginResponse? GenerateTokens(CacheUser cacheUser)
         {
             var sessionId = RandomStringHelper.RandomString(10);
 
-            var cacheKey = GetCacheKey(sessionId, cacheUser.Id);
-
-            distributedCache.SetString(cacheKey, JsonSerializer.Serialize(cacheUser));
             var claims = new Claim[]
             {
-                new Claim(jwtSubKey, cacheUser.Id.ToString()),
-                new Claim(jwtUsernameKey, cacheUser.Username),
-                new Claim(jwtRoleKey, cacheUser.Role.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, cacheUser.Guid.ToString()),
+                new Claim(JwtServiceConstants.SubKey, cacheUser.Guid.ToString()),
+                new Claim(ClaimTypes.Name, cacheUser.Username),
+                new Claim(ClaimTypes.Role, cacheUser.Role.ToString()),
+                new Claim(ClaimTypes.GivenName, cacheUser.FirstName),
+                new Claim(ClaimTypes.Surname, cacheUser.LastName),
+                new Claim(ClaimTypes.Email, cacheUser.Email ?? ""),
             };
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -81,13 +74,14 @@ namespace HardwareShop.Core.Implementations
             var handler = new JwtSecurityTokenHandler();
             var accessToken = handler.WriteToken(jwtToken);
             var jwtRefreshToken
-                = new JwtSecurityToken(sessionId.ToString(), null, claims, null, DateTime.UtcNow.AddMinutes(jwtConfiguration.ExpiredDuration + refreshTokenExtendedDuration), creds);
+                = new JwtSecurityToken(sessionId.ToString(), null, claims, null, DateTime.UtcNow.AddMinutes(jwtConfiguration.ExpiredDuration + JwtServiceConstants.RefreshTokenExtendedDuration), creds);
 
             var refreshToken = handler.WriteToken(jwtRefreshToken);
 
             return new LoginResponse(accessToken, refreshToken, sessionId);
 
         }
+
 
     }
 }

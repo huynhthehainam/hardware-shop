@@ -1,7 +1,7 @@
-using HardwareShop.Business.Services;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Models;
+using HardwareShop.Domain.Models;
 using HotChocolate.Authorization;
 using Microsoft.EntityFrameworkCore;
 

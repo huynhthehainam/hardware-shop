@@ -1,10 +1,10 @@
-﻿using HardwareShop.Business.Dtos;
-using HardwareShop.Business.Services;
+﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
-using HardwareShop.Dal.Extensions;
-using HardwareShop.Dal.Models;
+using HardwareShop.Domain.Extensions;
+using HardwareShop.Domain.Models;
 using HardwareShop.WebApi.Commands;
 using Microsoft.AspNetCore.Mvc;
 

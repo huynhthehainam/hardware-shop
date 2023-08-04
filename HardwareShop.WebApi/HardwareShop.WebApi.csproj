@@ -21,7 +21,7 @@
     <PackageReference Include="HotChocolate.AspNetCore" Version="13.2.1" />
     <PackageReference Include="HotChocolate.AspNetCore.Authorization" Version="13.2.1" />
     <PackageReference Include="HotChocolate.AspNetCore.Playground" Version="10.5.5" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.54.0"/>
+    <PackageReference Include="Grpc.AspNetCore" Version="2.54.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.54.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
   </ItemGroup>
@@ -30,7 +30,7 @@
     <None Include="HtmlTemplates/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HardwareShop.Business\HardwareShop.Business.csproj" />
+    <ProjectReference Include="..\HardwareShop.Application\HardwareShop.Application.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="Protos\user.proto" GrpcServices="Server" />

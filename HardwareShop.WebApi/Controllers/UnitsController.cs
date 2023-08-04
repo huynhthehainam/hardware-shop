@@ -1,7 +1,7 @@
 
 
 
-using HardwareShop.Business.Services;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
@@ -20,7 +20,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUnit([FromBody] CreateUnitCommand command)
         {
-            Business.Dtos.CreatedUnitDto? unit = await unitService.CreateUnitAsync(new Business.Dtos.CreateUnitDto
+            Application.Dtos.CreatedUnitDto? unit = await unitService.CreateUnitAsync(new Application.Dtos.CreateUnitDto
             {
                 Name = command.Name ?? "",
                 StepNumber = command.StepNumber ?? 0,
@@ -50,7 +50,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetUnits([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] int? categoryId)
         {
-            PageData<Business.Dtos.UnitDto> units = await unitService.GetUnitDtoPageDataAsync(pagingModel, search, categoryId);
+            PageData<Application.Dtos.UnitDto> units = await unitService.GetUnitDtoPageDataAsync(pagingModel, search, categoryId);
             responseResultBuilder.SetPageData(units);
             return responseResultBuilder.Build();
         }

@@ -12,6 +12,6 @@
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="7.0.9" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HardwareShop.Business\HardwareShop.Business.csproj" />
+    <ProjectReference Include="..\HardwareShop.Application\HardwareShop.Application.csproj" />
   </ItemGroup>
 </Project>
