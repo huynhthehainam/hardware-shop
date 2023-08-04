@@ -17,7 +17,6 @@ namespace HardwareShop.Domain.Models
         {
             get
             {
-                return Username;
                 return $"{FirstName} {LastName}";
             }
         }

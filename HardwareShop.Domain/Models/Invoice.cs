@@ -25,7 +25,6 @@ namespace HardwareShop.Domain.Models
             set => customer = value;
         }
         public string CustomerInformation { get; set; } = string.Empty;
-
         public int ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
