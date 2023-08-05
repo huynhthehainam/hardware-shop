@@ -2,7 +2,7 @@
 using HardwareShop.Application.Services;
 using Microsoft.Extensions.Options;
 
-namespace HardwareShop.WebApi.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class HashingConfiguration
     {

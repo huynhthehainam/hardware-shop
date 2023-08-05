@@ -10,11 +10,12 @@ using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
-using HardwareShop.WebApi.Implementations;
+using HardwareShop.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using HardwareShop.Infrastructure.Extensions;
 
 namespace HardwareShop.WebApi;
 public class Program
@@ -140,12 +141,10 @@ public class Program
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         builder.Services.AddScoped<ILanguageService, LanguageService>();
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
-        builder.Services.AddScoped<IJwtService, JwtService>();
-        builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
-        builder.Services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
         builder.Services.AddSingleton<IChatHubController, ChatHubController>();
 
-        builder.Services.ConfigureBusiness();
+        builder.Services.ConfigureApplication();
+        builder.Services.ConfigureInfrastructure();
 
 
         WebApplication app = builder.Build();

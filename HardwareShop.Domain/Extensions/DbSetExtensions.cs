@@ -3,8 +3,28 @@ using HardwareShop.Core.Bases;
 using HardwareShop.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Core.Extensions
+namespace HardwareShop.Domain.Extensions
 {
+    public class CreateIfNotExistResponse<T> where T : EntityBase
+    {
+        public bool IsExist { get; internal set; }
+        public T Entity { get; internal set; }
+        public CreateIfNotExistResponse(bool isExist, T entity)
+        {
+            IsExist = isExist;
+            Entity = entity;
+        }
+    }
+    public class CreateOrUpdateResponse<T> where T : EntityBase
+    {
+        public bool IsUpdate { get; internal set; }
+        public T Entity { get; internal set; }
+        public CreateOrUpdateResponse(bool isUpdate, T entity)
+        {
+            IsUpdate = isUpdate;
+            Entity = entity;
+        }
+    }
     public static class DbExtensions
     {
         public static IQueryable<T> Search<T>(this IQueryable<T> query, SearchQuery<T>? searchQuery) where T : EntityBase

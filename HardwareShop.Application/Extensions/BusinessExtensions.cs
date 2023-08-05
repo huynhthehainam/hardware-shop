@@ -1,5 +1,4 @@
-﻿using HardwareShop.Application.Implementations;
-using HardwareShop.Application.Services;
+﻿using HardwareShop.Application.Services;
 using HardwareShop.Core.Services;
 using HardwareShop.Domain.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -78,22 +77,10 @@ namespace HardwareShop.Application.Extensions
     }
     public static class BusinessExtensions
     {
-        public static void ConfigureBusiness(this IServiceCollection services)
+        public static IServiceCollection ConfigureApplication(this IServiceCollection services)
         {
             services.ConfigureRepository();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IShopService, ShopService>();
-            services.AddScoped<IWarehouseService, WarehouseService>();
-            services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IInvoiceService, InvoiceService>();
-            services.AddScoped<ICustomerDebtService, CustomerDebtService>();
-            services.AddScoped<IProductCategoryService, ProductCategoryService>();
-            services.AddScoped<IUnitService, UnitService>();
-            services.AddScoped<IUnitCategoryService, UnitCategoryService>();
-            services.AddScoped<ICustomerService, CustomerService>();
-            services.AddScoped<ICountryService, CountryService>();
-            services.AddScoped<IAssetService, AssetService>();
-            services.AddScoped<IChatService, ChatService>();
+            return services;
         }
     }
 }

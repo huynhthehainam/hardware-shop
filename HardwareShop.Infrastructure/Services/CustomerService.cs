@@ -1,20 +1,20 @@
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Helpers;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Domain.Models;
 using iText.Html2pdf;
+using HardwareShop.Domain.Extensions;
 using iText.Html2pdf.Resolver.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Application.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class CustomerService : ICustomerService
     {
@@ -35,7 +35,7 @@ namespace HardwareShop.Application.Implementations
             this.customerDebtService = customerDebtService;
         }
 
-   
+
 
         public async Task<CreatedCustomerDto?> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar, int? phoneCountryId)
         {

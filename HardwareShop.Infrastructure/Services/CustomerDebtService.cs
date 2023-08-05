@@ -1,11 +1,11 @@
 using System.Text.Json;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Domain.Models;
+using HardwareShop.Domain.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Application.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class CustomerDebtService : ICustomerDebtService
     {

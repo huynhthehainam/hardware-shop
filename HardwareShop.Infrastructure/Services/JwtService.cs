@@ -7,7 +7,7 @@ using HardwareShop.Core.Models;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace HardwareShop.WebApi.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class JwtConfiguration
     {
@@ -28,10 +28,7 @@ namespace HardwareShop.WebApi.Implementations
         {
             this.jwtConfiguration = options.Value;
         }
-        private static string GetCacheKey(string sessionId, int id)
-        {
-            return $"{JwtServiceConstants.AppName}-{id}-{sessionId}"; ;
-        }
+
         public CacheUser? GetUserFromToken(string token)
         {
 

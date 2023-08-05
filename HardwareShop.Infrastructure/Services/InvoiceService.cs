@@ -1,7 +1,6 @@
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Helpers;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Implementations;
 using HardwareShop.Core.Models;
@@ -15,7 +14,7 @@ using iText.Kernel.Pdf;
 using iText.Layout;
 using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Application.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class InvoiceService : IInvoiceService
     {
@@ -71,7 +70,7 @@ namespace HardwareShop.Application.Implementations
                     return null;
                 }
             }
-            Invoice invoice = new Invoice
+            Invoice invoice = new()
             {
                 CustomerId = customer.Id,
                 CreatedDate = DateTime.UtcNow,

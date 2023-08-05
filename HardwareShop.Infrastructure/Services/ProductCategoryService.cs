@@ -4,13 +4,13 @@
 
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Extensions;
+using HardwareShop.Domain.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Application.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class ProductCategoryService : IProductCategoryService
     {
@@ -33,7 +33,7 @@ namespace HardwareShop.Application.Implementations
                 responseResultBuilder.AddNotFoundEntityError("Shop");
                 return null;
             }
-            ProductCategory category = new ProductCategory { ShopId = shop.Id, Name = name, Description = description };
+            ProductCategory category = new() { ShopId = shop.Id, Name = name, Description = description };
             db.Add(category);
             db.SaveChanges();
             return new ProductCategoryDto { Id = category.Id, Name = category.Name };

@@ -7,7 +7,7 @@ using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HardwareShop.Application.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class AssetService : IAssetService
     {

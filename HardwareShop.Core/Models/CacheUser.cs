@@ -11,8 +11,6 @@ namespace HardwareShop.Core.Models
         public string LastName { get; set; } = String.Empty;
         public Guid Guid { get; set; }
         public CacheUser() { }
-
-
         public CacheUser(IEnumerable<Claim> claims)
         {
             Username = claims.FirstOrDefault(e => e.Type == ClaimTypes.Name)?.Value ?? "";
@@ -24,7 +22,6 @@ namespace HardwareShop.Core.Models
         }
         public CacheUser(ClaimsPrincipal claims) : this(claims.Claims)
         {
-
         }
     }
 }

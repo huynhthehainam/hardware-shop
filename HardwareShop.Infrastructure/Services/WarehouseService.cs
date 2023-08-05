@@ -1,12 +1,12 @@
 ﻿using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Extensions;
 using HardwareShop.Core.Models;
 using HardwareShop.Core.Services;
 using HardwareShop.Domain.Models;
+using HardwareShop.Domain.Extensions;
 using Microsoft.EntityFrameworkCore;
 
-namespace HardwareShop.Application.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
     public class WarehouseService : IWarehouseService
     {

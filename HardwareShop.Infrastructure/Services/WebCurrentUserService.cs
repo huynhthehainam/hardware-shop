@@ -1,33 +1,26 @@
 ﻿using HardwareShop.Application.Services;
 using HardwareShop.Core.Models;
+using Microsoft.AspNetCore.Http;
 
-namespace HardwareShop.WebApi.Implementations
+namespace HardwareShop.Infrastructure.Services
 {
-    public class CurrentUserService : ICurrentUserService
+    public class WebCurrentUserService : ICurrentUserService
     {
         private readonly IHttpContextAccessor httpContextAccessor;
         private CacheUser? cacheUser;
         public CacheUser GetCacheUser()
         {
-            var userPrincipals = httpContextAccessor.HttpContext?.User;
-            if (userPrincipals == null)
-            {
-                throw new Exception("Invalid token");
-            }
-            if (cacheUser == null)
-            {
-                cacheUser = new CacheUser(userPrincipals);
-            }
+            var userPrincipals = (httpContextAccessor.HttpContext?.User) ?? throw new Exception("Invalid token");
+            cacheUser ??= new CacheUser(userPrincipals);
             return cacheUser;
         }
-        public CurrentUserService(
+        public WebCurrentUserService(
             IHttpContextAccessor httpContextAccessor)
         {
             this.httpContextAccessor = httpContextAccessor;
         }
         public bool IsSystemAdmin()
         {
-
             return GetCacheUser().Role == SystemUserRole.Admin;
         }
         public Guid GetUserGuid()
