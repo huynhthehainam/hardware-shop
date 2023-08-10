@@ -1,11 +1,11 @@
 
 
 using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -20,38 +20,29 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCustomersOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] bool? isInDebt)
         {
-            PageData<CustomerDto>? customers = isInDebt.GetValueOrDefault(false) ? await customerService.GetCustomerInDebtPageDataOfCurrentUserShopAsync(pagingModel, search) : await customerService.GetCustomerPageDataOfCurrentUserShopAsync(pagingModel, search);
-            if (customers == null)
+            var response = isInDebt.GetValueOrDefault(false) ? await customerService.GetCustomerInDebtPageDataOfCurrentUserShopAsync(pagingModel, search) : await customerService.GetCustomerPageDataOfCurrentUserShopAsync(pagingModel, search);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) =>
             {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetPageData(customers);
+                builder.SetPageData(result);
+            });
             return responseResultBuilder.Build();
         }
         [HttpGet("AllDebtsPdf")]
         public async Task<IActionResult> GetAllDebtsPdf()
         {
-            byte[]? bytes = await customerService.GetAllDebtsPdfAsync();
-            if (bytes == null)
-            {
-                return responseResultBuilder.Build();
-            }
+            var response = await customerService.GetAllDebtsPdfAsync();
 
-            responseResultBuilder.SetFile(bytes, "application/pdf", "debt.pdf");
+            responseResultBuilder.SetApplicationResponse(response, (builder, bytes) => builder.SetFile(bytes, "application/pdf", "debt.pdf"));
             return responseResultBuilder.Build();
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateCustomerOfCurrentUserShop([FromBody] CreateCustomerCommand command)
         {
-            CreatedCustomerDto? customer = await customerService.CreateCustomerOfCurrentUserShopAsync(command.Name ?? "", command.Phone, command.Address, command.IsFamiliar, command.PhoneCountryId);
-            if (customer == null)
-            {
-                return responseResultBuilder.Build();
-            }
+            var response = await customerService.CreateCustomerOfCurrentUserShopAsync(command.Name ?? "", command.Phone, command.Address, command.IsFamiliar, command.PhoneCountryId);
 
-            responseResultBuilder.SetData(customer);
+
+            responseResultBuilder.SetApplicationResponse(response, (builder, customer) => builder.SetData(customer));
 
 
             return responseResultBuilder.Build();
@@ -59,76 +50,48 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("{id:int}/Update")]
         public async Task<IActionResult> UpdateCustomerOfCurrentUserShop([FromRoute] int id, [FromBody] UpdateCustomerCommand command)
         {
-            CustomerDto? customer = await customerService.UpdateCustomerOfCurrentUserShopAsync(id, command.Name, command.Phone, command.Address, command.IsFamiliar, command.AmountOfCash);
-            if (customer == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetUpdatedMessage();
+            var response = await customerService.UpdateCustomerOfCurrentUserShopAsync(id, command.Name, command.Phone, command.Address, command.IsFamiliar, command.AmountOfCash);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
 
             return responseResultBuilder.Build();
         }
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetCustomerById([FromRoute] int id)
         {
-            CustomerDto? customer = await customerService.GetCustomerDtoOfCurrentUserShopByIdAsync(id);
+            var response = await customerService.GetCustomerDtoOfCurrentUserShopByIdAsync(id);
 
-            if (customer == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetData(customer);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
         [HttpGet("{id:int}/AllInvoicesPdf")]
         public async Task<IActionResult> GetAllInvoicesPdf([FromRoute] int id)
         {
-            byte[]? invoiceBytes = await customerService.GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(id);
-            if (invoiceBytes == null)
-            {
-                return responseResultBuilder.Build();
-            }
+            var response = await customerService.GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(id);
 
-            responseResultBuilder.SetFile(invoiceBytes, "application/pdf", "invoice.pdf");
+
+            responseResultBuilder.SetApplicationResponse(response, (builder, invoiceBytes) => builder.SetFile(invoiceBytes, "application/pdf", "invoice.pdf"));
             return responseResultBuilder.Build();
         }
 
         [HttpGet("{id:int}/DebtHistories")]
         public async Task<IActionResult> GetDebtHistoriesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)
         {
-            PageData<CustomerDebtHistoryDto>? histories = await customerService.GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(id, pagingModel);
-            if (histories == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetPageData(histories);
+            var response = await customerService.GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(id, pagingModel);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetPageData(result));
             return responseResultBuilder.Build();
         }
         [HttpGet("{id:int}/Invoices")]
         public async Task<IActionResult> GetInvoicesOfCustomer([FromRoute] int id, [FromQuery] PagingModel pagingModel)
         {
-            PageData<InvoiceDto>? invoices = await customerService.GetCustomerInvoiceDtoPageDataByCustomerIdAsync(id, pagingModel);
-            if (invoices == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetPageData(invoices);
+            var response = await customerService.GetCustomerInvoiceDtoPageDataByCustomerIdAsync(id, pagingModel);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetPageData(result));
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/PayAllDebt")]
         public async Task<IActionResult> PayAllDebt([FromRoute] int id)
         {
-            bool isSuccess = await customerService.PayAllDebtForCustomerOfCurrentUserShopAsync(id);
-            if (!isSuccess)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetUpdatedMessage();
+            var response = await customerService.PayAllDebtForCustomerOfCurrentUserShopAsync(id);
+            responseResultBuilder.SetApplicationResponse(response);
             return responseResultBuilder.Build();
         }
     }

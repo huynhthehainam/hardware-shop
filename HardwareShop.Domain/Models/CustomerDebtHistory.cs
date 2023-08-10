@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
+using HardwareShop.Domain.Interfaces;
 
 namespace HardwareShop.Domain.Models
 {
@@ -12,7 +12,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public CustomerDebtHistory(ILazyLoader lazyLoader) : base(lazyLoader)
+        public CustomerDebtHistory(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
 
@@ -26,13 +26,13 @@ namespace HardwareShop.Domain.Models
         private CustomerDebt? customerDebt;
         public CustomerDebt? CustomerDebt
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref customerDebt) : customerDebt;
+            get => lazyLoader?.Load(this, ref customerDebt);
             set => customerDebt = value;
         }
         private ICollection<Invoice>? invoices;
         public ICollection<Invoice>? Invoices
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
+            get => lazyLoader?.Load(this, ref invoices);
             set => invoices = value;
         }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

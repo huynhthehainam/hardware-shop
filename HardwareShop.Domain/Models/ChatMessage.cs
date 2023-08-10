@@ -1,7 +1,5 @@
-
-
-using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -11,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public ChatMessage(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ChatMessage(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public long Id { get; set; }

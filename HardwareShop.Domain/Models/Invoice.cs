@@ -1,7 +1,7 @@
-﻿using HardwareShop.Core.Bases;
-using HardwareShop.Core.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using HardwareShop.Core.Helpers;
+using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
+using HardwareShop.Domain.Interfaces;
 
 namespace HardwareShop.Domain.Models
 {
@@ -11,7 +11,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Invoice(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Invoice(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
 
@@ -21,7 +21,7 @@ namespace HardwareShop.Domain.Models
         private Customer? customer;
         public Customer? Customer
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref customer) : customer;
+            get => lazyLoader?.Load(this, ref customer);
             set => customer = value;
         }
         public string CustomerInformation { get; set; } = string.Empty;
@@ -29,13 +29,13 @@ namespace HardwareShop.Domain.Models
         private Shop? shop;
         public Shop? Shop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            get => lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
         private ICollection<InvoiceDetail>? details;
         public ICollection<InvoiceDetail>? Details
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref details) : details;
+            get => lazyLoader?.Load(this, ref details);
             set => details = value;
         }
 
@@ -43,7 +43,7 @@ namespace HardwareShop.Domain.Models
         private Order? order;
         public Order? Order
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref order) : order;
+            get => lazyLoader?.Load(this, ref order);
             set => order = value;
         }
         public double Deposit { get; set; }
@@ -54,7 +54,7 @@ namespace HardwareShop.Domain.Models
         private CustomerDebtHistory? currentDebtHistory;
         public CustomerDebtHistory? CurrentDebtHistory
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref currentDebtHistory) : currentDebtHistory;
+            get => lazyLoader?.Load(this, ref currentDebtHistory);
             set => currentDebtHistory = value;
         }
         // Calculate total cost

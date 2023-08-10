@@ -2,7 +2,6 @@
 
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Commands;
 using HotChocolate.Authorization;
 
@@ -19,7 +18,8 @@ namespace HardwareShop.WebApi.GraphQL
             {
                 return null;
             }
-            return await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
+            var response = await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
+            return response.Result;
         }
     }
 }

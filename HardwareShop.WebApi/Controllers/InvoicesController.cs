@@ -1,11 +1,11 @@
 
 
 using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -21,7 +21,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateInvoice([FromBody] CreateInvoiceCommand command)
         {
-            CreatedInvoiceDto? invoice = await invoiceService.CreateInvoiceOfCurrentUserShopAsync(command.CustomerId.GetValueOrDefault(), command.Deposit.GetValueOrDefault(), command.OrderId,
+            var response = await invoiceService.CreateInvoiceOfCurrentUserShopAsync(command.CustomerId.GetValueOrDefault(), command.Deposit.GetValueOrDefault(), command.OrderId,
             command.Details.Select(e => new CreateInvoiceDetailDto
             {
                 Description = e.Description,
@@ -30,29 +30,23 @@ namespace HardwareShop.WebApi.Controllers
                 Quantity = e.Quantity.GetValueOrDefault(),
                 Price = e.Price.GetValueOrDefault(),
             }).ToList());
-            if (invoice == null) return responseResultBuilder.Build();
-            responseResultBuilder.SetData(invoice);
+            responseResultBuilder.SetApplicationResponse(response, (builder, invoice) => builder.SetData(invoice));
             return responseResultBuilder.Build();
         }
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetInvoiceByIdOfCurrentUserShop([FromRoute] int id)
         {
-            InvoiceDto? invoice = await invoiceService.GetInvoiceDtoOfCurrentUserShopByIdAsync(id);
-            if (invoice == null)
-            {
-                return responseResultBuilder.Build();
-            }
-            responseResultBuilder.SetData(invoice);
+            var response = await invoiceService.GetInvoiceDtoOfCurrentUserShopByIdAsync(id);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
 
         [HttpPost("{id:int}/Restore")]
         public async Task<IActionResult> RestoreInvoice([FromRoute] int id)
         {
-            bool isSuccess = await invoiceService.RestoreInvoiceOfCurrentUserSHopAsync(id);
-            if (!isSuccess)
-                return responseResultBuilder.Build();
-            responseResultBuilder.SetDeletedMessage();
+            var response = await invoiceService.RestoreInvoiceOfCurrentUserSHopAsync(id);
+
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetDeletedMessage());
             return responseResultBuilder.Build();
         }
 
@@ -60,15 +54,13 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetInvoicesOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] SortingModel sortingModel)
         {
-            var invoices = await invoiceService.GetInvoiceDtoPageDataOfCurrentUserShopAsync(pagingModel, search, sortingModel);
-            if (invoices == null) return responseResultBuilder.Build();
-
-            responseResultBuilder.SetPageData(invoices);
+            var response = await invoiceService.GetInvoiceDtoPageDataOfCurrentUserShopAsync(pagingModel, search, sortingModel);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetPageData(result));
             return responseResultBuilder.Build();
         }
 
         [HttpGet("{id:int}/Pdf")]
-        public async Task<IActionResult> GetPdf([FromRoute] int id, [FromQuery] bool? isAllowedToShowCustomerInformation, [FromQuery] bool? isAllowedToShowCustomerDeposit, [FromQuery] bool? isAllowedToShowShopInformation )
+        public async Task<IActionResult> GetPdf([FromRoute] int id, [FromQuery] bool? isAllowedToShowCustomerInformation, [FromQuery] bool? isAllowedToShowCustomerDeposit, [FromQuery] bool? isAllowedToShowShopInformation)
         {
             var bytes = await invoiceService.GetPdfBytesOfInvoiceOfCurrentUserShopAsync(id, isAllowedToShowCustomerInformation.GetValueOrDefault(false), isAllowedToShowCustomerDeposit.GetValueOrDefault(false), isAllowedToShowShopInformation.GetValueOrDefault(false));
             if (bytes == null) return responseResultBuilder.Build();

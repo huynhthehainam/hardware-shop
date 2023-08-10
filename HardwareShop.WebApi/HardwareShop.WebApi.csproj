@@ -8,12 +8,10 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.13" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.13">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+
+
     <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="6.0.8" />
+
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="itext7" Version="7.2.5" />
     <PackageReference Include="itext7.pdfhtml" Version="4.0.5" />
@@ -24,6 +22,7 @@
     <PackageReference Include="Grpc.AspNetCore" Version="2.54.0" />
     <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.54.0" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.13"></PackageReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="SampleImages/**" CopyToOutputDirectory="PreserveNewest" />
@@ -31,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\HardwareShop.Application\HardwareShop.Application.csproj" />
+    <ProjectReference Include="..\HardwareShop.Infrastructure\HardwareShop.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="Protos\user.proto" GrpcServices="Server" />

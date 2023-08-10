@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using HardwareShop.Core.Models;
+using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Models;
 
 namespace HardwareShop.Application.Dtos

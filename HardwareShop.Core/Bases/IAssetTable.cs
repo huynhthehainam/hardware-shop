@@ -1,7 +1,0 @@
-﻿namespace HardwareShop.Core.Bases
-{
-  
-   
-
-   
-}

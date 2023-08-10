@@ -1,7 +1,7 @@
 ﻿using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -13,6 +13,7 @@ namespace HardwareShop.WebApi.Controllers
         public AuthController(IResponseResultBuilder responseResultBuilder, IUserService userService) : base(responseResultBuilder)
         {
             this.userService = userService;
+
         }
 
         [HttpPost("Login")]

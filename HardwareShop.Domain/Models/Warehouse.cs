@@ -1,6 +1,5 @@
-﻿using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -10,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Warehouse(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Warehouse(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int Id { get; set; }
@@ -23,13 +22,13 @@ namespace HardwareShop.Domain.Models
         private Shop? shop;
         public Shop? Shop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            get => lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
         private ICollection<WarehouseProduct>? warehouseProducts;
         public ICollection<WarehouseProduct>? WarehouseProducts
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouseProducts) : warehouseProducts;
+            get => lazyLoader?.Load(this, ref warehouseProducts);
             set => warehouseProducts = value;
         }
     }

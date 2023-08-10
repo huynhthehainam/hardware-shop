@@ -1,5 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -13,7 +13,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public UserAsset(ILazyLoader lazyLoader) : base(lazyLoader)
+        public UserAsset(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int Id { get; set; }
@@ -21,7 +21,7 @@ namespace HardwareShop.Domain.Models
         private User? user;
         public User? User
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref user) : user;
+            get => lazyLoader?.Load(this, ref user);
             set => user = value;
         }
     }

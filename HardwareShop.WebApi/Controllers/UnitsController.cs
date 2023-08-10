@@ -1,11 +1,11 @@
 
 
 
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -20,31 +20,21 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateUnit([FromBody] CreateUnitCommand command)
         {
-            Application.Dtos.CreatedUnitDto? unit = await unitService.CreateUnitAsync(new Application.Dtos.CreateUnitDto
+            var response = await unitService.CreateUnitAsync(new Application.Dtos.CreateUnitDto
             {
                 Name = command.Name ?? "",
                 StepNumber = command.StepNumber ?? 0,
                 CompareWithPrimaryUnit = command.CompareWithPrimaryUnit ?? 0,
                 UnitCategoryId = command.UnitCategoryId ?? 0,
             });
-            if (unit == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetData(unit);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/RoundValue")]
         public async Task<IActionResult> RoundValue([FromRoute] int id, [FromBody] RoundNumberCommand command)
         {
-            double? newValue = await unitService.RoundValue(id, command.Value.GetValueOrDefault());
-            if (newValue == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetData(newValue);
+            var response = await unitService.RoundValue(id, command.Value.GetValueOrDefault());
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
         [HttpGet]

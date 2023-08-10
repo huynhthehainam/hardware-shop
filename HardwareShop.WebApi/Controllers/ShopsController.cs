@@ -1,12 +1,10 @@
 ﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
-using HardwareShop.Domain.Extensions;
-
-using HardwareShop.Domain.Models;
+using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Extensions;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -43,12 +41,8 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            CreatedShopDto? shop = await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
-            if (shop == null)
-            {
-                return responseResultBuilder.Build();
-            }
-            responseResultBuilder.SetData(shop);
+            var response = await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateLogo")]
@@ -64,13 +58,8 @@ namespace HardwareShop.WebApi.Controllers
                 return responseResultBuilder.Build();
             }
 
-            ShopAssetDto? shopAsset = await shopService.UpdateLogoAsync(id, command.Logo);
-            if (shopAsset == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetUpdatedMessage();
+            var response = await shopService.UpdateLogoAsync(id, command.Logo.ConvertToAsset());
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetUpdatedMessage());
             return responseResultBuilder.Build();
         }
 
@@ -81,38 +70,23 @@ namespace HardwareShop.WebApi.Controllers
             {
                 return responseResultBuilder.Build();
             }
-            ShopAssetDto? shopAsset = await shopService.UpdateYourShopLogoAsync(command.Logo);
-            if (shopAsset == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetUpdatedMessage();
+            var response = await shopService.UpdateYourShopLogoAsync(command.Logo.ConvertToAsset());
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetUpdatedMessage());
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateSetting")]
         public async Task<IActionResult> UpdateShopSettings([FromRoute] int id, [FromBody] UpdateShopSettingCommand command)
         {
-            var isSuccess = await shopService.UpdateShopSettingAsync(id, command.IsAllowedToShowInvoiceDownloadOptions);
-            if (!isSuccess)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetUpdatedMessage();
+            var response = await shopService.UpdateShopSettingAsync(id, command.IsAllowedToShowInvoiceDownloadOptions);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetUpdatedMessage());
             return responseResultBuilder.Build();
         }
 
         [HttpGet("YourShop/Logo")]
         public async Task<IActionResult> GetYourShopLogo()
         {
-            CachedAsset? asset = await shopService.GetCurrentUserShopLogoAsync();
-            if (asset == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetAsset(asset);
+            var response = await shopService.GetCurrentUserShopLogoAsync();
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetAsset(result));
             return responseResultBuilder.Build();
         }
 
@@ -120,13 +94,8 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("YourShop/Users")]
         public async Task<IActionResult> GetUsersOfYourShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            PageData<UserDto>? users = await userService.GetUserPageDataOfShopAsync(pagingModel, search);
-            if (users == null)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetPageData(users);
+            var response = await userService.GetUserPageDataOfShopAsync(pagingModel, search);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetPageData(result));
             return responseResultBuilder.Build();
         }
 
@@ -139,13 +108,8 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            bool isSuccess = await shopService.DeleteShopSoftlyAsync(id);
-            if (!isSuccess)
-            {
-                return responseResultBuilder.Build();
-            }
-
-            responseResultBuilder.SetDeletedMessage();
+            var response = await shopService.DeleteShopSoftlyAsync(id);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetUpdatedMessage());
             return responseResultBuilder.Build();
         }
 
@@ -157,8 +121,8 @@ namespace HardwareShop.WebApi.Controllers
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            CreatedUserDto? user = await shopService.CreateAdminUserAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
-            responseResultBuilder.SetData(user);
+            var response = await shopService.CreateAdminUserAsync(id, command.Username ?? "", command.Password ?? "", command.Email);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
 

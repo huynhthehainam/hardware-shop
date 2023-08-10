@@ -1,9 +1,9 @@
 ﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -31,32 +31,22 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetWarehouses([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            var warehousePageData = await warehouseService.GetWarehousesOfCurrentUserShopAsync(pagingModel, search);
-            if (warehousePageData == null) { return responseResultBuilder.Build(); }
-            responseResultBuilder.SetPageData(warehousePageData);
+            var response = await warehouseService.GetWarehousesOfCurrentUserShopAsync(pagingModel, search);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetPageData(result));
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/Delete")]
         public async Task<IActionResult> DeleteWarehouse([FromRoute] int id)
         {
-            var isSuccess = await warehouseService.DeleteWarehouseOfCurrentUserShopAsync(id);
-            if (!isSuccess)
-            {
-                responseResultBuilder.AddNotFoundEntityError("Warehouse");
-                return responseResultBuilder.Build();
-            }
-            responseResultBuilder.SetDeletedMessage();
+            var response = await warehouseService.DeleteWarehouseOfCurrentUserShopAsync(id);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetDeletedMessage());
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateQuantityForProduct")]
         public async Task<IActionResult> UpdateQuantityForProduct([FromRoute] int id, [FromBody] UpdateQuantityForProductCommand command)
         {
-            WarehouseProductDto? warehouseProduct = await warehouseService.CreateOrUpdateWarehouseProductAsync(id, command.ProductId.GetValueOrDefault(), command.Quantity.GetValueOrDefault());
-            if (warehouseProduct == null)
-            {
-                return responseResultBuilder.Build();
-            }
-            responseResultBuilder.SetData(warehouseProduct);
+            var response = await warehouseService.CreateOrUpdateWarehouseProductAsync(id, command.ProductId.GetValueOrDefault(), command.Quantity.GetValueOrDefault());
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }
     }

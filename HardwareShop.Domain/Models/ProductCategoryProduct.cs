@@ -1,6 +1,5 @@
-﻿using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -10,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public ProductCategoryProduct(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ProductCategoryProduct(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
 
@@ -18,7 +17,7 @@ namespace HardwareShop.Domain.Models
         private ProductCategory? productCategory;
         public ProductCategory? ProductCategory
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategory) : productCategory;
+            get => lazyLoader?.Load(this, ref productCategory);
             set => productCategory = value;
         }
 
@@ -26,7 +25,7 @@ namespace HardwareShop.Domain.Models
         private Product? product;
         public Product? Product
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref product) : product;
+            get => lazyLoader?.Load(this, ref product);
             set => product = value;
         }
     }

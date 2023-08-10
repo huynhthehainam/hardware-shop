@@ -1,12 +1,12 @@
 
 
-using HardwareShop.Application.Extensions;
-using HardwareShop.Domain.Models;
+using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 
 namespace HardwareShop.Application.Services
 {
     public interface IAssetService
     {
-        ApplicationResponse<CachedAsset> GetAssetById(long id);
+        ApplicationResponse<CachedAssetDto> GetAssetById(long id);
     }
 }

@@ -1,6 +1,5 @@
-﻿using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -11,21 +10,21 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public CustomerDebt(ILazyLoader lazyLoader) : base(lazyLoader)
+        public CustomerDebt(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int CustomerId { get; set; }
         private Customer? customer;
         public Customer? Customer
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref customer) : customer;
+            get => lazyLoader?.Load(this, ref customer);
             set => customer = value;
         }
         public double Amount { get; set; }
         private ICollection<CustomerDebtHistory>? histories;
         public ICollection<CustomerDebtHistory>? Histories
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref histories) : histories;
+            get => lazyLoader?.Load(this, ref histories);
             set => histories = value;
         }
 

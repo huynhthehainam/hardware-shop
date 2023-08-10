@@ -8,12 +8,12 @@ namespace HardwareShop.Application.Dtos
     public class InvoiceDetailDto
     {
         public long Id { get; set; }
-        public string? ProductName { get; internal set; }
-        public string? Description { get; internal set; }
-        public double Quantity { get; internal set; }
-        public double Price { get; internal set; }
-        public double TotalCost { get; internal set; }
-        public string? UnitName { get; internal set; }
+        public string? ProductName { get; set; }
+        public string? Description { get; set; }
+        public double Quantity { get; set; }
+        public double Price { get; set; }
+        public double TotalCost { get; set; }
+        public string? UnitName { get; set; }
         public double OriginalPrice { get; set; }
         public int ProductId { get; set; }
     }

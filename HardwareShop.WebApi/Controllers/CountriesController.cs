@@ -1,12 +1,7 @@
-
-
-
-using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
-using HardwareShop.Domain.Extensions;
+using HardwareShop.WebApi.Abstracts;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -35,7 +30,7 @@ namespace HardwareShop.WebApi.Controllers
             var assetResponse = await countryService.GetCountryIconByIdAsync(id);
             responseResultBuilder.SetApplicationResponse(assetResponse, (builder, result) =>
             {
-               
+
                 builder.SetAsset(result);
             });
             return responseResultBuilder.Build();

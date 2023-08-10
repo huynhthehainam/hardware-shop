@@ -1,9 +1,5 @@
-
-
-
-using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -13,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public ShopPhone(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ShopPhone(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
 
@@ -22,14 +18,14 @@ namespace HardwareShop.Domain.Models
         private Shop? shop;
         public Shop? Shop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            get => lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
         public int CountryId { get; set; }
         private Country? country;
         public Country? Country
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref country) : country;
+            get => lazyLoader?.Load(this, ref country);
             set => country = value;
         }
         public string OwnerName { get; set; } = string.Empty;

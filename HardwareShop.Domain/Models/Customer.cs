@@ -1,6 +1,5 @@
-﻿using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -10,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Customer(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Customer(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int Id { get; set; }
@@ -20,7 +19,7 @@ namespace HardwareShop.Domain.Models
         private Country? phoneCountry;
         public Country? PhoneCountry
         {
-            get => lazyLoader.Load(this, ref phoneCountry);
+            get => lazyLoader?.Load(this, ref phoneCountry);
             set => phoneCountry = value;
         }
         public string? Address { get; set; }
@@ -29,26 +28,26 @@ namespace HardwareShop.Domain.Models
         private Shop? shop;
         public Shop? Shop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            get =>  lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
 
         private CustomerDebt? debt;
         public CustomerDebt? Debt
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref debt) : debt;
+            get =>  lazyLoader?.Load(this, ref debt);
             set => debt = value;
         }
         private ICollection<Invoice>? invoices;
         public ICollection<Invoice>? Invoices
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
+            get =>  lazyLoader?.Load(this, ref invoices);
             set => invoices = value;
         }
         private ICollection<Order>? orders;
         public ICollection<Order>? Orders
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref orders) : orders;
+            get =>  lazyLoader?.Load(this, ref orders);
             set => orders = value;
         }
     }

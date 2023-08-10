@@ -1,7 +1,7 @@
 
 
 using Grpc.Core;
-using HardwareShop.Core.Services;
+using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Protos;
 using Microsoft.AspNetCore.Authorization;
 

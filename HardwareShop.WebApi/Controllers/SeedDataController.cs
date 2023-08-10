@@ -1,18 +1,8 @@
-
-
-
-
-
 using System.Text.Json;
 using HardwareShop.Application.Helpers;
-using HardwareShop.Core.Bases;
-using HardwareShop.Core.Extensions;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
-using HardwareShop.Domain.Models;
-using HardwareShop.WebApi.Commands;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
+using HardwareShop.Application.Services;
+using HardwareShop.WebApi.Abstracts;
+using HardwareShop.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.WebApi.Controllers
@@ -146,224 +136,224 @@ namespace HardwareShop.WebApi.Controllers
             this.db = db;
             this.environment = environment;
         }
-        [HttpPost("SeedFromDbFile")]
-        public Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
-        {
-            if (command.DbFile == null || command.ShopId == null)
-            {
-                return Task.FromResult(responseResultBuilder.Build());
-            }
-            var productAsset = db.Set<Asset>().FirstOrDefault(e => e.Filename == "ProductAsset.jpg");
-            if (productAsset == null)
-            {
-                return Task.FromResult(responseResultBuilder.Build());
-            }
-            string dbFilePath = System.IO.Path.Combine("UploadedDb");
-            _ = Directory.CreateDirectory(dbFilePath);
-            dbFilePath = System.IO.Path.Combine(dbFilePath, "dbab.db");
-            using (FileStream fileStream = new(dbFilePath, FileMode.Create))
-            {
-                command.DbFile.CopyTo(fileStream);
-            }
-            using SqliteConnection connection = new($"Data source={dbFilePath}");
-            connection.Open();
-            TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            try
-            {
-                #region SeedUnits
-                int singleCategoryId = 2;
-                int lengthCategoryId = 4;
-                int volumeCategoryId = 5;
-                int massCategoryId = 1;
-                List<DbUnitModel> dbUnits = new()
-                {
-                    new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}, 1,1),
-                    new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"},1,1),
-                    new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ,1,1),
-                    new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ,1,1),
-                    new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"},1,1),
-                    new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"},1,1),
-                    new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"},1,1),
-                    new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"},1,1),
-                    new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"},0.01,1),
-                    new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"},0.01,0.1),
-                    new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"},1,1),
-                    new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"},0.01,1),
-                    new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ,1,1),
-                    new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"},0.01,1)
-                };
-                foreach (DbUnitModel dbUnit in dbUnits)
-                {
-                    CreateOrUpdateResponse<Unit> unit = db.CreateOrUpdate(new Unit()
-                    {
-                        CompareWithPrimaryUnit = dbUnit.CompareWithPrimaryUnit,
-                        IsPrimary = false,
-                        Name = dbUnit.Name,
-                        StepNumber = dbUnit.StepNumber,
-                        UnitCategoryId = dbUnit.CategoryId,
-                    }, e => new { e.Name, e.UnitCategoryId }, e => new
-                    {
-                        e.Name
-                    });
-                    dbUnit.Id = unit.Entity.Id;
-                }
-                #endregion
+        // [HttpPost("SeedFromDbFile")]
+        // public Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
+        // {
+        //     if (command.DbFile == null || command.ShopId == null)
+        //     {
+        //         return Task.FromResult(responseResultBuilder.Build());
+        //     }
+        //     var productAsset = db.Set<Asset>().FirstOrDefault(e => e.Filename == "ProductAsset.jpg");
+        //     if (productAsset == null)
+        //     {
+        //         return Task.FromResult(responseResultBuilder.Build());
+        //     }
+        //     string dbFilePath = System.IO.Path.Combine("UploadedDb");
+        //     _ = Directory.CreateDirectory(dbFilePath);
+        //     dbFilePath = System.IO.Path.Combine(dbFilePath, "dbab.db");
+        //     using (FileStream fileStream = new(dbFilePath, FileMode.Create))
+        //     {
+        //         command.DbFile.CopyTo(fileStream);
+        //     }
+        //     using SqliteConnection connection = new($"Data source={dbFilePath}");
+        //     connection.Open();
+        //     TimeZoneInfo timeZoneInfo = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        //     try
+        //     {
+        //         #region SeedUnits
+        //         int singleCategoryId = 2;
+        //         int lengthCategoryId = 4;
+        //         int volumeCategoryId = 5;
+        //         int massCategoryId = 1;
+        //         List<DbUnitModel> dbUnits = new()
+        //         {
+        //             new DbUnitModel("Sheet", singleCategoryId, new List<string>{"Tâm", "Tấm", "tâm", "tấm"}, 1,1),
+        //             new DbUnitModel("Sphere piece", singleCategoryId, new List<string>{"Viên", "vien", "viên", "viển"},1,1),
+        //             new DbUnitModel("Piece", singleCategoryId,new List<string>{"cai", "cái"} ,1,1),
+        //             new DbUnitModel("Bag", singleCategoryId,new List<string>{"bich", "bịch"} ,1,1),
+        //             new DbUnitModel("Bar", singleCategoryId,new List<string>{"cay", "cây"},1,1),
+        //             new DbUnitModel("Bottle", singleCategoryId, new List<string>{"chai"},1,1),
+        //             new DbUnitModel("Roll", singleCategoryId, new List<string>{"cuon", "cuộn"},1,1),
+        //             new DbUnitModel("Box", singleCategoryId, new List<string>{"hop"},1,1),
+        //             new DbUnitModel("Meter", lengthCategoryId, new List<string>{"m", "mét"},0.01,1),
+        //             new DbUnitModel("Ounce", massCategoryId, new List<string>{"lạng"},0.01,0.1),
+        //             new DbUnitModel("Ball", singleCategoryId, new List<string>{"trái"},1,1),
+        //             new DbUnitModel("Litter", volumeCategoryId, new List<string>{"lit"},0.01,1),
+        //             new DbUnitModel("Can", singleCategoryId, new List<string>{"lon"} ,1,1),
+        //             new DbUnitModel("Kg", massCategoryId,new List<string>{"kg"},0.01,1)
+        //         };
+        //         foreach (DbUnitModel dbUnit in dbUnits)
+        //         {
+        //             CreateOrUpdateResponse<Unit> unit = db.CreateOrUpdate(new Unit()
+        //             {
+        //                 CompareWithPrimaryUnit = dbUnit.CompareWithPrimaryUnit,
+        //                 IsPrimary = false,
+        //                 Name = dbUnit.Name,
+        //                 StepNumber = dbUnit.StepNumber,
+        //                 UnitCategoryId = dbUnit.CategoryId,
+        //             }, e => new { e.Name, e.UnitCategoryId }, e => new
+        //             {
+        //                 e.Name
+        //             });
+        //             dbUnit.Id = unit.Entity.Id;
+        //         }
+        //         #endregion
 
-                #region SeedProducts
-                SqliteCommand getAllProductCommand = connection.CreateCommand();
-                getAllProductCommand.CommandText = "SELECT * from Warehouses w";
-                using SqliteDataReader getAllProductReader = getAllProductCommand.ExecuteReader();
-                int index = 0;
-                List<Product> products = new();
-                const string assetFolder = "SampleImages";
-                const string productAssetFile = "ProductAsset.jpg";
-                string productAssetPath = System.IO.Path.Join(assetFolder, productAssetFile);
-                byte[] productAssetBytes = System.IO.File.ReadAllBytes(productAssetPath);
-                while (getAllProductReader.Read())
-                {
-                    index++;
-                    string name = getAllProductReader.GetString(1);
-                    name = name.Trim();
-                    double quantity = getAllProductReader.GetDouble(2);
-                    string unitName = getAllProductReader.GetString(3);
-                    double pricePerMass = getAllProductReader.GetDouble(4);
-                    double mass = getAllProductReader.GetDouble(5);
-                    double percentForFamiliarCustomer = getAllProductReader.GetDouble(6);
-                    double percentForCustomer = getAllProductReader.GetDouble(7);
-                    double priceForFamiliarCustomer = getAllProductReader.GetDouble(8);
-                    double priceForCustomer = getAllProductReader.GetDouble(9);
-                    double originalPrice = getAllProductReader.GetDouble(11);
-                    int? unitId = dbUnits.FirstOrDefault(e => e.Variants.Contains(unitName))?.Id;
-                    if (unitId == null)
-                    {
-                        responseResultBuilder.AddInvalidFieldError($"Products[{index}].Unit");
-                        continue;
-                    }
+        //         #region SeedProducts
+        //         SqliteCommand getAllProductCommand = connection.CreateCommand();
+        //         getAllProductCommand.CommandText = "SELECT * from Warehouses w";
+        //         using SqliteDataReader getAllProductReader = getAllProductCommand.ExecuteReader();
+        //         int index = 0;
+        //         List<Product> products = new();
+        //         const string assetFolder = "SampleImages";
+        //         const string productAssetFile = "ProductAsset.jpg";
+        //         string productAssetPath = System.IO.Path.Join(assetFolder, productAssetFile);
+        //         byte[] productAssetBytes = System.IO.File.ReadAllBytes(productAssetPath);
+        //         while (getAllProductReader.Read())
+        //         {
+        //             index++;
+        //             string name = getAllProductReader.GetString(1);
+        //             name = name.Trim();
+        //             double quantity = getAllProductReader.GetDouble(2);
+        //             string unitName = getAllProductReader.GetString(3);
+        //             double pricePerMass = getAllProductReader.GetDouble(4);
+        //             double mass = getAllProductReader.GetDouble(5);
+        //             double percentForFamiliarCustomer = getAllProductReader.GetDouble(6);
+        //             double percentForCustomer = getAllProductReader.GetDouble(7);
+        //             double priceForFamiliarCustomer = getAllProductReader.GetDouble(8);
+        //             double priceForCustomer = getAllProductReader.GetDouble(9);
+        //             double originalPrice = getAllProductReader.GetDouble(11);
+        //             int? unitId = dbUnits.FirstOrDefault(e => e.Variants.Contains(unitName))?.Id;
+        //             if (unitId == null)
+        //             {
+        //                 responseResultBuilder.AddInvalidFieldError($"Products[{index}].Unit");
+        //                 continue;
+        //             }
 
-                    var createWarehouseIfNotExistResponse = db.CreateIfNotExists(new Warehouse()
-                    {
-                        Name = "Kho 1",
-                        Address = "Châu Đức, BRVT",
-                        ShopId = command.ShopId.Value,
-                    }, e => new { e.ShopId, e.Name, e.Address });
+        //             var createWarehouseIfNotExistResponse = db.CreateIfNotExists(new Warehouse()
+        //             {
+        //                 Name = "Kho 1",
+        //                 Address = "Châu Đức, BRVT",
+        //                 ShopId = command.ShopId.Value,
+        //             }, e => new { e.ShopId, e.Name, e.Address });
 
-                    CreateIfNotExistResponse<Product> createIfNotExistResponse = db.CreateIfNotExists(new Product()
-                    {
-                        Name = name,
-                        HasAutoCalculatePermission = true,
-                        Mass = mass,
-                        OriginalPrice = originalPrice,
-                        PercentForCustomer = percentForCustomer,
-                        PercentForFamiliarCustomer = percentForFamiliarCustomer,
-                        PriceForCustomer = priceForCustomer,
-                        PriceForFamiliarCustomer = priceForFamiliarCustomer,
-                        UnitId = unitId.Value,
-                        ShopId = command.ShopId.Value,
-                        PricePerMass = pricePerMass,
-                        ProductAssets = new ProductAsset[] {
-                             new ProductAsset
-                            {
+        //             CreateIfNotExistResponse<Product> createIfNotExistResponse = db.CreateIfNotExists(new Product()
+        //             {
+        //                 Name = name,
+        //                 HasAutoCalculatePermission = true,
+        //                 Mass = mass,
+        //                 OriginalPrice = originalPrice,
+        //                 PercentForCustomer = percentForCustomer,
+        //                 PercentForFamiliarCustomer = percentForFamiliarCustomer,
+        //                 PriceForCustomer = priceForCustomer,
+        //                 PriceForFamiliarCustomer = priceForFamiliarCustomer,
+        //                 UnitId = unitId.Value,
+        //                 ShopId = command.ShopId.Value,
+        //                 PricePerMass = pricePerMass,
+        //                 ProductAssets = new ProductAsset[] {
+        //                      new ProductAsset
+        //                     {
 
-                                AssetType =  ProductAssetConstants.ThumbnailAssetType,
-                               Asset = productAsset
-                            }
-                        },
-                        WarehouseProducts = new WarehouseProduct[]{
-                            new WarehouseProduct(){
-                                WarehouseId = createWarehouseIfNotExistResponse.Entity.Id,
-                                Quantity = Math.Max(0,quantity),
-                            }
-                        },
-                    }, e => new { e.ShopId, e.Name });
-                    products.Add(createIfNotExistResponse.Entity);
+        //                         AssetType =  ProductAssetConstants.ThumbnailAssetType,
+        //                        Asset = productAsset
+        //                     }
+        //                 },
+        //                 WarehouseProducts = new WarehouseProduct[]{
+        //                     new WarehouseProduct(){
+        //                         WarehouseId = createWarehouseIfNotExistResponse.Entity.Id,
+        //                         Quantity = Math.Max(0,quantity),
+        //                     }
+        //                 },
+        //             }, e => new { e.ShopId, e.Name });
+        //             products.Add(createIfNotExistResponse.Entity);
 
-                }
-                #endregion
+        //         }
+        //         #endregion
 
-                #region SeedCustomers
-                if (!environment.IsDevelopment())
-                {
-                    SqliteCommand getAllCustomerCommand = connection.CreateCommand();
-                    getAllCustomerCommand.CommandText = "SELECT * from Customers c ";
+        //         #region SeedCustomers
+        //         if (!environment.IsDevelopment())
+        //         {
+        //             SqliteCommand getAllCustomerCommand = connection.CreateCommand();
+        //             getAllCustomerCommand.CommandText = "SELECT * from Customers c ";
 
-                    using SqliteDataReader getAllCustomerReader = getAllCustomerCommand.ExecuteReader();
-                    List<DbCustomerModel> dbCustomers = new();
+        //             using SqliteDataReader getAllCustomerReader = getAllCustomerCommand.ExecuteReader();
+        //             List<DbCustomerModel> dbCustomers = new();
 
-                    while (getAllCustomerReader.Read())
-                    {
-                        int oldId = getAllCustomerReader.GetInt32(0);
-                        string name = getAllCustomerReader.GetString(1);
-                        string address = getAllCustomerReader.GetString(2);
-                        double currentDebt = getAllCustomerReader.GetDouble(3);
-                        List<DbDebtHistoryModel> debtHistories = new();
-                        SqliteCommand getAllCustomerDebtHistoryCommand = connection.CreateCommand();
-                        getAllCustomerDebtHistoryCommand.CommandText = $"SELECT * from DeptHistories dh where dh.customer_id = {oldId} order by dh .created DESC ";
-                        SqliteDataReader getAllCustomerDebtHistoryReader = getAllCustomerDebtHistoryCommand.ExecuteReader();
-                        double debt = currentDebt;
-                        while (getAllCustomerDebtHistoryReader.Read())
-                        {
-                            DateTime createdDate = getAllCustomerDebtHistoryReader.GetDateTime(1);
-                            double amount = getAllCustomerDebtHistoryReader.GetDouble(2);
-                            string reason = getAllCustomerDebtHistoryReader.GetString(3);
-                            DbDebtHistoryModel debtHistory = new(createdDate, amount, reason)
-                            {
-                                NewDebt = debt,
-                                OldDebt = debt - amount
-                            };
-                            debt = debtHistory.OldDebt;
-                            debtHistories.Add(debtHistory);
-                        }
-                        if (!string.IsNullOrEmpty(name))
-                        {
-                            dbCustomers.Add(new DbCustomerModel(oldId, name, address, currentDebt, debtHistories));
-                        }
+        //             while (getAllCustomerReader.Read())
+        //             {
+        //                 int oldId = getAllCustomerReader.GetInt32(0);
+        //                 string name = getAllCustomerReader.GetString(1);
+        //                 string address = getAllCustomerReader.GetString(2);
+        //                 double currentDebt = getAllCustomerReader.GetDouble(3);
+        //                 List<DbDebtHistoryModel> debtHistories = new();
+        //                 SqliteCommand getAllCustomerDebtHistoryCommand = connection.CreateCommand();
+        //                 getAllCustomerDebtHistoryCommand.CommandText = $"SELECT * from DeptHistories dh where dh.customer_id = {oldId} order by dh .created DESC ";
+        //                 SqliteDataReader getAllCustomerDebtHistoryReader = getAllCustomerDebtHistoryCommand.ExecuteReader();
+        //                 double debt = currentDebt;
+        //                 while (getAllCustomerDebtHistoryReader.Read())
+        //                 {
+        //                     DateTime createdDate = getAllCustomerDebtHistoryReader.GetDateTime(1);
+        //                     double amount = getAllCustomerDebtHistoryReader.GetDouble(2);
+        //                     string reason = getAllCustomerDebtHistoryReader.GetString(3);
+        //                     DbDebtHistoryModel debtHistory = new(createdDate, amount, reason)
+        //                     {
+        //                         NewDebt = debt,
+        //                         OldDebt = debt - amount
+        //                     };
+        //                     debt = debtHistory.OldDebt;
+        //                     debtHistories.Add(debtHistory);
+        //                 }
+        //                 if (!string.IsNullOrEmpty(name))
+        //                 {
+        //                     dbCustomers.Add(new DbCustomerModel(oldId, name, address, currentDebt, debtHistories));
+        //                 }
 
-                    }
-                    foreach (DbCustomerModel dbCustomer in dbCustomers)
-                    {
-
-
-                        CreateIfNotExistResponse<Customer> createIfNotExistResponse = db.CreateIfNotExists(new Customer
-                        {
-                            Address = dbCustomer.Address,
-                            Name = dbCustomer.Name,
-                            ShopId = command.ShopId.Value,
-                            IsFamiliar = false,
-                            Debt = new CustomerDebt
-                            {
-                                Amount = dbCustomer.Debt,
-                                Histories = dbCustomer.DebtHistories.Select(e => new CustomerDebtHistory()
-                                {
-                                    ChangeOfDebt = e.Amount,
-                                    CreatedDate = TimeZoneInfo.ConvertTimeToUtc(e.CreatedDate, timeZoneInfo),
-                                    NewDebt = e.NewDebt,
-                                    OldDebt = e.OldDebt,
-                                    Reason = e.GetReasonTuple().Item1,
-                                    ReasonParams = e.GetReasonTuple().Item2,
-                                }).ToList()
-                            }
-                        }, e => new { e.ShopId, e.Name });
-                        dbCustomer.Id = createIfNotExistResponse.Entity.Id;
-                    }
-                }
-                #endregion
+        //             }
+        //             foreach (DbCustomerModel dbCustomer in dbCustomers)
+        //             {
 
 
+        //                 CreateIfNotExistResponse<Customer> createIfNotExistResponse = db.CreateIfNotExists(new Customer
+        //                 {
+        //                     Address = dbCustomer.Address,
+        //                     Name = dbCustomer.Name,
+        //                     ShopId = command.ShopId.Value,
+        //                     IsFamiliar = false,
+        //                     Debt = new CustomerDebt
+        //                     {
+        //                         Amount = dbCustomer.Debt,
+        //                         Histories = dbCustomer.DebtHistories.Select(e => new CustomerDebtHistory()
+        //                         {
+        //                             ChangeOfDebt = e.Amount,
+        //                             CreatedDate = TimeZoneInfo.ConvertTimeToUtc(e.CreatedDate, timeZoneInfo),
+        //                             NewDebt = e.NewDebt,
+        //                             OldDebt = e.OldDebt,
+        //                             Reason = e.GetReasonTuple().Item1,
+        //                             ReasonParams = e.GetReasonTuple().Item2,
+        //                         }).ToList()
+        //                     }
+        //                 }, e => new { e.ShopId, e.Name });
+        //                 dbCustomer.Id = createIfNotExistResponse.Entity.Id;
+        //             }
+        //         }
+        //         #endregion
 
-            }
 
-            catch (Exception)
-            {
 
-            }
-            finally
-            {
-                connection.Close();
-                SqliteConnection.ClearAllPools();
-                System.IO.File.Delete(dbFilePath);
-            }
-            return Task.FromResult(responseResultBuilder.Build());
-        }
+        //     }
+
+        //     catch (Exception)
+        //     {
+
+        //     }
+        //     finally
+        //     {
+        //         connection.Close();
+        //         SqliteConnection.ClearAllPools();
+        //         System.IO.File.Delete(dbFilePath);
+        //     }
+        //     return Task.FromResult(responseResultBuilder.Build());
+        // }
 
     }
 }
