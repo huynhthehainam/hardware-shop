@@ -1,18 +1,8 @@
-
-
-
-
-
 using System.Text.Json;
 using HardwareShop.Application.Helpers;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
-using HardwareShop.Domain.Models;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.Sqlite;
+using HardwareShop.WebApi.Services;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.WebApi.Controllers

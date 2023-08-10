@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Core.Bases;
+using HardwareShop.Domain.Abstracts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 

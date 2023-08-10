@@ -6,6 +6,8 @@ using HardwareShop.Core.Models;
 using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using HardwareShop.Domain.Extensions;
+using HardwareShop.Application.Models;
+using HardwareShop.Infrastructure.Extensions;
 
 namespace HardwareShop.Infrastructure.Services
 {

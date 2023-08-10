@@ -1,9 +1,11 @@
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Models;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -21,12 +23,12 @@ namespace HardwareShop.Infrastructure.Services
             this.distributedCache = distributedCache;
         }
 
-        public async Task<ApplicationResponse<CachedAsset>> GetCountryIconByIdAsync(int id)
+        public async Task<ApplicationResponse<CachedAssetDto>> GetCountryIconByIdAsync(int id)
         {
             var country = await db.Set<Country>().FirstOrDefaultAsync(e => e.Id == id);
             if (country == null)
             {
-                return new ApplicationResponse<CachedAsset>
+                return new ApplicationResponse<CachedAssetDto>
                 {
                     Error = ApplicationError.CreateNotFoundError("Country")
                 };
@@ -36,13 +38,13 @@ namespace HardwareShop.Infrastructure.Services
             var asset = country.Asset;
             if (asset == null)
             {
-                return new ApplicationResponse<CachedAsset>
+                return new ApplicationResponse<CachedAssetDto>
                 {
                     Error = ApplicationError.CreateNotFoundError("Asset")
                 };
 
             }
-            return new ApplicationResponse<CachedAsset>
+            return new ApplicationResponse<CachedAssetDto>
             {
                 Result = db.GetCachedAssetById(distributedCache, asset.AssetId)
             };

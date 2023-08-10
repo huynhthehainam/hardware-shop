@@ -2,10 +2,12 @@
 
 using System.Linq.Expressions;
 using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Models;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Infrastructure.Services

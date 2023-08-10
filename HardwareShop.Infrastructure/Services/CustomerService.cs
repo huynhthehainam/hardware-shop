@@ -2,9 +2,6 @@ using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Helpers;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Helpers;
-using HardwareShop.Core.Implementations;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.Domain.Models;
 using iText.Html2pdf;
 using HardwareShop.Domain.Extensions;
@@ -13,6 +10,8 @@ using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using Microsoft.EntityFrameworkCore;
+using HardwareShop.Application.Models;
+using HardwareShop.Infrastructure.Extensions;
 
 namespace HardwareShop.Infrastructure.Services
 {
@@ -20,14 +19,12 @@ namespace HardwareShop.Infrastructure.Services
     {
         private readonly IShopService shopService;
 
-        private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ILanguageService languageService;
         private readonly ICustomerDebtService customerDebtService;
         private readonly IInvoiceService invoiceService;
         private readonly DbContext db;
-        public CustomerService(ILanguageService languageService, DbContext db, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IResponseResultBuilder responseResultBuilder, IShopService shopService)
+        public CustomerService(ILanguageService languageService, DbContext db, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IShopService shopService)
         {
-            this.responseResultBuilder = responseResultBuilder;
             this.db = db;
             this.shopService = shopService;
             this.languageService = languageService;
@@ -37,13 +34,13 @@ namespace HardwareShop.Infrastructure.Services
 
 
 
-        public async Task<CreatedCustomerDto?> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar, int? phoneCountryId)
+        public async Task<ApplicationResponse<CreatedCustomerDto>> CreateCustomerOfCurrentUserShopAsync(string name, string? phone, string? address, bool isFamiliar, int? phoneCountryId)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
+
             }
 
             var createIfNotExistResponse = db.CreateIfNotExists(new Customer
@@ -57,17 +54,18 @@ namespace HardwareShop.Infrastructure.Services
             }, e => new { e.Name, e.Address, e.Phone });
             if (createIfNotExistResponse.IsExist)
             {
-                responseResultBuilder.AddExistedEntityError("Customer");
-                return null;
+                return new(ApplicationError.CreateExistedError("Customer"));
+
             }
-            return new CreatedCustomerDto { Id = createIfNotExistResponse.Entity.Id };
+            return new(new CreatedCustomerDto { Id = createIfNotExistResponse.Entity.Id });
 
         }
 
-        public async Task<CustomerDto?> UpdateCustomerOfCurrentUserShopAsync(int customerId, string? name, string? phone, string? address, bool? isFamiliar, double? amountOfCash)
+        public async Task<ApplicationResponse<CustomerDto>> UpdateCustomerOfCurrentUserShopAsync(int customerId, string? name, string? phone, string? address, bool? isFamiliar, double? amountOfCash)
         {
-            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
-            if (customer == null) return null;
+            var response = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (response.Result == null) return new() { Error = response.Error };
+            var customer = response.Result;
             customer.Name = string.IsNullOrEmpty(name) ? customer.Name : name;
             customer.Phone = string.IsNullOrEmpty(phone) ? customer.Phone : phone;
             customer.Address = string.IsNullOrEmpty(address) ? customer.Address : address;
@@ -79,32 +77,31 @@ namespace HardwareShop.Infrastructure.Services
             }
             db.Update(customer);
             db.SaveChanges();
-            return new CustomerDto { Id = customer.Id };
+            return new(new CustomerDto { Id = customer.Id });
         }
 
-        private async Task<Customer?> GetCustomerOfCurrentUserShopByIdAsync(int customerId)
+        private async Task<ApplicationResponse<Customer>> GetCustomerOfCurrentUserShopByIdAsync(int customerId)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Staff);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var customer = await db.Set<Customer>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == customerId);
             if (customer == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Customer");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Customer"));
+
             }
-            return customer;
+            return new(customer);
         }
 
-        public async Task<CustomerDto?> GetCustomerDtoOfCurrentUserShopByIdAsync(int customerId)
+        public async Task<ApplicationResponse<CustomerDto>> GetCustomerDtoOfCurrentUserShopByIdAsync(int customerId)
         {
-            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
-            if (customer == null) return null;
-
-            return new CustomerDto()
+            var response = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (response.Result == null) return new() { Error = response.Error };
+            var customer = response.Result;
+            return new(new CustomerDto()
             {
                 Id = customer.Id,
                 Name = customer.Name,
@@ -115,15 +112,16 @@ namespace HardwareShop.Infrastructure.Services
                 PhoneCountryId = customer.PhoneCountryId,
                 PhonePrefix = customer.PhoneCountry?.PhonePrefix,
 
-            };
+            });
         }
 
-        public async Task<PageData<CustomerDebtHistoryDto>?> GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
+        public async Task<ApplicationResponse<PageData<CustomerDebtHistoryDto>>> GetCustomerDebtHistoryDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
-            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
-            if (customer == null) return null;
+            var response = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (response.Result == null) return new() { Error = response.Error };
+            var customer = response.Result;
             var customerDebtHistoryPageData = await db.Set<CustomerDebtHistory>().Where(e => e.CustomerDebtId == customer.Id).GetPageDataAsync(pagingModel, new OrderQuery<CustomerDebtHistory>[] { new OrderQuery<CustomerDebtHistory>(e => e.CreatedDate, false) });
-            return customerDebtHistoryPageData.ConvertToOtherPageData(e => new CustomerDebtHistoryDto
+            return new(customerDebtHistoryPageData.ConvertToOtherPageData(e => new CustomerDebtHistoryDto
             {
                 ChangeOfDebt = e.ChangeOfDebt,
                 CreatedDate = e.CreatedDate,
@@ -132,43 +130,46 @@ namespace HardwareShop.Infrastructure.Services
                 Id = e.Id,
                 Reason = e.Reason,
                 ReasonParams = e.ReasonParams
-            });
+            }));
         }
 
-        public async Task<PageData<InvoiceDto>?> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
+        public async Task<ApplicationResponse<PageData<InvoiceDto>>> GetCustomerInvoiceDtoPageDataByCustomerIdAsync(int customerId, PagingModel pagingModel)
         {
-            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
-            if (customer == null) return null;
+            var response = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (response.Result == null) return new() { Error = response.Error };
+            var customer = response.Result;
             var invoicePageData = await db.Set<Invoice>().Where(e => e.CustomerId == customer.Id).GetPageDataAsync(pagingModel, new OrderQuery<Invoice>[] { new OrderQuery<Invoice>(e => e.CreatedDate, false) });
-            return invoicePageData.ConvertToOtherPageData(e => new InvoiceDto
+            return new(invoicePageData.ConvertToOtherPageData(e => new InvoiceDto
             {
                 Id = e.Id,
                 Code = e.Code,
                 CreatedDate = e.CreatedDate,
                 Deposit = e.Deposit,
                 TotalCost = e.GetTotalCost(),
-            });
+            }));
 
         }
 
-        public async Task<bool> PayAllDebtForCustomerOfCurrentUserShopAsync(int id)
+        public async Task<ApplicationResponse> PayAllDebtForCustomerOfCurrentUserShopAsync(int customerId)
         {
-            var customer = await GetCustomerOfCurrentUserShopByIdAsync(id);
-            if (customer == null) return false;
+            var response = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (response.Result == null) return new() { Error = response.Error };
+            var customer = response.Result;
             var debt = customer.Debt?.Amount ?? 0;
             if (debt < 0)
             {
-                responseResultBuilder.AddInvalidFieldError("Debt");
-                return false;
+                return new(ApplicationError.CreateInvalidError("Debt"));
+
             }
             var reason = CustomerDebtHistoryHelper.GenerateDebtReasonWhenPayingAll();
             await customerDebtService.AddDebtToCustomerAsync(customer, -debt, reason);
-            return true;
+            return new();
         }
-        public async Task<byte[]?> GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(int customerId)
+        public async Task<ApplicationResponse<byte[]>> GetPdfBytesOfCurrentUserShopCustomerInvoicesAsync(int customerId)
         {
-            var customer = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
-            if (customer == null) return null;
+            var response = await GetCustomerOfCurrentUserShopByIdAsync(customerId);
+            if (response.Result == null) return new() { Error = response.Error };
+            var customer = response.Result;
             var invoices = customer.Invoices ?? Array.Empty<Invoice>();
             var invoiceContents = new List<string>();
             foreach (var invoice in invoices)
@@ -188,16 +189,15 @@ namespace HardwareShop.Infrastructure.Services
             HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
 
             var bytes = ms.ToArray();
-            return bytes;
+            return new(bytes);
         }
 
-        public async Task<byte[]?> GetAllDebtsPdfAsync()
+        public async Task<ApplicationResponse<byte[]>> GetAllDebtsPdfAsync()
         {
-            var shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
 
             var customerPageData = await db.Set<Customer>().Where(e => e.ShopId == shop.Id && e.Debt != null && e.Debt.Amount > 0).
@@ -310,16 +310,15 @@ namespace HardwareShop.Infrastructure.Services
             HtmlConverter.ConvertToPdf(htmlStr, pdf, properties);
 
             var bytes = ms.ToArray();
-            return bytes;
+            return new(bytes);
         }
 
-        public async Task<PageData<CustomerDto>?> GetCustomerPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        public async Task<ApplicationResponse<PageData<CustomerDto>>> GetCustomerPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Staff);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var customerPageData = await db.Set<Customer>().Where(e => e.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
             {
@@ -327,7 +326,7 @@ namespace HardwareShop.Infrastructure.Services
                 e.Address,
                 e.Phone
             })).GetPageDataAsync(pagingModel, new OrderQuery<Customer>[] { new OrderQuery<Customer>(e => e.Name, true) });
-            return customerPageData.ConvertToOtherPageData(e => new CustomerDto
+            return new(customerPageData.ConvertToOtherPageData(e => new CustomerDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -337,16 +336,15 @@ namespace HardwareShop.Infrastructure.Services
                 PhoneCountryId = e.PhoneCountryId,
                 Phone = e.Phone,
                 Debt = e.Debt?.Amount ?? 0,
-            });
+            }));
         }
 
-        public async Task<PageData<CustomerDto>?> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        public async Task<ApplicationResponse<PageData<CustomerDto>>> GetCustomerInDebtPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync(UserShopRole.Staff);
+            var shop = await shopService.GetShopDtoByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var customerPageData = await db.Set<Customer>().Where(e => e.ShopId == shop.Id && (e.Debt == null || e.Debt.Amount > 0)).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Customer>(search, e => new
             {
@@ -354,7 +352,7 @@ namespace HardwareShop.Infrastructure.Services
                 e.Address,
                 e.Phone
             })).GetPageDataAsync(pagingModel, new OrderQuery<Customer>[] { new OrderQuery<Customer>(e => e.Name, true) });
-            return customerPageData.ConvertToOtherPageData(e => new CustomerDto
+            return new(customerPageData.ConvertToOtherPageData(e => new CustomerDto
             {
                 Id = e.Id,
                 Name = e.Name,
@@ -364,7 +362,7 @@ namespace HardwareShop.Infrastructure.Services
                 PhoneCountryId = e.PhoneCountryId,
                 Phone = e.Phone,
                 Debt = e.Debt?.Amount ?? 0,
-            });
+            }));
         }
     }
 }

@@ -1,6 +1,7 @@
 
 
 using HardwareShop.Core.Bases;
+using HardwareShop.Domain.Abstracts;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace HardwareShop.Domain.Models

@@ -1,4 +1,4 @@
-﻿namespace HardwareShop.Core.Models
+﻿namespace HardwareShop.Application.Models
 {
     public class PageData<T>
     {

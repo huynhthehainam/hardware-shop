@@ -5,7 +5,7 @@ namespace HardwareShop.Application.Dtos
     public class ShopDto
     {
         public int Id { get; set; }
-        public UserShopRole UserRole { get; set; } = UserShopRole.Staff;
+        public string UserRole { get; set; } = string.Empty;
     }
     public class ShopPhoneDto
     {

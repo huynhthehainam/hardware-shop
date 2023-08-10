@@ -1,9 +1,9 @@
 
 
 using System.Linq.Expressions;
-using HardwareShop.Core.Bases;
+using HardwareShop.Domain.Abstracts;
 
-namespace HardwareShop.Core.Models
+namespace HardwareShop.Application.Models
 {
     public class SearchQuery<T> where T : EntityBase
     {

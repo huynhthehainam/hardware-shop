@@ -2,6 +2,7 @@
 
 
 
+using HardwareShop.Domain.Abstracts;
 using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

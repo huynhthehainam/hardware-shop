@@ -1,11 +1,11 @@
 
 
 
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -21,22 +21,23 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCategories([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            var categories = await productCategoryService.GetCategoryPageDataOfCurrentUserShopAsync(pagingModel, search);
+            var response = await productCategoryService.GetCategoryPageDataOfCurrentUserShopAsync(pagingModel, search);
 
-            if (categories == null) return responseResultBuilder.Build();
 
-            responseResultBuilder.SetPageData(categories);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) =>
+            {
+                builder.SetPageData(result);
+            });
             return responseResultBuilder.Build();
         }
         [HttpPost]
         public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryCommand command)
         {
-            var productCategory = await productCategoryService.CreateCategoryOfCurrentUserShopAsync(command.Name ?? "", command.Description);
-            if (productCategory == null)
+            var response = await productCategoryService.CreateCategoryOfCurrentUserShopAsync(command.Name ?? "", command.Description);
+            responseResultBuilder.SetApplicationResponse(response, (builder, result) =>
             {
-                return responseResultBuilder.Build();
-            }
-            responseResultBuilder.SetData(productCategory);
+                builder.SetData(result);
+            });
             return responseResultBuilder.Build();
         }
     }

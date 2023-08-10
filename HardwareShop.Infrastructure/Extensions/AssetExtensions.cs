@@ -1,8 +1,11 @@
+
+
+using HardwareShop.Application.Dtos;
 using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace HardwareShop.Domain.Extensions
+namespace HardwareShop.Infrastructure.Extensions
 {
     public static class AssetCacheHelpers
     {
@@ -22,7 +25,7 @@ namespace HardwareShop.Domain.Extensions
         {
             AbsoluteExpirationRelativeToNow = new TimeSpan(0, 5, 0)
         };
-        private static CachedAsset SaveAssetToCache(IDistributedCache distributedCache, Asset asset)
+        private static CachedAssetDto SaveAssetToCache(IDistributedCache distributedCache, Asset asset)
         {
             var keys = AssetCacheHelpers.GetAssetCacheKeys(asset.Id);
             distributedCache.Set(keys.Item1, asset.Bytes, cacheEntryOptions);
@@ -30,9 +33,9 @@ namespace HardwareShop.Domain.Extensions
             distributedCache.SetString(keys.Item3, asset.Filename, cacheEntryOptions);
             distributedCache.SetString(keys.Item4, asset.CreatedDate.ToString(), cacheEntryOptions);
             distributedCache.SetString(keys.Item5, asset.LastModifiedDate?.ToString() ?? "", cacheEntryOptions);
-            return CachedAsset.BuildFromAsset(asset);
+            return CachedAssetDto.BuildFromAsset(asset);
         }
-        public static CachedAsset? GetCachedAssetById(this DbContext db, IDistributedCache distributedCache, long id)
+        public static CachedAssetDto? GetCachedAssetById(this DbContext db, IDistributedCache distributedCache, long id)
         {
             var assetSet = db.Set<Asset>();
             var keys = AssetCacheHelpers.GetAssetCacheKeys(id);
@@ -55,7 +58,7 @@ namespace HardwareShop.Domain.Extensions
                 string? fileName = distributedCache.GetString(keys.Item3);
                 string? createdDate = distributedCache.GetString(keys.Item4);
                 string? modifiedDate = distributedCache.GetString(keys.Item5);
-                return new CachedAsset()
+                return new CachedAssetDto()
                 {
                     Bytes = content,
                     Filename = fileName ?? "",

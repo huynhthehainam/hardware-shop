@@ -1,9 +1,8 @@
 
 using System.Diagnostics;
 using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 

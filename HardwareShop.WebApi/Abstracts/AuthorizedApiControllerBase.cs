@@ -1,5 +1,5 @@
 ﻿using HardwareShop.Application.Services;
-using HardwareShop.Core.Services;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HardwareShop.WebApi.Abstracts

@@ -1,9 +1,9 @@
 ﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -14,29 +14,30 @@ namespace HardwareShop.Infrastructure.Services
     {
 
         private readonly ICurrentUserService currentUserService;
-        private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly DbContext db;
         private readonly IDistributedCache distributedCache;
         private readonly IUnitService unitService;
 
-        public ShopService(DbContext db, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, IHashingPasswordService hashingPasswordService, IDistributedCache distributedCache, IUnitService unitService)
+        public ShopService(DbContext db, ICurrentUserService currentUserService, IHashingPasswordService hashingPasswordService, IDistributedCache distributedCache, IUnitService unitService)
         {
             this.distributedCache = distributedCache;
             this.db = db;
             this.currentUserService = currentUserService;
-            this.responseResultBuilder = responseResultBuilder;
             this.unitService = unitService;
             this.hashingPasswordService = hashingPasswordService;
         }
 
-        public async Task<CreatedUserDto?> CreateAdminUserAsync(int id, string username, string password, string? email)
+        public async Task<ApplicationResponse<CreatedUserDto>> CreateAdminUserAsync(int id, string username, string password, string? email)
         {
+            if (currentUserService.IsSystemAdmin())
+            {
+                return new(ApplicationError.CreateNotPermittedError());
+            }
             var shop = await db.Set<Shop>().FirstOrDefaultAsync(e => e.Id == id);
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var createIfNotExistResponse = db.CreateIfNotExists(new User
             {
@@ -49,8 +50,8 @@ namespace HardwareShop.Infrastructure.Services
             });
             if (createIfNotExistResponse.IsExist)
             {
-                responseResultBuilder.AddExistedEntityError("User");
-                return null;
+                return new(ApplicationError.CreateExistedError("User"));
+
             }
 
             UserShop userShop = new UserShop
@@ -63,17 +64,17 @@ namespace HardwareShop.Infrastructure.Services
             db.Add(userShop);
             db.SaveChanges();
 
-            return new CreatedUserDto { Id = createIfNotExistResponse.Entity.Id };
+            return new(new CreatedUserDto { Id = createIfNotExistResponse.Entity.Id });
 
         }
 
-        public Task<CreatedShopDto?> CreateShopAsync(string name, string? address, int cashUnitId)
+        public async Task<ApplicationResponse<CreatedShopDto>> CreateShopAsync(string name, string? address, int cashUnitId)
         {
             var isCashUnitExist = unitService.IsCashUnitExist(cashUnitId);
             if (!isCashUnitExist)
             {
-                responseResultBuilder.AddInvalidFieldError("CashUnit");
-                return Task.FromResult<CreatedShopDto?>(null);
+                return new(ApplicationError.CreateInvalidError("CashUnit"));
+
             }
             var createIfNotExistResponse = db.CreateIfNotExists(new Shop
             {
@@ -87,73 +88,63 @@ namespace HardwareShop.Infrastructure.Services
                 });
             if (createIfNotExistResponse.IsExist)
             {
-                responseResultBuilder.AddExistedEntityError("Shop");
-                return Task.FromResult<CreatedShopDto?>(null);
+                return new(ApplicationError.CreateExistedError("Shop"));
+
             }
-            return Task.FromResult<CreatedShopDto?>(new CreatedShopDto { Id = createIfNotExistResponse.Entity.Id });
+            return new(new CreatedShopDto { Id = createIfNotExistResponse.Entity.Id });
         }
 
 
 
-        public async Task<bool> DeleteShopSoftlyAsync(int shopId)
+        public async Task<ApplicationResponse> DeleteShopSoftlyAsync(int shopId)
         {
             var shop = await db.Set<Shop>().FirstOrDefaultAsync(e => e.Id == shopId);
             if (shop == null)
             {
-                this.responseResultBuilder.AddNotFoundEntityError("Shop");
-                return false;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
-            return db.SoftDelete(shop);
+            db.SoftDelete(shop);
+            return new();
         }
 
-        public async Task<ShopDto?> GetShopByUserIdAsync(Guid userId, UserShopRole role = UserShopRole.Staff)
+        public async Task<ShopDto?> GetShopByUserIdAsync(Guid userId)
         {
-            var userShop = await GetUserShopByUserIdAsync(userId, role);
+            var userShop = await GetUserShopByUserIdAsync(userId);
             if (userShop == null)
                 return null;
             if (userShop.Shop == null)
                 return null;
-            return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
+            return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role.ToString() };
         }
 
-        private async Task<UserShop?> GetUserShopByUserIdAsync(Guid userGuid, UserShopRole role)
+        private async Task<UserShop?> GetUserShopByUserIdAsync(Guid userGuid)
         {
-            var acceptedRoles = new List<UserShopRole>();
-            switch (role)
-            {
-                case UserShopRole.Staff:
-                    acceptedRoles = new List<UserShopRole> { UserShopRole.Staff, UserShopRole.Admin };
-                    break;
-                case UserShopRole.Admin:
-                    acceptedRoles = new List<UserShopRole> { UserShopRole.Admin };
-                    break;
-                default:
-                    break;
-            }
+            var acceptedRoles = new List<UserShopRole> { UserShopRole.Staff, UserShopRole.Admin };
+
 
             var userShop = await db.Set<UserShop>().Include(e => e.Shop).FirstOrDefaultAsync(e => e.User!.Guid == userGuid && acceptedRoles.Contains(e.Role));
 
             return userShop;
         }
-        public async Task<Shop?> GetShopByCurrentUserIdAsync(UserShopRole role)
+        public async Task<Shop?> GetShopByCurrentUserIdAsync()
         {
-            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserGuid(), role);
+            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserGuid());
             if (userShop == null)
             {
                 return null;
             }
             return userShop.Shop;
         }
-        public async Task<ShopDto?> GetShopDtoByCurrentUserIdAsync(UserShopRole role)
+        public async Task<ShopDto?> GetShopDtoByCurrentUserIdAsync()
         {
-            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserGuid(), role);
+            var userShop = await GetUserShopByUserIdAsync(currentUserService.GetUserGuid());
             if (userShop == null)
             {
                 return null;
             }
             if (userShop.Shop == null)
                 return null;
-            return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role };
+            return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role.ToString() };
         }
         private Task<ShopAssetDto> UpdateShopLogo(Shop shop, IFormFile file)
         {
@@ -171,43 +162,41 @@ namespace HardwareShop.Infrastructure.Services
 
             return Task.FromResult(new ShopAssetDto { Id = createOrUpdateResponse.Entity.Id });
         }
-        public async Task<ShopAssetDto?> UpdateLogoAsync(int shopId, IFormFile file)
+        public async Task<ApplicationResponse<ShopAssetDto>> UpdateLogoAsync(int shopId, IFormFile file)
         {
             var shop = await db.Set<Shop>().FirstOrDefaultAsync(e => e.Id == shopId);
             if (shop == null)
             {
-                this.responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
-            return await UpdateShopLogo(shop, file);
+            return new(await UpdateShopLogo(shop, file));
         }
 
-        public async Task<ShopAssetDto?> UpdateYourShopLogoAsync(IFormFile file)
+        public async Task<ApplicationResponse<ShopAssetDto>> UpdateYourShopLogoAsync(IFormFile file)
         {
-            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            var shop = await GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                this.responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
-            return await UpdateShopLogo(shop, file);
+            return new(await UpdateShopLogo(shop, file));
         }
 
-        public async Task<CachedAsset?> GetCurrentUserShopLogoAsync()
+        public async Task<ApplicationResponse<CachedAssetDto>> GetCurrentUserShopLogoAsync()
         {
-            var shop = await GetShopByCurrentUserIdAsync(UserShopRole.Staff);
+            var shop = await GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var logo = await db.Set<ShopAsset>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.AssetType == ShopAssetConstants.LogoAssetType);
             if (logo == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Logo");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Logo"));
             }
-            return db.GetCachedAssetById(distributedCache, logo.AssetId);
+            var asset = db.GetCachedAssetById(distributedCache, logo.AssetId);
+            if (asset == null) return new(ApplicationError.CreateNotFoundError("Asset"));
+            return new(asset);
         }
 
         public async Task<PageData<ShopItemDto>> GetShopDtoPageDataAsync(PagingModel pagingModel, string? search)
@@ -234,13 +223,12 @@ namespace HardwareShop.Infrastructure.Services
             });
         }
 
-        public async Task<bool> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions)
+        public async Task<ApplicationResponse> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions)
         {
             var shopSetting = await db.Set<ShopSetting>().FirstOrDefaultAsync(e => e.ShopId == shopId && e.Shop != null && e.Shop.UserShops != null && e.Shop.UserShops.Any(e => e.User!.Guid == currentUserService.GetUserGuid() && e.Role == UserShopRole.Admin));
             if (shopSetting == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return false;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             if (isAllowedToShowInvoiceDownloadOptions.HasValue)
             {
@@ -248,12 +236,11 @@ namespace HardwareShop.Infrastructure.Services
             }
             db.Entry(shopSetting).State = EntityState.Modified;
             db.SaveChanges();
-            return true;
+            return new();
         }
 
-        public Task<ShopDto?> GetShopByUserIdAsync(int userId, UserShopRole role = UserShopRole.Staff)
-        {
-            throw new NotImplementedException();
-        }
+
     }
+
+
 }

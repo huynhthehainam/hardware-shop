@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using HardwareShop.Core.Bases;
-using HardwareShop.Core.Models;
+using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

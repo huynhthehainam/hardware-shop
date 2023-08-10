@@ -3,6 +3,7 @@
 using HardwareShop.Core.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Abstracts;
 
 namespace HardwareShop.Domain.Models
 {

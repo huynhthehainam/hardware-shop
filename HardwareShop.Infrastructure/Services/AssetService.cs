@@ -1,9 +1,9 @@
 
+using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Services;
-using HardwareShop.Domain.Extensions;
-using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -13,22 +13,21 @@ namespace HardwareShop.Infrastructure.Services
     {
         private readonly DbContext db;
         private readonly IDistributedCache distributedCache;
-        private readonly IResponseResultBuilder responseResultBuilder;
-        public AssetService(DbContext dbContext, IDistributedCache distributedCache, IResponseResultBuilder responseResultBuilder) => (this.db, this.distributedCache, this.responseResultBuilder) = (dbContext, distributedCache, responseResultBuilder);
+        public AssetService(DbContext dbContext, IDistributedCache distributedCache) => (this.db, this.distributedCache) = (dbContext, distributedCache);
 
-        public ApplicationResponse<CachedAsset> GetAssetById(long id)
+        public ApplicationResponse<CachedAssetDto> GetAssetById(long id)
         {
             var asset = db.GetCachedAssetById(distributedCache, id);
             if (asset == null)
             {
 
-                return new ApplicationResponse<CachedAsset>
+                return new ApplicationResponse<CachedAssetDto>
                 {
                     Error = ApplicationError.CreateNotFoundError("Asset"),
                 };
 
             }
-            return new ApplicationResponse<CachedAsset> { Result = asset };
+            return new ApplicationResponse<CachedAssetDto> { Result = asset };
         }
     }
 }

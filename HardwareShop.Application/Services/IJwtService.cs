@@ -1,10 +1,11 @@
-﻿using HardwareShop.Core.Models;
+﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Core.Models;
 
 namespace HardwareShop.Application.Services
 {
     public interface IJwtService
     {
-        CacheUser? GetUserFromToken(string token);
-        LoginResponse GenerateTokens(CacheUser cacheUser);
+        ApplicationUserDto? GetUserFromToken(string token);
+        TokenDto GenerateTokens(ApplicationUserDto cacheUser);
     }
 }

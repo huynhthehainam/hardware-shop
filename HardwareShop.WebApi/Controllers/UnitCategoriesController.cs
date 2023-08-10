@@ -1,9 +1,9 @@
 
 
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.WebApi.Abstracts;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -18,8 +18,8 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet]
         public async Task<IActionResult> GetCategories([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
         {
-            PageData<Application.Dtos.UnitCategoryDto> categories = await unitCategoryService.GetUnitCategoryPageDataAsync(pagingModel, search);
-            responseResultBuilder.SetPageData(categories);
+            var response = await unitCategoryService.GetUnitCategoryPageDataAsync(pagingModel, search);
+            responseResultBuilder.SetPageData(response);
             return responseResultBuilder.Build();
         }
     }

@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\HardwareShop.Core\HardwareShop.Core.csproj" />
+    <ProjectReference Include="..\HardwareShop.Core\HardwareShop.Core.csproj" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

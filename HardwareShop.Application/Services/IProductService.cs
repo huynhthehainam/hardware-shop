@@ -1,4 +1,6 @@
 ﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Models;
 using HardwareShop.Core.Models;
 using HardwareShop.Domain.Models;
 using Microsoft.AspNetCore.Http;
@@ -7,8 +9,8 @@ namespace HardwareShop.Application.Services
 {
     public interface IProductService
     {
-        Task<PageData<ProductDto>?> GetProductPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search, SortingModel sortingModel);
-        Task<CreatedProductDto?> CreateProductOfShopAsync(string name, int unitId,
+        Task<ApplicationResponse<PageData<ProductDto>>> GetProductPageDataOfCurrentUserShopAsync(PagingModel pagingModel, string? search, SortingModel sortingModel);
+        Task<ApplicationResponse<CreatedProductDto>> CreateProductOfShopAsync(string name, int unitId,
          double? mass,
          double? pricePerMass,
          double? percentForFamiliarCustomer,
@@ -19,13 +21,13 @@ namespace HardwareShop.Application.Services
          List<int>? categoryIds,
          List<Tuple<int, double>>? warehouses
          );
-        Task<CachedAsset?> GetProductThumbnailAsync(int productId);
-        Task<CachedAsset?> GetProductAssetByIdAsync(int productId, int assetId);
-        Task<int?> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file);
-        Task<ProductDto?> GetProductDtoOfCurrentUserShopAsync(int productId);
-        Task<bool> RemoveProductAssetByIdAsync(int productId, int assetId);
-        Task<bool> SetProductThumbnailAsync(int productId, int assetId);
-        Task<bool> UpdateProductOfCurrentUserShopAsync(
+        Task<ApplicationResponse<CachedAssetDto>> GetProductThumbnailAsync(int productId);
+        Task<ApplicationResponse<CachedAssetDto>> GetProductAssetByIdAsync(int productId, int assetId);
+        Task<ApplicationResponse<int>> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file);
+        Task<ApplicationResponse<ProductDto>> GetProductDtoOfCurrentUserShopAsync(int productId);
+        Task<ApplicationResponse> RemoveProductAssetByIdAsync(int productId, int assetId);
+        Task<ApplicationResponse> SetProductThumbnailAsync(int productId, int assetId);
+        Task<ApplicationResponse> UpdateProductOfCurrentUserShopAsync(
             int productId,
             string? name,
             int? unitId,
@@ -39,7 +41,7 @@ namespace HardwareShop.Application.Services
             List<int>? categoryIds,
             List<Tuple<int, double>>? warehouses
         );
-        Task<bool> AddPricePerMassOfCurrentUserShopAsync(List<int> categoryIds, double amountOfCash);
-        Task<bool> SoftlyDeleteProductOfCurrentUserShopAsync(int id);
+        Task<ApplicationResponse> AddPricePerMassOfCurrentUserShopAsync(List<int> categoryIds, double amountOfCash);
+        Task<ApplicationResponse> SoftlyDeleteProductOfCurrentUserShopAsync(int id);
     }
 }

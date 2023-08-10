@@ -1,31 +1,28 @@
 ﻿using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.Domain.Models;
 using HardwareShop.Domain.Extensions;
 using Microsoft.EntityFrameworkCore;
+using HardwareShop.Application.Models;
+using HardwareShop.Infrastructure.Extensions;
 
 namespace HardwareShop.Infrastructure.Services
 {
     public class WarehouseService : IWarehouseService
     {
         private readonly IShopService shopService;
-        private readonly IResponseResultBuilder responseResultBuilder;
         private readonly DbContext db;
-        public WarehouseService(IShopService shopService, IResponseResultBuilder responseResultBuilder, DbContext db)
+        public WarehouseService(IShopService shopService, DbContext db)
         {
             this.shopService = shopService;
-            this.responseResultBuilder = responseResultBuilder;
             this.db = db;
         }
-        public async Task<PageData<WarehouseDto>?> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
+        public async Task<ApplicationResponse<PageData<WarehouseDto>>> GetWarehousesOfCurrentUserShopAsync(PagingModel pagingModel, string? search)
         {
-            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
 
 
@@ -34,30 +31,29 @@ namespace HardwareShop.Infrastructure.Services
                 e.Name,
                 e.Address
             })).GetPageData(pagingModel);
-            return warehousePageData.ConvertToOtherPageData(e => new WarehouseDto(e.Id, e.Name, e.Address));
+            return new(warehousePageData.ConvertToOtherPageData(e => new WarehouseDto(e.Id, e.Name, e.Address)));
         }
 
-        public async Task<bool> DeleteWarehouseOfCurrentUserShopAsync(int warehouseId)
+        public async Task<ApplicationResponse> DeleteWarehouseOfCurrentUserShopAsync(int warehouseId)
         {
-            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return false;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var warehouses = db.Set<Warehouse>().Where(e => e.ShopId == shop.Id && e.Id == warehouseId).ToArray();
             db.RemoveRange(warehouses);
             db.SaveChanges();
-            return true;
+            return new();
         }
-        public async Task<CreatedWarehouseDto?> CreateWarehouseOfCurrentUserShopAsync(string name, string? address)
+        public async Task<ApplicationResponse<CreatedWarehouseDto>> CreateWarehouseOfCurrentUserShopAsync(string name, string? address)
         {
-            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
-            Warehouse warehouse = new Warehouse
+            Warehouse warehouse = new()
             {
                 Name = name,
                 Address = address,
@@ -66,30 +62,32 @@ namespace HardwareShop.Infrastructure.Services
             db.Add(warehouse);
             db.SaveChanges();
 
-            return new CreatedWarehouseDto { Id = warehouse.Id };
+            return new(new CreatedWarehouseDto
+            {
+                Id = warehouse.Id
+            });
 
         }
 
-        public async Task<WarehouseProductDto?> CreateOrUpdateWarehouseProductAsync(int warehouseId, int productId, double quantity)
+        public async Task<ApplicationResponse<WarehouseProductDto>> CreateOrUpdateWarehouseProductAsync(int warehouseId, int productId, double quantity)
         {
             Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             Warehouse? warehouse = await db.Set<Warehouse>().FirstOrDefaultAsync(e => e.ShopId == shop.Id && e.Id == warehouseId);
             if (warehouse == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Warehouse");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Warehouse"));
+
             }
 
             Product? product = await db.Set<Product>().FirstOrDefaultAsync(e => (e.ShopId == shop.Id) && e.Id == productId);
             if (product == null)
             {
-                responseResultBuilder.AddInvalidFieldError("ProductId");
-                return null;
+                return new(ApplicationError.CreateInvalidError("ProductId"));
+
             }
             CreateOrUpdateResponse<WarehouseProduct> createOrUpdateResponse = db.CreateOrUpdate(new WarehouseProduct { ProductId = productId, Quantity = quantity, WarehouseId = warehouseId }, e => new
             {
@@ -100,7 +98,7 @@ namespace HardwareShop.Infrastructure.Services
                 e.Quantity
             });
             WarehouseProduct item = createOrUpdateResponse.Entity;
-            return new WarehouseProductDto(item.WarehouseId, item.ProductId, item.Quantity);
+            return new(new WarehouseProductDto(item.WarehouseId, item.ProductId, item.Quantity));
         }
     }
 }

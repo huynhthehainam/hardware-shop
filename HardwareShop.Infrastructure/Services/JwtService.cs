@@ -1,9 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Core.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -29,7 +31,7 @@ namespace HardwareShop.Infrastructure.Services
             this.jwtConfiguration = options.Value;
         }
 
-        public CacheUser? GetUserFromToken(string token)
+        public ApplicationUserDto? GetUserFromToken(string token)
         {
 
             var handler = new JwtSecurityTokenHandler();
@@ -43,9 +45,9 @@ namespace HardwareShop.Infrastructure.Services
             {
                 return null;
             }
-            return new CacheUser(jwtToken.Claims);
+            return ApplicationUserDtoHelper.CreateFromClaims(jwtToken.Claims);
         }
-        public LoginResponse GenerateTokens(CacheUser cacheUser)
+        public TokenDto GenerateTokens(ApplicationUserDto cacheUser)
         {
             var sessionId = RandomStringHelper.RandomString(10);
 
@@ -69,7 +71,7 @@ namespace HardwareShop.Infrastructure.Services
 
             var refreshToken = handler.WriteToken(jwtRefreshToken);
 
-            return new LoginResponse(accessToken, refreshToken, sessionId);
+            return new TokenDto(accessToken, refreshToken, sessionId);
 
         }
 

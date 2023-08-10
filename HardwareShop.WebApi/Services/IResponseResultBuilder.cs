@@ -1,11 +1,32 @@
-﻿using System.Text.Json.Serialization;
-using HardwareShop.Core.Bases;
+﻿
+using System.Text.Json.Serialization;
+using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Extensions;
+using HardwareShop.Application.Models;
+using HardwareShop.Application.Services;
 using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
+using HardwareShop.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace HardwareShop.Core.Implementations
+namespace HardwareShop.WebApi.Services
 {
+    public interface IResponseResultBuilder
+    {
+        IActionResult Build();
+        void SetUpdatedMessage();
+        void SetData(object? data);
+        void SetDeletedMessage();
+        void SetMessage(IDictionary<SupportedLanguage, string> message);
+        void SetNoContent();
+        void SetFile(byte[] bytes, string contentType, string fileName);
+
+        void SetCreatedObject<T>(T entity);
+        void AddInvalidFieldError(string fieldName);
+        void AddExistedEntityError(string entityName);
+        void AddNotFoundEntityError(string entityName);
+        void AddNotPermittedError();
+        void SetPageData<T>(PageData<T> pageData);
+    }
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ResponseResultType
     {
@@ -53,7 +74,7 @@ namespace HardwareShop.Core.Implementations
         {
             SetMessage(ResponseMessages.DeletedMessage);
         }
-        public void SetCreatedObject<T>(T entity) where T : EntityBase
+        public void SetCreatedObject<T>(T entity)
         {
             statusCode = 201;
         }
@@ -168,6 +189,47 @@ namespace HardwareShop.Core.Implementations
         {
             SetData(pageData.Items);
             totalItems = pageData.TotalRecords;
+        }
+    }
+    public static class ResponseResultBuilderExtensions
+    {
+        public static void SetAsset(this IResponseResultBuilder responseResultBuilder, CachedAssetDto cachedAsset)
+        {
+            responseResultBuilder.SetFile(cachedAsset.Bytes, cachedAsset.ContentType, cachedAsset.Filename);
+        }
+        public static void SetApplicationResponse<T>(this IResponseResultBuilder responseResultBuilder, ApplicationResponse<T> response, Action<IResponseResultBuilder, T>? onSuccess = null)
+        {
+            if (response.Error != null)
+            {
+                switch (response.Error.Type)
+                {
+                    case ApplicationErrorType.Invalid:
+                        responseResultBuilder.AddInvalidFieldError(response.Error.Message ?? "");
+                        break;
+                    case ApplicationErrorType.NotFound:
+                        responseResultBuilder.AddNotFoundEntityError(response.Error.Message ?? "");
+                        break;
+                    case ApplicationErrorType.NotPermitted:
+                        responseResultBuilder.AddNotPermittedError();
+                        break;
+                    case ApplicationErrorType.Existed:
+                        responseResultBuilder.AddExistedEntityError(response.Error.Message ?? "");
+                        break;
+                }
+            }
+            else
+            {
+                if (response.Result == null)
+                {
+                    throw new Exception("Result must not be null");
+                }
+                if (onSuccess == null)
+                {
+                    responseResultBuilder.SetData(response.Result);
+                }
+                else
+                    onSuccess(responseResultBuilder, response.Result);
+            }
         }
     }
 }

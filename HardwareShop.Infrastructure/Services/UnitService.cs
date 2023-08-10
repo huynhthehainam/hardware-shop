@@ -2,11 +2,11 @@
 
 
 using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Infrastructure.Services
@@ -14,29 +14,26 @@ namespace HardwareShop.Infrastructure.Services
     public class UnitService : IUnitService
     {
 
-        private readonly IResponseResultBuilder responseResultBuilder;
         private readonly ICurrentUserService currentUserService;
         private readonly DbContext db;
-        public UnitService(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService, DbContext db)
+        public UnitService(ICurrentUserService currentUserService, DbContext db)
         {
-            this.responseResultBuilder = responseResultBuilder;
             this.currentUserService = currentUserService;
             this.db = db;
         }
 
-        public async Task<CreatedUnitDto?> CreateUnitAsync(CreateUnitDto model)
+        public async Task<ApplicationResponse<CreatedUnitDto>> CreateUnitAsync(CreateUnitDto model)
         {
             bool isAdmin = currentUserService.IsSystemAdmin();
             if (!isAdmin)
             {
-                responseResultBuilder.AddNotPermittedError();
-                return null;
+                return new(ApplicationError.CreateNotPermittedError());
             }
             var unitCategory = await db.Set<UnitCategory>().FirstOrDefaultAsync(e => e.Id == model.UnitCategoryId);
             if (unitCategory == null)
             {
-                responseResultBuilder.AddInvalidFieldError("UnitCategoryId");
-                return null;
+                return new(ApplicationError.CreateInvalidError("UnitCategoryId"));
+
             }
             CreateIfNotExistResponse<Unit> createIfNotExistResponse = db.CreateIfNotExists(new Unit
             {
@@ -47,13 +44,13 @@ namespace HardwareShop.Infrastructure.Services
             }, e => new { e.Name, e.UnitCategoryId });
             if (createIfNotExistResponse.IsExist)
             {
-                responseResultBuilder.AddExistedEntityError("Unit");
-                return null;
+                return new(ApplicationError.CreateExistedError("Unit"));
+
             }
-            return new CreatedUnitDto
+            return new(new CreatedUnitDto
             {
                 Id = createIfNotExistResponse.Entity.Id
-            };
+            });
 
         }
         public bool IsCashUnitExist(int cashUnitId)
@@ -73,15 +70,14 @@ namespace HardwareShop.Infrastructure.Services
             });
         }
 
-        public async Task<double?> RoundValue(int unitId, double value)
+        public async Task<ApplicationResponse<double>> RoundValue(int unitId, double value)
         {
             Unit? unit = await db.Set<Unit>().Where(e => e.Id == unitId).FirstOrDefaultAsync();
             if (unit == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Unit");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Unit"));
             }
-            return unit.RoundValue(value);
+            return new(unit.RoundValue(value));
         }
     }
 }

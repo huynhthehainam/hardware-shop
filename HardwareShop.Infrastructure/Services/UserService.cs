@@ -3,11 +3,11 @@ using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Constants;
 using HardwareShop.Core.Models;
-using HardwareShop.Core.Services;
-using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using HardwareShop.Application.Models;
+using HardwareShop.Infrastructure.Extensions;
 
 namespace HardwareShop.Infrastructure.Services
 {
@@ -15,18 +15,16 @@ namespace HardwareShop.Infrastructure.Services
     {
 
         private readonly IJwtService jwtService;
-        private readonly IResponseResultBuilder responseResultBuilder;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly ICurrentUserService currentUserService;
         private readonly ILanguageService languageService;
         private readonly IShopService shopService;
         private readonly DbContext db;
         private readonly IDistributedCache distributedCache;
-        public UserService(DbContext dbContext, IJwtService jwtService, ICurrentUserService currentUserService, IResponseResultBuilder responseResultBuilder, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService, IDistributedCache distributedCache)
+        public UserService(DbContext dbContext, IJwtService jwtService, ICurrentUserService currentUserService, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService, IDistributedCache distributedCache)
         {
             this.jwtService = jwtService;
             this.currentUserService = currentUserService;
-            this.responseResultBuilder = responseResultBuilder;
             this.languageService = languageService;
             this.hashingPasswordService = hashingPasswordService;
             this.shopService = shopService;
@@ -51,16 +49,17 @@ namespace HardwareShop.Infrastructure.Services
 && e.AssetType == UserAssetConstants.AvatarAssetType);
             return userAsset;
         }
-        public async Task<CachedAsset?> GetCurrentUserAvatarAsync()
+        public async Task<ApplicationResponse<CachedAssetDto>> GetCurrentUserAvatarAsync()
         {
             Guid userId = currentUserService.GetUserGuid();
             var avatar = await GetUserAvatarByUserId(userId);
             if (avatar == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Avatar");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Avatar"));
             }
-            return db.GetCachedAssetById(distributedCache, avatar.AssetId);
+            var asset = db.GetCachedAssetById(distributedCache, avatar.AssetId);
+            if (asset == null) return new(ApplicationError.CreateNotFoundError("Avatar"));
+            return new(asset);
         }
 
 
@@ -80,7 +79,7 @@ namespace HardwareShop.Infrastructure.Services
         private LoginDto GenerateLoginDtoFromUser(User user)
         {
 
-            CacheUser cacheUser = new()
+            ApplicationUserDto cacheUser = new()
             {
                 Username = user.Username ?? "",
                 Role = user.Role,
@@ -90,7 +89,7 @@ namespace HardwareShop.Infrastructure.Services
                 Guid = user.Guid,
             };
 
-            LoginResponse tokens = jwtService.GenerateTokens(cacheUser);
+            TokenDto tokens = jwtService.GenerateTokens(cacheUser);
             UserShop? userShop = user.UserShop;
             return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
                 languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings, user.Guid), (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
@@ -105,7 +104,7 @@ namespace HardwareShop.Infrastructure.Services
         }
         public async Task<LoginDto?> LoginByTokenAsync(string token)
         {
-            CacheUser? cacheUser = jwtService.GetUserFromToken(token);
+            ApplicationUserDto? cacheUser = jwtService.GetUserFromToken(token);
             if (cacheUser == null)
             {
                 return null;
@@ -114,13 +113,12 @@ namespace HardwareShop.Infrastructure.Services
             return user == null ? null : GenerateLoginDtoFromUser(user);
         }
 
-        public async Task<PageData<UserDto>?> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search)
+        public async Task<ApplicationResponse<PageData<UserDto>>> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search)
         {
-            Shop? shop = await shopService.GetShopByCurrentUserIdAsync(UserShopRole.Admin);
+            Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Shop");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("Shop"));
             }
             var userPageData = db.Set<User>().Where(e => e.UserShop != null && e.UserShop.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<User>(search, e => new
             {
@@ -130,14 +128,14 @@ namespace HardwareShop.Infrastructure.Services
                 e.LastName,
                 e.Phone,
             })).GetPageData(pagingModel);
-            return userPageData.ConvertToOtherPageData(e => new UserDto
+            return new(userPageData.ConvertToOtherPageData(e => new UserDto
             {
                 Id = e.Id,
                 Email = e.Email,
                 FullName = languageService.GenerateFullName(e.FirstName, e.LastName),
                 Phone = e.Phone,
                 Username = e.Username,
-            });
+            }));
         }
 
         public async Task<PageData<UserDto>> GetUserPageDataAsync(PagingModel pagingModel, string? search)
@@ -160,31 +158,29 @@ namespace HardwareShop.Infrastructure.Services
             });
         }
 
-        public async Task<bool> UpdateCurrentUserInterfaceSettings(JsonDocument settings)
+        public async Task<ApplicationResponse> UpdateCurrentUserInterfaceSettings(JsonDocument settings)
         {
             User? user = await GetCurrentUserAsync();
             if (user == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("User");
-                return false;
+                return new(ApplicationError.CreateNotFoundError("User"));
             }
 
             user.InterfaceSettings = settings;
             db.Update(user);
             db.SaveChanges();
-            return true;
+            return new();
         }
 
-        public async Task<PageData<NotificationDto>?> GetNotificationDtoPageDataOfCurrentUserAsync(PagingModel pagingModel)
+        public async Task<ApplicationResponse<PageData<NotificationDto>>> GetNotificationDtoPageDataOfCurrentUserAsync(PagingModel pagingModel)
         {
             User? user = await GetCurrentUserAsync();
             if (user == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("User");
-                return null;
+                return new(ApplicationError.CreateNotFoundError("User"));
             }
             var notificationPageData = await db.Set<Notification>().Where(e => e.UserId == user.Id && e.IsDismissed == false).GetPageDataAsync(pagingModel, new OrderQuery<Notification>[] { new OrderQuery<Notification>(e => e.CreatedDate, false) });
-            return notificationPageData.ConvertToOtherPageData(e => new NotificationDto
+            return new(notificationPageData.ConvertToOtherPageData(e => new NotificationDto
             {
                 Id = e.Id,
                 CreatedDate = e.CreatedDate,
@@ -195,48 +191,44 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     e.Variant
                 }, JsonSerializerConstants.CamelOptions))
-            });
+            }));
 
         }
         private async Task<User?> GetCurrentUserAsync()
         {
             Guid currentUserId = currentUserService.GetUserGuid();
             User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == currentUserId);
-            if (user == null)
-            {
-                responseResultBuilder.AddNotFoundEntityError("User");
-                return null;
-            }
+
             return user;
         }
 
 
-        public async Task<bool> DismissNotificationOfCurrentUserAsync(Guid id)
+        public async Task<ApplicationResponse> DismissNotificationOfCurrentUserAsync(Guid id)
         {
             User? user = await GetCurrentUserAsync();
             if (user == null)
             {
-                return false;
+                return new(ApplicationError.CreateNotFoundError("User"));
             }
 
             Notification? notification = await db.Set<Notification>().FirstOrDefaultAsync(e => e.Id == id && e.UserId == user.Id);
             if (notification == null)
             {
-                responseResultBuilder.AddNotFoundEntityError("Notification");
-                return false;
+                return new(ApplicationError.CreateNotFoundError("Notification"));
+
             }
             notification.IsDismissed = true;
             db.Update(notification);
             db.SaveChanges();
-            return true;
+            return new();
         }
 
-        public async Task<bool> DismissAllNotificationsOfCurrentUserAsync()
+        public async Task<ApplicationResponse> DismissAllNotificationsOfCurrentUserAsync()
         {
             User? user = await GetCurrentUserAsync();
             if (user == null)
             {
-                return false;
+                return new(ApplicationError.CreateNotFoundError("User"));
             }
 
             var notifications = db.Set<Notification>().Where(e => e.UserId == user.Id && e.IsDismissed == false).ToArray();
@@ -246,7 +238,7 @@ namespace HardwareShop.Infrastructure.Services
                 db.Update(notification);
             }
             db.SaveChanges();
-            return true;
+            return new();
 
         }
 
@@ -272,23 +264,23 @@ namespace HardwareShop.Infrastructure.Services
             return new CreatedNotificationDto { Id = notification.Id };
         }
 
-        public async Task<bool> UpdateCurrentUserPasswordAsync(string oldPassword, string newPassword)
+        public async Task<ApplicationResponse> UpdateCurrentUserPasswordAsync(string oldPassword, string newPassword)
         {
             User? user = await GetCurrentUserAsync();
             if (user == null)
             {
-                return false;
+                return new(ApplicationError.CreateNotFoundError("User"));
             }
 
             if (!hashingPasswordService.Verify(oldPassword, user.HashedPassword))
             {
-                responseResultBuilder.AddInvalidFieldError("OldPassword");
-                return false;
+                return new(ApplicationError.CreateInvalidError("OldPassword"));
+
             }
 
             user.HashedPassword = hashingPasswordService.Hash(newPassword);
             db.Update(user); db.SaveChanges();
-            return true;
+            return new();
         }
 
 

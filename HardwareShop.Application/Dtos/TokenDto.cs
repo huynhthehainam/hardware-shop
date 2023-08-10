@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace HardwareShop.Core.Models
 {
-    public class LoginResponse
+    public class TokenDto
     {
         public string AccessToken { get; set; }
         public string RefreshToken { get; set; }
         public string SessionId { get; set; }
-        public LoginResponse(
+        public TokenDto(
             string accessToken, string refreshToken, string sessionId)
         {
 

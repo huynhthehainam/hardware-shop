@@ -1,4 +1,4 @@
-﻿using HardwareShop.Core.Services;
+﻿using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Abstracts

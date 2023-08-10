@@ -1,8 +1,13 @@
-﻿using HardwareShop.Core.Implementations;
+﻿using System.Text.Json.Serialization;
 
-namespace HardwareShop.Core.Services
+namespace HardwareShop.Application.Services
 {
-
+    [JsonConverter(typeof(JsonStringEnumConverter))]
+    public enum SupportedLanguage
+    {
+        Vietnamese,
+        English
+    }
     public interface ILanguageService
     {
         SupportedLanguage GetLanguage();

@@ -1,6 +1,8 @@
-using HardwareShop.Core.Bases;
 
-namespace HardwareShop.Core.Models
+
+using HardwareShop.Domain.Abstracts;
+
+namespace HardwareShop.Application.Models
 {
     public class OrderQuery<T> where T : EntityBase
     {
