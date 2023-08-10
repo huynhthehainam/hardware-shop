@@ -1,8 +1,7 @@
 using System.Text.Json;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
 using HardwareShop.Domain.Models;
-using HardwareShop.Domain.Extensions;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Infrastructure.Services
@@ -23,7 +22,7 @@ namespace HardwareShop.Infrastructure.Services
                 Amount = 0,
             }, e => new { e.CustomerId }, e => new { e.CustomerId });
             CustomerDebt debt = createOrUpdateResponse.Entity;
-            CustomerDebtHistory history = new CustomerDebtHistory
+            CustomerDebtHistory history = new()
             {
                 ChangeOfDebt = changeOfDebt,
                 CustomerDebtId = debt.CustomerId,

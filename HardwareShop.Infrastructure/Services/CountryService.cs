@@ -1,9 +1,6 @@
 using HardwareShop.Application.Dtos;
-using HardwareShop.Application.Extensions;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -54,6 +51,7 @@ namespace HardwareShop.Infrastructure.Services
         {
 
             var countryPageData = await db.Set<Country>().Where(e => true).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Country>(search, e => new { e.Name, e.PhonePrefix })).GetPageDataAsync(pagingModel);
+
             return new ApplicationResponse<PageData<CountryDto>>
             {
                 Result = countryPageData.ConvertToOtherPageData(e => new CountryDto

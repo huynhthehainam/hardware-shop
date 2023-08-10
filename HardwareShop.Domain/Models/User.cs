@@ -2,9 +2,8 @@
 using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Abstracts;
 using HardwareShop.Domain.Enums;
+using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Helpers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace HardwareShop.Domain.Models
 {
@@ -28,7 +27,7 @@ namespace HardwareShop.Domain.Models
         private Country? phoneCountry;
         public Country? PhoneCountry
         {
-            get => lazyLoader.Load(this, ref phoneCountry);
+            get => lazyLoader?.Load(this, ref phoneCountry);
             set => phoneCountry = value;
         }
         public string HashedPassword { get; set; } = string.Empty;
@@ -37,14 +36,14 @@ namespace HardwareShop.Domain.Models
         {
 
         }
-        public User(ILazyLoader lazyLoader) : base(lazyLoader)
+        public User(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
 
         }
         private UserShop? userShop;
         public UserShop? UserShop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref userShop) : userShop;
+            get => lazyLoader?.Load(this, ref userShop);
             set => userShop = value;
         }
         public bool IsDeleted { get; set; }
@@ -54,13 +53,13 @@ namespace HardwareShop.Domain.Models
         private ICollection<UserAsset>? assets;
         public ICollection<UserAsset>? Assets
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref assets) : assets;
+            get => lazyLoader?.Load(this, ref assets);
             set => assets = value;
         }
         private ICollection<Notification>? notifications;
         public ICollection<Notification>? Notifications
         {
-            get => lazyLoader.Load(this, ref notifications);
+            get => lazyLoader?.Load(this, ref notifications);
             set => notifications = value;
         }
 

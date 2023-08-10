@@ -1,8 +1,7 @@
 using System.Text.Json;
 using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Abstracts;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -12,7 +11,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Notification(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Notification(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public Guid Id { get; set; }
@@ -22,7 +21,7 @@ namespace HardwareShop.Domain.Models
         private User? user;
         public User? User
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref user) : user;
+            get => lazyLoader?.Load(this, ref user);
             set => user = value;
         }
 

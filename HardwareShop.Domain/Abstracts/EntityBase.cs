@@ -1,16 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HardwareShop.Domain.Abstracts
+﻿namespace HardwareShop.Domain.Abstracts
 {
     public abstract class EntityBase
     {
-        protected ILazyLoader? lazyLoader;
-        public EntityBase(ILazyLoader lazyLoader)
+        protected Action<object, string?>? lazyLoader;
+        public EntityBase(Action<object, string?> lazyLoader)
         {
             this.lazyLoader = lazyLoader;
         }

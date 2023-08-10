@@ -1,7 +1,6 @@
 ﻿using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain.Models;
-using HardwareShop.Domain.Extensions;
 using Microsoft.EntityFrameworkCore;
 using HardwareShop.Application.Models;
 using HardwareShop.Infrastructure.Extensions;

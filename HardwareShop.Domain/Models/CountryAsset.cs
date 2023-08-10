@@ -1,5 +1,5 @@
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -13,14 +13,14 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public CountryAsset(ILazyLoader lazyLoader) : base(lazyLoader)
+        public CountryAsset(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int CountryId { get; set; }
         private Country? country;
         public Country? Country
         {
-            get => lazyLoader.Load(this, ref country);
+            get => lazyLoader?.Load(this, ref country);
             set => country = value;
         }
     }

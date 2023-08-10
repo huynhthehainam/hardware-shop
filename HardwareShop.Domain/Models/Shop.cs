@@ -1,7 +1,6 @@
 ﻿using HardwareShop.Domain.Abstracts;
 using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -11,7 +10,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Shop(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Shop(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int Id { get; set; }
@@ -22,41 +21,41 @@ namespace HardwareShop.Domain.Models
         private ICollection<ShopAsset>? assets;
         public ICollection<ShopAsset>? Assets
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref assets) : assets;
+            get => lazyLoader?.Load(this, ref assets);
             set => assets = value;
         }
 
         private ICollection<UserShop>? userShops;
         public ICollection<UserShop>? UserShops
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref userShops) : userShops;
+            get => lazyLoader?.Load(this, ref userShops);
             set => userShops = value;
         }
 
         private ICollection<ProductCategory>? productCategories;
         public ICollection<ProductCategory>? ProductCategories
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategories) : productCategories;
+            get => lazyLoader?.Load(this, ref productCategories);
             set => productCategories = value;
         }
 
         private ICollection<Warehouse>? warehouses;
         public ICollection<Warehouse>? Warehouses
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouses) : warehouses;
+            get => lazyLoader?.Load(this, ref warehouses);
             set => warehouses = value;
         }
 
         private ICollection<Invoice>? invoices;
         public ICollection<Invoice>? Invoices
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref invoices) : invoices;
+            get => lazyLoader?.Load(this, ref invoices);
             set => invoices = value;
         }
         private ICollection<Product>? products;
         public ICollection<Product>? Products
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref products) : products;
+            get => lazyLoader?.Load(this, ref products);
             set => products = value;
         }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
@@ -65,33 +64,33 @@ namespace HardwareShop.Domain.Models
         private ICollection<Order>? orders;
         public ICollection<Order>? Orders
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref orders) : orders;
+            get => lazyLoader?.Load(this, ref orders);
             set => orders = value;
         }
         public int CashUnitId { get; set; }
         private Unit? cashUnit;
         public Unit? CashUnit
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref cashUnit) : cashUnit;
+            get => lazyLoader?.Load(this, ref cashUnit);
             set => cashUnit = value;
         }
 
         private ICollection<Customer>? customers;
         public ICollection<Customer>? Customers
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref customers) : customers;
+            get => lazyLoader?.Load(this, ref customers);
             set => customers = value;
         }
         private ICollection<ShopPhone>? phones;
         public ICollection<ShopPhone>? Phones
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref phones) : phones;
+            get => lazyLoader?.Load(this, ref phones);
             set => phones = value;
         }
         private ShopSetting? shopSetting;
         public ShopSetting? ShopSetting
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shopSetting) : shopSetting;
+            get => lazyLoader?.Load(this, ref shopSetting);
             set => shopSetting = value;
         }
 

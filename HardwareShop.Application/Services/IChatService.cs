@@ -3,7 +3,6 @@
 
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Models;
-using HardwareShop.Application.Models;
 
 namespace HardwareShop.Application.Services
 {

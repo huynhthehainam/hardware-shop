@@ -6,6 +6,7 @@ using HardwareShop.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using HardwareShop.Infrastructure.Data;
 
 namespace HardwareShop.Infrastructure.Extensions
 {
@@ -16,7 +17,9 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) => opt.UseNpgsql(configuration.GetConnectionString("AppConn"), b =>
        {
 
+
        }).UseInternalServiceProvider(sp));
+            services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();
             services.AddScoped<IWarehouseService, WarehouseService>();
@@ -33,6 +36,7 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ICurrentUserService, WebCurrentUserService>();
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
+            services.AddScoped<ISeedingService, SeedingService>();
             return services;
         }
     }

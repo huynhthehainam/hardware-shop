@@ -1,10 +1,5 @@
-
-
-
-using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -14,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Country(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Country(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int Id { get; set; }
@@ -24,27 +19,27 @@ namespace HardwareShop.Domain.Models
         private ICollection<Customer>? customers;
         public ICollection<Customer>? Customers
         {
-            get => lazyLoader.Load(this, ref customers);
+            get => lazyLoader?.Load(this, ref customers);
             set => customers = value;
         }
 
         private ICollection<User>? users;
         public ICollection<User>? Users
         {
-            get => lazyLoader.Load(this, ref users);
+            get => lazyLoader?.Load(this, ref users);
             set => users = value;
         }
         private CountryAsset? asset;
         public CountryAsset? Asset
         {
-            get => lazyLoader.Load(this, ref asset);
+            get => lazyLoader?.Load(this, ref asset);
             set => asset = value;
 
         }
         private ICollection<ShopPhone>? shopPhones;
         public ICollection<ShopPhone>? ShopPhones
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shopPhones) : shopPhones;
+            get =>  lazyLoader?.Load(this, ref shopPhones);
             set => shopPhones = value;
         }
 

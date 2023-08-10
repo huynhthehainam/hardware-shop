@@ -4,7 +4,6 @@ using HardwareShop.Application.Services;
 using HardwareShop.Core.Helpers;
 using HardwareShop.Domain.Models;
 using iText.Html2pdf;
-using HardwareShop.Domain.Extensions;
 using iText.Html2pdf.Resolver.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
@@ -111,7 +110,6 @@ namespace HardwareShop.Infrastructure.Services
                 Phone = customer.Phone,
                 PhoneCountryId = customer.PhoneCountryId,
                 PhonePrefix = customer.PhoneCountry?.PhonePrefix,
-
             });
         }
 

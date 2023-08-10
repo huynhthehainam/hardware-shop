@@ -3,9 +3,7 @@
 
 
 using HardwareShop.Domain.Abstracts;
-using HardwareShop.Core.Bases;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -15,14 +13,14 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public ShopSetting(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ShopSetting(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            get => lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
         public bool IsAllowedToShowInvoiceDownloadOptions { get; set; } = true;

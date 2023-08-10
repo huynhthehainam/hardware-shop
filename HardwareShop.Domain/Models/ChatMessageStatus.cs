@@ -1,8 +1,5 @@
-
-
-using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Abstracts;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -12,7 +9,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public ChatMessageStatus(ILazyLoader lazyLoader) : base(lazyLoader)
+        public ChatMessageStatus(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public bool IsRead { get; set; }

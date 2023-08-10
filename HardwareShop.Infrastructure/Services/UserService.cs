@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using HardwareShop.Application.Models;
 using HardwareShop.Infrastructure.Extensions;
+using HardwareShop.Domain.Abstracts;
 
 namespace HardwareShop.Infrastructure.Services
 {

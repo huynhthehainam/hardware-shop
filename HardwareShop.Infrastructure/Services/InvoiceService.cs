@@ -3,7 +3,6 @@ using HardwareShop.Application.Helpers;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Helpers;
-using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Extensions;
 using iText.Html2pdf;

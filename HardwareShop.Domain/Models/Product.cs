@@ -1,7 +1,6 @@
 ﻿using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Abstracts;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
+using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
 {
@@ -11,7 +10,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public Product(ILazyLoader lazyLoader) : base(lazyLoader)
+        public Product(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
         public int Id { get; set; }
@@ -31,7 +30,7 @@ namespace HardwareShop.Domain.Models
         private Shop? shop;
         public Shop? Shop
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref shop) : shop;
+            get =>  lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
 
@@ -39,19 +38,19 @@ namespace HardwareShop.Domain.Models
         private Unit? unit;
         public Unit? Unit
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref unit) : unit;
+            get =>  lazyLoader?.Load(this, ref unit);
             set => unit = value;
         }
         private ICollection<InvoiceDetail>? invoiceDetails;
         public ICollection<InvoiceDetail>? InvoiceDetails
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref invoiceDetails) : invoiceDetails;
+            get =>  lazyLoader?.Load(this, ref invoiceDetails);
             set => invoiceDetails = value;
         }
         private ICollection<OrderDetail>? orderDetails;
         public ICollection<OrderDetail>? OrderDetails
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref orderDetails) : orderDetails;
+            get =>  lazyLoader?.Load(this, ref orderDetails);
             set => orderDetails = value;
         }
         public bool IsDeleted { get; set; }
@@ -59,19 +58,19 @@ namespace HardwareShop.Domain.Models
         private ICollection<ProductAsset>? productAssets;
         public ICollection<ProductAsset>? ProductAssets
         {
-            get => lazyLoader != null ? lazyLoader.Load(this, ref productAssets) : productAssets;
+            get =>  lazyLoader?.Load(this, ref productAssets);
             set => productAssets = value;
         }
         private ICollection<WarehouseProduct>? warehouseProducts;
         public ICollection<WarehouseProduct>? WarehouseProducts
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref warehouseProducts) : warehouseProducts;
+            get =>  lazyLoader?.Load(this, ref warehouseProducts);
             set => warehouseProducts = value;
         }
         private ICollection<ProductCategoryProduct>? productCategoryProducts;
         public ICollection<ProductCategoryProduct>? ProductCategoryProducts
         {
-            get => lazyLoader is not null ? lazyLoader.Load(this, ref productCategoryProducts) : productCategoryProducts;
+            get =>  lazyLoader?.Load(this, ref productCategoryProducts);
             set => productCategoryProducts = value;
         }
         public double InventoryNumber => WarehouseProducts == null ? 0 : WarehouseProducts.Sum(e => e.Quantity);
