@@ -1,6 +1,6 @@
 using System.Linq.Expressions;
-using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Infrastructure.Extensions
@@ -27,7 +27,7 @@ namespace HardwareShop.Infrastructure.Extensions
     }
     public static class DbExtensions
     {
-       
+
 
         public static bool SoftDelete<T>(this DbContext db, T entity) where T : EntityBase, ISoftDeletable
         {

@@ -152,7 +152,7 @@ namespace HardwareShop.Infrastructure.Services
             var currentUserId = currentUserService.GetUserGuid();
 
             var messagePageData = await db.Set<ChatMessage>().Where(e => e.SessionId == chatSessionId).Include(e => e.User).OrderByDescending(e => e.CreatedTime).GetPageDataAsync(pagingModel);
-            messagePageData.Items = messagePageData.Items.OrderBy(e => e.CreatedTime).ToArray();
+            messagePageData.SetItems(messagePageData.OrderBy(e => e.CreatedTime).ToArray());
             return messagePageData.ConvertToOtherPageData(e => new ChatMessageDto()
             {
                 Content = e.Content,

@@ -42,7 +42,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Filename")
+                    b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("text");
 

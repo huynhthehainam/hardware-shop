@@ -1,11 +1,8 @@
 ﻿
 using System.Text.Json.Serialization;
 using HardwareShop.Application.Dtos;
-using HardwareShop.Application.Extensions;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
-using HardwareShop.Infrastructure.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Services
@@ -187,7 +184,7 @@ namespace HardwareShop.WebApi.Services
         }
         public void SetPageData<T>(PageData<T> pageData)
         {
-            SetData(pageData.Items);
+            SetData(pageData.ToArray());
             totalItems = pageData.TotalRecords;
         }
     }

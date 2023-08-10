@@ -1,9 +1,5 @@
 ﻿using HardwareShop.Application.Dtos;
-using HardwareShop.Application.Extensions;
 using HardwareShop.Application.Models;
-using HardwareShop.Core.Models;
-using HardwareShop.Domain.Models;
-using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Application.Services
 {
@@ -23,7 +19,7 @@ namespace HardwareShop.Application.Services
          );
         Task<ApplicationResponse<CachedAssetDto>> GetProductThumbnailAsync(int productId);
         Task<ApplicationResponse<CachedAssetDto>> GetProductAssetByIdAsync(int productId, int assetId);
-        Task<ApplicationResponse<int>> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file);
+        Task<ApplicationResponse<int>> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, AssetDto file);
         Task<ApplicationResponse<ProductDto>> GetProductDtoOfCurrentUserShopAsync(int productId);
         Task<ApplicationResponse> RemoveProductAssetByIdAsync(int productId, int assetId);
         Task<ApplicationResponse> SetProductThumbnailAsync(int productId, int assetId);

@@ -1,7 +1,7 @@
-﻿using HardwareShop.Core.Bases;
-using HardwareShop.Core.Helpers;
+﻿using HardwareShop.Core.Helpers;
 using HardwareShop.Domain.Abstracts;
 using HardwareShop.Domain.Extensions;
+using HardwareShop.Domain.Interfaces;
 
 namespace HardwareShop.Domain.Models
 {

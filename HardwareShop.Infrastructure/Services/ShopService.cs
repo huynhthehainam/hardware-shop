@@ -145,7 +145,7 @@ namespace HardwareShop.Infrastructure.Services
                 return null;
             return new ShopDto { Id = userShop.Shop.Id, UserRole = userShop.Role.ToString() };
         }
-        private Task<ShopAssetDto> UpdateShopLogo(Shop shop, IFormFile file)
+        private Task<ShopAssetDto> UpdateShopLogo(Shop shop, AssetDto file)
         {
             ShopAsset shopAsset = new()
             {
@@ -161,7 +161,7 @@ namespace HardwareShop.Infrastructure.Services
 
             return Task.FromResult(new ShopAssetDto { Id = createOrUpdateResponse.Entity.Id });
         }
-        public async Task<ApplicationResponse<ShopAssetDto>> UpdateLogoAsync(int shopId, IFormFile file)
+        public async Task<ApplicationResponse<ShopAssetDto>> UpdateLogoAsync(int shopId, AssetDto file)
         {
             var shop = await db.Set<Shop>().FirstOrDefaultAsync(e => e.Id == shopId);
             if (shop == null)
@@ -171,7 +171,7 @@ namespace HardwareShop.Infrastructure.Services
             return new(await UpdateShopLogo(shop, file));
         }
 
-        public async Task<ApplicationResponse<ShopAssetDto>> UpdateYourShopLogoAsync(IFormFile file)
+        public async Task<ApplicationResponse<ShopAssetDto>> UpdateYourShopLogoAsync(AssetDto file)
         {
             var shop = await GetShopByCurrentUserIdAsync();
             if (shop == null)

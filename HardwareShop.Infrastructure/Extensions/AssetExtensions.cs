@@ -30,7 +30,7 @@ namespace HardwareShop.Infrastructure.Extensions
             var keys = AssetCacheHelpers.GetAssetCacheKeys(asset.Id);
             distributedCache.Set(keys.Item1, asset.Bytes, cacheEntryOptions);
             distributedCache.SetString(keys.Item2, asset.ContentType, cacheEntryOptions);
-            distributedCache.SetString(keys.Item3, asset.Filename, cacheEntryOptions);
+            distributedCache.SetString(keys.Item3, asset.FileName, cacheEntryOptions);
             distributedCache.SetString(keys.Item4, asset.CreatedDate.ToString(), cacheEntryOptions);
             distributedCache.SetString(keys.Item5, asset.LastModifiedDate?.ToString() ?? "", cacheEntryOptions);
             return CachedAssetDto.BuildFromAsset(asset);

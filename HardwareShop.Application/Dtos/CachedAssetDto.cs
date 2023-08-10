@@ -1,5 +1,4 @@
 using HardwareShop.Domain.Models;
-using Microsoft.Extensions.Caching.Distributed;
 
 namespace HardwareShop.Application.Dtos;
 public sealed class CachedAssetDto
@@ -17,7 +16,7 @@ public sealed class CachedAssetDto
             Bytes = asset.Bytes,
             ContentType = asset.ContentType,
             CreatedDate = asset.CreatedDate,
-            Filename = asset.Filename,
+            Filename = asset.FileName,
             Id = asset.Id,
             LastModifiedDate = asset.LastModifiedDate,
         };

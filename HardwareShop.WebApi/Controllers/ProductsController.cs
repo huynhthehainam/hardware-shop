@@ -3,6 +3,7 @@ using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
+using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -75,7 +76,7 @@ namespace HardwareShop.WebApi.Controllers
             {
                 return responseResultBuilder.Build();
             }
-            var response = await productService.UploadProductImageOfCurrentUserShopAsync(id, command.AssetType ?? "", command.Image);
+            var response = await productService.UploadProductImageOfCurrentUserShopAsync(id, command.AssetType ?? "", command.Image.ConvertToAsset());
 
             responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();

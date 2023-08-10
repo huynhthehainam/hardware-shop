@@ -1,6 +1,6 @@
 ﻿using HardwareShop.Domain.Abstracts;
-using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Extensions;
+using HardwareShop.Domain.Interfaces;
 
 namespace HardwareShop.Domain.Models
 {

@@ -1,6 +1,5 @@
 ﻿
 using System.Text;
-using HardwareShop.Application.Extensions;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
@@ -9,7 +8,6 @@ using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
 using HardwareShop.Infrastructure.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using HardwareShop.Infrastructure.Extensions;
@@ -138,7 +136,6 @@ public class Program
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
         builder.Services.AddSingleton<IChatHubController, ChatHubController>();
 
-        builder.Services.ConfigureApplication();
         builder.Services.ConfigureInfrastructure(builder.Configuration);
 
 

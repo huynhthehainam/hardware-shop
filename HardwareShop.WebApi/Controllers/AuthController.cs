@@ -13,6 +13,7 @@ namespace HardwareShop.WebApi.Controllers
         public AuthController(IResponseResultBuilder responseResultBuilder, IUserService userService) : base(responseResultBuilder)
         {
             this.userService = userService;
+
         }
 
         [HttpPost("Login")]

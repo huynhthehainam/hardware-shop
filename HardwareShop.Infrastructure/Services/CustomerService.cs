@@ -137,6 +137,7 @@ namespace HardwareShop.Infrastructure.Services
             if (response.Result == null) return new() { Error = response.Error };
             var customer = response.Result;
             var invoicePageData = await db.Set<Invoice>().Where(e => e.CustomerId == customer.Id).GetPageDataAsync(pagingModel, new OrderQuery<Invoice>[] { new OrderQuery<Invoice>(e => e.CreatedDate, false) });
+
             return new(invoicePageData.ConvertToOtherPageData(e => new InvoiceDto
             {
                 Id = e.Id,
@@ -202,7 +203,7 @@ namespace HardwareShop.Infrastructure.Services
             GetPageDataAsync(new PagingModel(), new OrderQuery<Customer>[] { new OrderQuery<Customer>(e => e.Name, true) });
 
 
-            var customers = customerPageData.Items;
+            var customers = customerPageData.ToArray();
             var rows = new List<string>();
             var rowHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_SingleRow.html");
             var halfIndex = customers.Length / 2;

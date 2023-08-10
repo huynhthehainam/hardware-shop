@@ -20,7 +20,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     Bytes = table.Column<byte[]>(type: "bytea", nullable: false),
-                    Filename = table.Column<string>(type: "text", nullable: false),
+                    FileName = table.Column<string>(type: "text", nullable: false),
                     ContentType = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>

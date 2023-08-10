@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
-using HardwareShop.Core.Bases;
 using HardwareShop.Domain.Abstracts;
 using HardwareShop.Domain.Extensions;
+using HardwareShop.Domain.Interfaces;
 
 namespace HardwareShop.Domain.Models
 {

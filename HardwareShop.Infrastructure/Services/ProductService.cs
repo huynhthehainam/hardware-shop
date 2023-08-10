@@ -272,7 +272,7 @@ namespace HardwareShop.Infrastructure.Services
             return new() { Result = db.GetCachedAssetById(distributedCache, asset.AssetId) };
         }
 
-        public async Task<ApplicationResponse<int>> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, IFormFile file)
+        public async Task<ApplicationResponse<int>> UploadProductImageOfCurrentUserShopAsync(int productId, string assetType, AssetDto file)
         {
             Shop? shop = await shopService.GetShopByCurrentUserIdAsync();
             if (shop == null)

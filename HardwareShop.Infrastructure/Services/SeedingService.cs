@@ -68,43 +68,43 @@ namespace HardwareShop.Infrastructure.Services
                 {
 
                     Bytes = productAssetBytes,
-                    Filename = productAssetFile,
+                    FileName = productAssetFile,
                     ContentType = ContentTypeConstants.PngContentType
                 };
                 var shopAsset = new Asset()
                 {
                     Bytes = shopAssetBytes,
-                    Filename = shopAssetFile,
+                    FileName = shopAssetFile,
                     ContentType = ContentTypeConstants.PngContentType
                 };
                 var userAsset = new Asset()
                 {
                     Bytes = userAssetBytes,
-                    Filename = userAssetFile,
+                    FileName = userAssetFile,
                     ContentType = ContentTypeConstants.JpegContentType
                 };
                 var user2Asset = new Asset()
                 {
                     Bytes = user2AssetBytes,
-                    Filename = user2AssetFile,
+                    FileName = user2AssetFile,
                     ContentType = ContentTypeConstants.PngContentType
                 };
                 var user3Asset = new Asset()
                 {
                     Bytes = user3AssetBytes,
-                    Filename = user3AssetFile,
+                    FileName = user3AssetFile,
                     ContentType = ContentTypeConstants.PngContentType
                 };
                 var countryAsset = new Asset()
                 {
                     Bytes = countryAssetBytes,
-                    Filename = countryAssetFile,
+                    FileName = countryAssetFile,
                     ContentType = ContentTypeConstants.PngContentType
                 };
                 var country2Asset = new Asset()
                 {
                     Bytes = countryAsset2Bytes,
-                    Filename = countryAsset2File,
+                    FileName = countryAsset2File,
                     ContentType = ContentTypeConstants.PngContentType
                 };
 

@@ -1,12 +1,13 @@
-﻿using HardwareShop.Domain.Abstracts;
+﻿using HardwareShop.Application.Dtos;
+using HardwareShop.Domain.Abstracts;
 using HardwareShop.Domain.Models;
 using Microsoft.AspNetCore.Http;
 
 namespace HardwareShop.Infrastructure.Extensions
 {
-    public static class FormFileExtensions
+    public static class AssetDtoExtensions
     {
-        public static T ConvertToAsset<T>(this IFormFile file, T assetEntityBase) where T : AssetEntityBase
+        public static T ConvertToAsset<T>(this AssetDto file, T assetEntityBase) where T : AssetEntityBase
         {
             var asset = assetEntityBase.Asset;
             if (asset == null)
@@ -17,14 +18,10 @@ namespace HardwareShop.Infrastructure.Extensions
                 };
             }
             if (asset == null) return assetEntityBase;
-            using (var ms = new MemoryStream())
-            {
-                file.CopyTo(ms);
-                var fileBytes = ms.ToArray();
-                asset.Bytes = fileBytes;
-            }
+
+            asset.Bytes = file.Bytes;
             asset.ContentType = file.ContentType;
-            asset.Filename = file.FileName;
+            asset.FileName = file.FileName;
             assetEntityBase.Asset = asset;
             return assetEntityBase;
         }
