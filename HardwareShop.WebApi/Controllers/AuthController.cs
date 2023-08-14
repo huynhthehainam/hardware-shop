@@ -19,6 +19,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginCommand command)
         {
+
             var response = await userService.LoginAsync(command.Username ?? "", command.Password ?? "");
             if (response == null)
             {
