@@ -67,7 +67,7 @@ namespace HardwareShop.Infrastructure.Services
 
         }
 
-        public async Task<ApplicationResponse<CreatedShopDto>> CreateShopAsync(string name, string? address, int cashUnitId)
+        public ApplicationResponse<CreatedShopDto> CreateShop(string name, string? address, int cashUnitId)
         {
             var isCashUnitExist = unitService.IsCashUnitExist(cashUnitId);
             if (!isCashUnitExist)

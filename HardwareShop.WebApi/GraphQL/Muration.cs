@@ -12,13 +12,13 @@ namespace HardwareShop.WebApi.GraphQL
 
         [Authorize]
 
-        public async Task<CreatedShopDto?> CreateShop([Service] IShopService shopService, [Service] ICurrentUserService currentUserService, CreateShopCommand command, string str)
+        public CreatedShopDto? CreateShop([Service] IShopService shopService, [Service] ICurrentUserService currentUserService, CreateShopCommand command, string str)
         {
             if (!currentUserService.IsSystemAdmin())
             {
                 return null;
             }
-            var response = await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
+            var response = shopService.CreateShop(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
             return response.Result;
         }
     }

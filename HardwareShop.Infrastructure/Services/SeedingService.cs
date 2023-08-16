@@ -4,24 +4,21 @@ using HardwareShop.Application.Services;
 using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Data;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace HardwareShop.Infrastructure.Services
 {
     public class SeedingService : ISeedingService
     {
-        private readonly IWebHostEnvironment env;
+
         private readonly MainDatabaseContext db;
         private readonly IHashingPasswordService hashingPasswordService;
-        public SeedingService(MainDatabaseContext db, IWebHostEnvironment env, IHashingPasswordService hashingPasswordService)
+        public SeedingService(MainDatabaseContext db, IHashingPasswordService hashingPasswordService)
         {
             this.db = db;
-            this.env = env;
             this.hashingPasswordService = hashingPasswordService;
         }
-        public void SeedData()
+        public void SeedData(bool isDevelopment)
         {
 
             const string assetFolder = "SampleImages";
@@ -37,7 +34,7 @@ namespace HardwareShop.Infrastructure.Services
 
 
 
-            if (!env.IsDevelopment())
+            if (!isDevelopment)
             {
                 db.Database.Migrate();
             }
@@ -351,7 +348,7 @@ namespace HardwareShop.Infrastructure.Services
 
                 _ = db.Shops.Add(shop);
                 _ = db.SaveChanges();
-                if (env.IsDevelopment())
+                if (isDevelopment)
                 {
                     Product product = new()
                     {

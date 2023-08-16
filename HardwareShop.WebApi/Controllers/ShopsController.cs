@@ -34,14 +34,14 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateShop([FromBody] CreateShopCommand command)
+        public IActionResult CreateShop([FromBody] CreateShopCommand command)
         {
             if (!currentUserService.IsSystemAdmin())
             {
                 responseResultBuilder.AddNotPermittedError();
                 return responseResultBuilder.Build();
             }
-            var response = await shopService.CreateShopAsync(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
+            var response = shopService.CreateShop(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
             responseResultBuilder.SetApplicationResponse(response, (builder, result) => builder.SetData(result));
             return responseResultBuilder.Build();
         }

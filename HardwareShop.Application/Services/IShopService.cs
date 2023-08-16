@@ -8,7 +8,7 @@ namespace HardwareShop.Application.Services
     {
         Task<ShopDto?> GetShopByUserIdAsync(Guid userId);
         Task<ShopDto?> GetShopDtoByCurrentUserIdAsync();
-        Task<ApplicationResponse<CreatedShopDto>> CreateShopAsync(string name, string? address, int cashUnitId);
+        ApplicationResponse<CreatedShopDto> CreateShop(string name, string? address, int cashUnitId);
         Task<ApplicationResponse<ShopAssetDto>> UpdateLogoAsync(int shopId, AssetDto file);
         Task<ApplicationResponse> DeleteShopSoftlyAsync(int shopId);
         Task<ApplicationResponse> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions);

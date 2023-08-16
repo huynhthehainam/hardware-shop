@@ -1,9 +1,5 @@
 ﻿using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.AspNetCore.Mvc.Razor;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.AspNetCore.Mvc.ViewFeatures;
 
 namespace HardwareShop.WebApi.Controllers
 {
@@ -20,7 +16,7 @@ namespace HardwareShop.WebApi.Controllers
             this.responseResultBuilder = responseResultBuilder;
 
         }
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             responseResultBuilder.SetData(new
             {
