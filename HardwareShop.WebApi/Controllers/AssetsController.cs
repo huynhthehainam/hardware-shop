@@ -15,6 +15,7 @@ namespace HardwareShop.WebApi.Controllers
         [HttpGet("{id:long}")]
         public IActionResult GetAssetById([FromRoute] long id)
         {
+            // Some comments
             var assetResponse = assetService.GetAssetById(id);
             responseResultBuilder.SetApplicationResponse(assetResponse, (builder, result) =>
             {
