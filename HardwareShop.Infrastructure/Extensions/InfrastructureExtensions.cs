@@ -37,6 +37,7 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddScoped<ICurrentUserService, WebCurrentUserService>();
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
             services.AddScoped<ISeedingService, SeedingService>();
+            services.AddScoped<ITestService, TestService>();
             return services;
         }
     }

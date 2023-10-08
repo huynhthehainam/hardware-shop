@@ -12,9 +12,21 @@ namespace HardwareShop.WebApi.Controllers
     public sealed class TestController : AuthorizedApiControllerBase
     {
         private readonly IChatService chatService;
-        public TestController(IChatService chatService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly ITestService testService;
+        public TestController(IChatService chatService, ITestService testService, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
             this.chatService = chatService;
+            this.testService = testService;
+        }
+        [HttpGet("TestEntity")]
+        public async Task<IActionResult> TestEntity()
+        {
+            var data = await testService.TestEntityAsync();
+            responseResultBuilder.SetData(new
+            {
+                Count = data
+            });
+            return responseResultBuilder.Build();
         }
         [HttpGet("Contracts")]
         public async Task<IActionResult> GetContacts()
