@@ -12,8 +12,29 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using HardwareShop.Infrastructure.Extensions;
 using HardwareShop.WebApi.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HardwareShop.WebApi;
+public class HasScopeRequirement : IAuthorizationRequirement
+{
+
+
+    public HasScopeRequirement()
+    {
+        var a = 0;
+
+    }
+}
+public class HasScopeHandler : AuthorizationHandler<HasScopeRequirement>
+{
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, HasScopeRequirement requirement)
+    {
+
+        context.Succeed(requirement);
+
+    }
+}
+
 public class Program
 {
     public static void Main(string[] args)
@@ -36,7 +57,11 @@ public class Program
 
 
 
-        builder.Services.AddControllers();
+        builder.Services.AddControllers().AddJsonOptions(options =>
+        {
+            options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        });
         builder.Services.AddGraphQLServer().AddAuthorization().AddQueryType<Query>().AddMutationType<Mutation>();
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
@@ -47,11 +72,7 @@ public class Program
             option.Configuration = builder.Configuration["RedisSettings:Host"] + ":" + builder.Configuration["RedisSettings:Port"] + ",connectTimeout=10000,syncTimeout=10000";
         });
 
-        builder.Services.AddMvc().AddJsonOptions(options =>
-        {
-            options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
-            options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
-        });
+
 
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -86,10 +107,20 @@ public class Program
         builder.Services.Configure<AuthConfiguration>(jwtConfiguration);
         var appSettings = jwtConfiguration.Get<JwtConfiguration>();
         var key = Encoding.ASCII.GetBytes(appSettings.SecretKey ?? "");
-        builder.Services.AddAuthentication(x =>
+        builder.Services.AddAuthorization(options =>
+        {
+            options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            options.AddPolicy("read:messages", policy =>
+               {
+                   policy.RequireAuthenticatedUser();
+                   policy.Requirements.Add(new HasScopeRequirement());
+               });
+        });
+        builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+        builder.Services.AddAuthentication(options =>
             {
-                x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
            .AddJwtBearer(x =>
            {
@@ -125,6 +156,7 @@ public class Program
                    }
                };
            });
+
 
         #region Configuration
         builder.Services.Configure<HashingConfiguration>(builder.Configuration.GetSection("HashingConfiguration"));
