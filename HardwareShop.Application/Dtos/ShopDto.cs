@@ -1,5 +1,4 @@
 ﻿using HardwareShop.Domain.Models;
-
 namespace HardwareShop.Application.Dtos
 {
     public class ShopDto

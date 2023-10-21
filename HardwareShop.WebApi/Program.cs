@@ -15,25 +15,25 @@ using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 
 namespace HardwareShop.WebApi;
-public class HasScopeRequirement : IAuthorizationRequirement
-{
+// public class HasScopeRequirement : IAuthorizationRequirement
+// {
 
 
-    public HasScopeRequirement()
-    {
-        var a = 0;
+//     public HasScopeRequirement()
+//     {
+//         var a = 0;
 
-    }
-}
-public class HasScopeHandler : AuthorizationHandler<HasScopeRequirement>
-{
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, HasScopeRequirement requirement)
-    {
+//     }
+// }
+// public class HasScopeHandler : AuthorizationHandler<HasScopeRequirement>
+// {
+//     protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, HasScopeRequirement requirement)
+//     {
 
-        context.Succeed(requirement);
+//         context.Succeed(requirement);
 
-    }
-}
+//     }
+// }
 
 public class Program
 {
@@ -107,16 +107,16 @@ public class Program
         builder.Services.Configure<AuthConfiguration>(jwtConfiguration);
         var appSettings = jwtConfiguration.Get<JwtConfiguration>();
         var key = Encoding.ASCII.GetBytes(appSettings.SecretKey ?? "");
-        builder.Services.AddAuthorization(options =>
-        {
-            options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-            options.AddPolicy("read:messages", policy =>
-               {
-                   policy.RequireAuthenticatedUser();
-                   policy.Requirements.Add(new HasScopeRequirement());
-               });
-        });
-        builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+        // builder.Services.AddAuthorization(options =>
+        // {
+        //     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+        //     options.AddPolicy("read:messages", policy =>
+        //        {
+        //            policy.RequireAuthenticatedUser();
+        //            policy.Requirements.Add(new HasScopeRequirement());
+        //        });
+        // });
+        // builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
         builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
