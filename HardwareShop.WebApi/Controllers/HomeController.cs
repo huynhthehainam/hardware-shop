@@ -1,5 +1,6 @@
 ﻿using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace HardwareShop.WebApi.Controllers
 {
@@ -10,17 +11,20 @@ namespace HardwareShop.WebApi.Controllers
     public class HomeController : ControllerBase
     {
         private readonly IResponseResultBuilder responseResultBuilder;
+        private readonly IStringLocalizer<HomeController> localizer;
 
-        public HomeController(IResponseResultBuilder responseResultBuilder)
+        public HomeController(IResponseResultBuilder responseResultBuilder, IStringLocalizer<HomeController> localizer)
         {
             this.responseResultBuilder = responseResultBuilder;
+            this.localizer = localizer;
 
         }
         public IActionResult Index()
         {
             responseResultBuilder.SetData(new
             {
-                Title = "My workshop"
+                Title = "My workshop",
+                Content = localizer["Content"].Value
             });
             return responseResultBuilder.Build();
         }

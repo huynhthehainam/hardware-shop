@@ -4,6 +4,7 @@ using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
 
 namespace HardwareShop.WebApi.Services
 {
@@ -13,7 +14,7 @@ namespace HardwareShop.WebApi.Services
         void SetUpdatedMessage();
         void SetData(object? data);
         void SetDeletedMessage();
-        void SetMessage(IDictionary<SupportedLanguage, string> message);
+        void SetMessage(string message);
         void SetNoContent();
         void SetFile(byte[] bytes, string contentType, string fileName);
 
@@ -30,27 +31,12 @@ namespace HardwareShop.WebApi.Services
         Json,
         File,
     }
-
-    public static class ResponseMessages
-    {
-        public readonly static Dictionary<SupportedLanguage, string> UpdatedMessage = new()
-        {
-            {SupportedLanguage.English, "Updated"},
-            {SupportedLanguage.Vietnamese, "Đã cập nhật" }
-        };
-        public readonly static Dictionary<SupportedLanguage, string> DeletedMessage = new()
-        {
-            {SupportedLanguage.English, "Deleted"},
-            {SupportedLanguage.Vietnamese, "Đã xoá" }
-        };
-    }
     public class ResponseResultBuilder : IResponseResultBuilder
     {
-        private readonly ILanguageService languageService;
-
-        public ResponseResultBuilder(ILanguageService languageService)
+        private readonly IStringLocalizer<ResponseResultBuilder> stringLocalizer;
+        public ResponseResultBuilder(IStringLocalizer<ResponseResultBuilder> stringLocalizer)
         {
-            this.languageService = languageService;
+            this.stringLocalizer = stringLocalizer;
         }
         private IDictionary<string, List<string>>? error = null;
         private string? message;
@@ -58,18 +44,17 @@ namespace HardwareShop.WebApi.Services
         private int statusCode = 200;
         private Object? data = null;
         private int? totalItems = null;
-        public void SetMessage(IDictionary<SupportedLanguage, string> message)
+        public void SetMessage(string message)
         {
-            var language = languageService.GetLanguage();
-            this.message = message[language];
+            this.message = stringLocalizer[message].Value;
         }
         public void SetUpdatedMessage()
         {
-            SetMessage(ResponseMessages.UpdatedMessage);
+            SetMessage("Updated");
         }
         public void SetDeletedMessage()
         {
-            SetMessage(ResponseMessages.DeletedMessage);
+            SetMessage("Deleted");
         }
         public void SetCreatedObject<T>(T entity)
         {
@@ -103,7 +88,6 @@ namespace HardwareShop.WebApi.Services
                         TotalItems = totalItems,
                         Data = data,
                         Error = error,
-                        Language = languageService.GetLanguage(),
                         Message = message,
                     })
                     { StatusCode = this.statusCode };
@@ -119,7 +103,6 @@ namespace HardwareShop.WebApi.Services
                     {
                         TotalItems = totalItems,
                         Data = data,
-                        Language = languageService.GetLanguage(),
                         Error = error,
                         Message = message
                     })
@@ -127,7 +110,7 @@ namespace HardwareShop.WebApi.Services
             }
         }
 
-        public void AddError(string fieldName, IDictionary<SupportedLanguage, string> message)
+        public void AddError(string fieldName, string message)
         {
             error ??= new Dictionary<string, List<string>>();
 
@@ -135,39 +118,24 @@ namespace HardwareShop.WebApi.Services
             {
                 error.Add(fieldName, new List<string>());
             }
-            var language = languageService.GetLanguage();
-            error[fieldName].Add(message[language]);
+            error[fieldName].Add(stringLocalizer[message].Value);
 
         }
         public void AddInvalidFieldError(string fieldName)
         {
-            var invalidMessage = new Dictionary<SupportedLanguage, string>()
-            {
-                [SupportedLanguage.Vietnamese] = $"Trường {fieldName} không hợp lệ",
-                [SupportedLanguage.English] = $"{fieldName} field is invalid"
-            };
-
-            AddError(fieldName, invalidMessage);
+            AddError(fieldName, stringLocalizer["{0} field is invalid", fieldName].Value);
             statusCode = 400;
         }
         public void AddExistedEntityError(string entityName)
         {
-            var invalidMessage = new Dictionary<SupportedLanguage, string>()
-            {
-                [SupportedLanguage.Vietnamese] = $"{entityName} đã tồn tại",
-                [SupportedLanguage.English] = $"{entityName} entity is already exists"
-            };
-            AddError(entityName, invalidMessage);
+
+            AddError(entityName, stringLocalizer["{0} entity is already exists", entityName]);
             statusCode = 400;
         }
         public void AddNotFoundEntityError(string entityName)
         {
-            var invalidMessage = new Dictionary<SupportedLanguage, string>()
-            {
-                [SupportedLanguage.Vietnamese] = $"{entityName} không tìm thấy",
-                [SupportedLanguage.English] = $"{entityName} is not found"
-            };
-            AddError(entityName, invalidMessage);
+            
+            AddError(entityName, stringLocalizer["{0} is not found", entityName]);
             statusCode = 404;
         }
 

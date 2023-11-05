@@ -29,10 +29,22 @@
     <None Include="HtmlTemplates/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Remove="Resources\Controllers.HomeController.vn-VI.resx" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\HardwareShop.Application\HardwareShop.Application.csproj" />
     <ProjectReference Include="..\HardwareShop.Infrastructure\HardwareShop.Infrastructure.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="Protos\user.proto" GrpcServices="Server" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Controllers\HomeController.en-US.resx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Resources\Controllers\HomeController.vi-VN.resx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
   </ItemGroup> 
 </Project>

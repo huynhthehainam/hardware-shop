@@ -13,6 +13,7 @@ using Microsoft.OpenApi.Models;
 using HardwareShop.Infrastructure.Extensions;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
+using System.Globalization;
 
 namespace HardwareShop.WebApi;
 // public class HasScopeRequirement : IAuthorizationRequirement
@@ -61,6 +62,21 @@ public class Program
         {
             options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        });
+        builder.Services.AddLocalization(options =>
+        {
+            options.ResourcesPath = "Resources";
+        });
+        builder.Services.Configure<RequestLocalizationOptions>(options =>
+        {
+            options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US");
+            var cultures = new CultureInfo[]
+            {
+                new CultureInfo("en-US"),
+                new CultureInfo("vi-VN"),
+            };
+            options.SupportedCultures = cultures;
+            options.SupportedUICultures = cultures;
         });
         builder.Services.AddGraphQLServer().AddAuthorization().AddQueryType<Query>().AddMutationType<Mutation>();
         builder.Services.AddGrpc();
@@ -185,6 +201,7 @@ public class Program
 
 
         app.MapControllers();
+        app.UseRequestLocalization();
         app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
         app.MapGraphQL();
 
