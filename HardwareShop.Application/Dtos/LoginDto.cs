@@ -1,4 +1,6 @@
 ﻿using System.Text.Json;
+using HardwareShop.Core.Constants;
+using HardwareShop.Core.Helpers;
 using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Models;
 
@@ -32,19 +34,14 @@ namespace HardwareShop.Application.Dtos
     }
     public class LoginUserDataDto
     {
-        public string DisplayName { get; set; }
-        public string? Email { get; set; }
-        public JsonDocument Settings { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string? Email { get; set; } = string.Empty;
+        public JsonDocument Settings { get; set; } = JsonSerializerConstants.DefaultDocumentValue;
         public Guid Guid { get; set; }
         public string[] Shortcuts { get; set; } = new
             string[] { "calendar", "mail", "contacts" };
-        public LoginUserDataDto(string displayName, string? email, JsonDocument settings, Guid guid)
-        {
-            DisplayName = displayName;
-            Email = email;
-            Settings = settings;
-            Guid = guid;
-        }
+
     }
     public class LoginUserDto
     {

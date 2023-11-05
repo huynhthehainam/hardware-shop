@@ -46,5 +46,5 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-  </ItemGroup> 
+  </ItemGroup>
 </Project>

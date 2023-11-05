@@ -18,15 +18,13 @@ namespace HardwareShop.Infrastructure.Services
         private readonly IJwtService jwtService;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly ICurrentUserService currentUserService;
-        private readonly ILanguageService languageService;
         private readonly IShopService shopService;
         private readonly DbContext db;
         private readonly IDistributedCache distributedCache;
-        public UserService(DbContext dbContext, IJwtService jwtService, ICurrentUserService currentUserService, ILanguageService languageService, IHashingPasswordService hashingPasswordService, IShopService shopService, IDistributedCache distributedCache)
+        public UserService(DbContext dbContext, IJwtService jwtService, ICurrentUserService currentUserService, IHashingPasswordService hashingPasswordService, IShopService shopService, IDistributedCache distributedCache)
         {
             this.jwtService = jwtService;
             this.currentUserService = currentUserService;
-            this.languageService = languageService;
             this.hashingPasswordService = hashingPasswordService;
             this.shopService = shopService;
             this.db = dbContext;
@@ -92,8 +90,14 @@ namespace HardwareShop.Infrastructure.Services
 
             TokenDto tokens = jwtService.GenerateTokens(cacheUser);
             UserShop? userShop = user.UserShop;
-            return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto(
-                languageService.GenerateFullName(user.FirstName, user.LastName), user.Email, user.InterfaceSettings, user.Guid), (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
+            return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto
+            {
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Guid = user.Guid,
+                Settings = user.InterfaceSettings,
+            }, (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
                  userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0, userShop.Shop?.Phones?.Select(e => new ShopPhoneDto()
                  {
                      Id = e.Id,
@@ -133,7 +137,8 @@ namespace HardwareShop.Infrastructure.Services
             {
                 Id = e.Id,
                 Email = e.Email,
-                FullName = languageService.GenerateFullName(e.FirstName, e.LastName),
+                FirstName = e.FirstName,
+                LastName = e.LastName,
                 Phone = e.Phone,
                 Username = e.Username,
             }));
@@ -153,7 +158,8 @@ namespace HardwareShop.Infrastructure.Services
             {
                 Id = e.Id,
                 Email = e.Email,
-                FullName = languageService.GenerateFullName(e.FirstName, e.LastName),
+                FirstName = e.FirstName,
+                LastName = e.LastName,
                 Phone = e.Phone,
                 Username = e.Username,
             });

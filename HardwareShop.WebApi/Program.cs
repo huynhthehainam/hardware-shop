@@ -180,7 +180,6 @@ public class Program
 
         #endregion
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-        builder.Services.AddScoped<ILanguageService, LanguageService>();
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
         builder.Services.AddSingleton<IChatHubController, ChatHubController>();
 

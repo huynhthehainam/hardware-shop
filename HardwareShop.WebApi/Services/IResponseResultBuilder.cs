@@ -50,11 +50,11 @@ namespace HardwareShop.WebApi.Services
         }
         public void SetUpdatedMessage()
         {
-            SetMessage("Updated");
+            SetMessage("UPDATED");
         }
         public void SetDeletedMessage()
         {
-            SetMessage("Deleted");
+            SetMessage("DELETED");
         }
         public void SetCreatedObject<T>(T entity)
         {
@@ -123,19 +123,19 @@ namespace HardwareShop.WebApi.Services
         }
         public void AddInvalidFieldError(string fieldName)
         {
-            AddError(fieldName, stringLocalizer["{0} field is invalid", fieldName].Value);
+            AddError(fieldName, stringLocalizer["INVALID_ERROR", fieldName].Value);
             statusCode = 400;
         }
         public void AddExistedEntityError(string entityName)
         {
 
-            AddError(entityName, stringLocalizer["{0} entity is already exists", entityName]);
+            AddError(entityName, stringLocalizer["EXISTING_ERROR", entityName]);
             statusCode = 400;
         }
         public void AddNotFoundEntityError(string entityName)
         {
-            
-            AddError(entityName, stringLocalizer["{0} is not found", entityName]);
+
+            AddError(entityName, stringLocalizer["NOT_FOUND_ERROR", entityName]);
             statusCode = 404;
         }
 

@@ -24,7 +24,7 @@ namespace HardwareShop.WebApi.Controllers
             responseResultBuilder.SetData(new
             {
                 Title = "My workshop",
-                Content = localizer["Content"].Value
+                Content = localizer["Content", "Nam Huynh"].Value
             });
             return responseResultBuilder.Build();
         }

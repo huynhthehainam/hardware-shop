@@ -18,15 +18,13 @@ namespace HardwareShop.Infrastructure.Services
     {
         private readonly IShopService shopService;
 
-        private readonly ILanguageService languageService;
         private readonly ICustomerDebtService customerDebtService;
         private readonly IInvoiceService invoiceService;
         private readonly DbContext db;
-        public CustomerService(ILanguageService languageService, DbContext db, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IShopService shopService)
+        public CustomerService(DbContext db, IInvoiceService invoiceService, ICustomerDebtService customerDebtService, IShopService shopService)
         {
             this.db = db;
             this.shopService = shopService;
-            this.languageService = languageService;
             this.invoiceService = invoiceService;
             this.customerDebtService = customerDebtService;
         }
@@ -237,18 +235,18 @@ namespace HardwareShop.Infrastructure.Services
                 {"VALUE_ROWS", rowsStr}
             });
 
-            table1Str = languageService.Translate(table1Str, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
-    {"NAME", new Dictionary<SupportedLanguage, string>(){{
-        SupportedLanguage.English, "Name"
-    },{
-         SupportedLanguage.Vietnamese, "Tên"
-    }}},
-     {"DEBT", new Dictionary<SupportedLanguage, string>(){{
-        SupportedLanguage.English, "Debt"
-    },{
-         SupportedLanguage.Vietnamese, "Nợ"
-    }}}
-});
+            //             table1Str = languageService.Translate(table1Str, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
+            //     {"NAME", new Dictionary<SupportedLanguage, string>(){{
+            //         SupportedLanguage.English, "Name"
+            //     },{
+            //          SupportedLanguage.Vietnamese, "Tên"
+            //     }}},
+            //      {"DEBT", new Dictionary<SupportedLanguage, string>(){{
+            //         SupportedLanguage.English, "Debt"
+            //     },{
+            //          SupportedLanguage.Vietnamese, "Nợ"
+            //     }}}
+            // });
             rows.Clear();
             for (var i = halfIndex + 1; i < customers.Length; i++)
             {
@@ -278,18 +276,18 @@ namespace HardwareShop.Infrastructure.Services
                 {"VALUE_ROWS", rowsStr}
             });
 
-            table2Str = languageService.Translate(table2Str, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
-    {"NAME", new Dictionary<SupportedLanguage, string>(){{
-        SupportedLanguage.English, "Name"
-    },{
-         SupportedLanguage.Vietnamese, "Tên"
-    }}},
-     {"DEBT", new Dictionary<SupportedLanguage, string>(){{
-        SupportedLanguage.English, "Debt"
-    },{
-         SupportedLanguage.Vietnamese, "Nợ"
-    }}}
-});
+            //             table2Str = languageService.Translate(table2Str, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
+            //     {"NAME", new Dictionary<SupportedLanguage, string>(){{
+            //         SupportedLanguage.English, "Name"
+            //     },{
+            //          SupportedLanguage.Vietnamese, "Tên"
+            //     }}},
+            //      {"DEBT", new Dictionary<SupportedLanguage, string>(){{
+            //         SupportedLanguage.English, "Debt"
+            //     },{
+            //          SupportedLanguage.Vietnamese, "Nợ"
+            //     }}}
+            // });
 
             var debtHtml = System.IO.File.ReadAllText("HtmlTemplates/CustomersDebt/_FullDebt.html");
             var htmlStr = HtmlHelper.ReplaceKeyWithValue(debtHtml, new Dictionary<string, string>(){

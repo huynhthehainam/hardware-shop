@@ -18,13 +18,11 @@ namespace HardwareShop.Infrastructure.Services
     {
         private readonly IShopService shopService;
         private readonly ICustomerDebtService customerDebtService;
-        private readonly ILanguageService languageService;
         private readonly DbContext db;
-        public InvoiceService(IShopService shopService, ICustomerDebtService customerDebtService, ILanguageService languageService, DbContext context)
+        public InvoiceService(IShopService shopService, ICustomerDebtService customerDebtService, DbContext context)
         {
             this.shopService = shopService;
             this.customerDebtService = customerDebtService;
-            this.languageService = languageService;
             this.db = context;
 
         }
@@ -254,16 +252,16 @@ namespace HardwareShop.Infrastructure.Services
             if (isAllowedToShowCustomerDeposit)
             {
                 var depositHtmlStr = System.IO.File.ReadAllText("HtmlTemplates/Invoice/_Deposit.html");
-                depositHtmlStr = languageService.Translate(depositHtmlStr, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
-                    {"DEPOSIT_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Deposit"},
-                   {SupportedLanguage.Vietnamese,  "Trả trước"}
-                }},
-                {"REST_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Rest"},
-                   {SupportedLanguage.Vietnamese,  "Còn lại"}
-                }},
-                });
+                // depositHtmlStr = languageService.Translate(depositHtmlStr, new Dictionary<string, Dictionary<SupportedLanguage, string>>(){
+                //     {"DEPOSIT_LABEL", new Dictionary<SupportedLanguage, string>(){
+                //      { SupportedLanguage.English, "Deposit"},
+                //    {SupportedLanguage.Vietnamese,  "Trả trước"}
+                // }},
+                // {"REST_LABEL", new Dictionary<SupportedLanguage, string>(){
+                //      { SupportedLanguage.English, "Rest"},
+                //    {SupportedLanguage.Vietnamese,  "Còn lại"}
+                // }},
+                // });
                 depositHtmlStr = HtmlHelper.ReplaceKeyWithValue(depositHtmlStr, new Dictionary<string, string>(){
                       {"VALUE_DEPOSIT",cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.Deposit)},
                 {"VALUE_REST", cashUnit == null ? "0": cashUnit.ConvertValueToString(invoice.CurrentDebtHistory?.NewDebt ?? 0)},
@@ -332,39 +330,39 @@ namespace HardwareShop.Infrastructure.Services
                 });
             }
 
-            htmlStr = languageService.Translate(htmlStr,
-            new Dictionary<string, Dictionary<SupportedLanguage, string>>()
-            {
-                {"INVOICE_LABEL" , new Dictionary<SupportedLanguage, string>()
-                {
-                   { SupportedLanguage.English, "Invoice"},
-                   {SupportedLanguage.Vietnamese, "Hoá đơn"}
-                }
-                },
-                 {
-                    "OLD_DEBT_LABEL", new Dictionary<SupportedLanguage, string>{
-                        { SupportedLanguage.English, "Old debt"},
-                   {SupportedLanguage.Vietnamese, "Nợ trước"}
-                    }
-                },
-                 {"TOTAL_COST_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Total"},
-                   {SupportedLanguage.Vietnamese,  "Thành tiền"}
-                }},
+            // htmlStr = languageService.Translate(htmlStr,
+            // new Dictionary<string, Dictionary<SupportedLanguage, string>>()
+            // {
+            //     {"INVOICE_LABEL" , new Dictionary<SupportedLanguage, string>()
+            //     {
+            //        { SupportedLanguage.English, "Invoice"},
+            //        {SupportedLanguage.Vietnamese, "Hoá đơn"}
+            //     }
+            //     },
+            //      {
+            //         "OLD_DEBT_LABEL", new Dictionary<SupportedLanguage, string>{
+            //             { SupportedLanguage.English, "Old debt"},
+            //        {SupportedLanguage.Vietnamese, "Nợ trước"}
+            //         }
+            //     },
+            //      {"TOTAL_COST_LABEL", new Dictionary<SupportedLanguage, string>(){
+            //          { SupportedLanguage.English, "Total"},
+            //        {SupportedLanguage.Vietnamese,  "Thành tiền"}
+            //     }},
 
-                 {"PRODUCT_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Product"},
-                   {SupportedLanguage.Vietnamese,  "Sản phẩm"}
-                }},
-                  {"PRICE_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Price"},
-                   {SupportedLanguage.Vietnamese,  "Đơn giá"}
-                }},
-                 {"QUANTITY_LABEL", new Dictionary<SupportedLanguage, string>(){
-                     { SupportedLanguage.English, "Quantity"},
-                   {SupportedLanguage.Vietnamese,  "Số lượng"}
-                }},
-            });
+            //      {"PRODUCT_LABEL", new Dictionary<SupportedLanguage, string>(){
+            //          { SupportedLanguage.English, "Product"},
+            //        {SupportedLanguage.Vietnamese,  "Sản phẩm"}
+            //     }},
+            //       {"PRICE_LABEL", new Dictionary<SupportedLanguage, string>(){
+            //          { SupportedLanguage.English, "Price"},
+            //        {SupportedLanguage.Vietnamese,  "Đơn giá"}
+            //     }},
+            //      {"QUANTITY_LABEL", new Dictionary<SupportedLanguage, string>(){
+            //          { SupportedLanguage.English, "Quantity"},
+            //        {SupportedLanguage.Vietnamese,  "Số lượng"}
+            //     }},
+            // });
 
 
 
