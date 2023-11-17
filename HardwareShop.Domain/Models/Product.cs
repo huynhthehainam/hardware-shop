@@ -15,7 +15,6 @@ namespace HardwareShop.Domain.Models
         }
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
-
         public double? Mass { get; set; }
         public double? PricePerMass { get; set; }
         public double? PercentForFamiliarCustomer { get; set; }
@@ -23,8 +22,6 @@ namespace HardwareShop.Domain.Models
         public double? PriceForFamiliarCustomer { get; set; }
         public double OriginalPrice { get; set; }
         public double PriceForCustomer { get; set; }
-
-
         public bool HasAutoCalculatePermission { get; set; }
         public int ShopId { get; set; }
         private Shop? shop;

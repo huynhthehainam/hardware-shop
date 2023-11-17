@@ -2,7 +2,7 @@
 using HardwareShop.Core.Constants;
 using System.Text.Json;
 
-namespace HardwareShop.Application.Helpers
+namespace HardwareShop.Infrastructure.Helpers
 {
     public static class CustomerDebtHistoryHelper
     {

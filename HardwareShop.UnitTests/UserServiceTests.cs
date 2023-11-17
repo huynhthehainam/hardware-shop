@@ -46,8 +46,8 @@ public class UserServiceTests
     {
         var result = await userService.LoginAsync(username, password);
         Assert.NotNull(result);
-        Assert.Equal(result.AccessToken, dumpAccessToken);
-        Assert.Equal(result.SessionId, dumpSessionId);
+        Assert.Equal(dumpAccessToken, result.AccessToken);
+        Assert.Equal(dumpSessionId, result.SessionId);
 
     }
 }

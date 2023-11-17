@@ -1,5 +1,5 @@
 using System.Text.Json;
-using HardwareShop.Application.Helpers;
+using HardwareShop.Infrastructure.Helpers;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Services;
@@ -129,12 +129,9 @@ namespace HardwareShop.WebApi.Controllers
         }
         #endregion
 
-        private readonly IWebHostEnvironment environment;
-        private readonly DbContext db;
-        public SeedDataController(IWebHostEnvironment environment, DbContext db, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        public SeedDataController(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
-            this.db = db;
-            this.environment = environment;
+
         }
         // [HttpPost("SeedFromDbFile")]
         // public Task<IActionResult> SeedFromDbFile([FromForm] SeedFromFileCommand command)
