@@ -6,13 +6,12 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
 {
     public sealed class ChatSessionConfiguration : IEntityTypeConfiguration<ChatSession>
     {
-      
-
         public void Configure(EntityTypeBuilder<ChatSession> e)
         {
-            e.HasKey(e => e.Id);
-                e.HasOne(e => e.Asset).WithMany(e => e.ChatSessions).HasForeignKey(e => e.AssetId).OnDelete(DeleteBehavior.Cascade);
-                
+            e.HasKey(chatSession => chatSession.Id);
+            e.HasOne(chatSession => chatSession.Asset).WithMany(asset => asset.ChatSessions)
+                .HasForeignKey(chatSession => chatSession.AssetId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

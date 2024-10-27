@@ -1,5 +1,4 @@
-﻿
-using System.Text;
+﻿using System.Text;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
@@ -19,7 +18,6 @@ namespace HardwareShop.WebApi;
 // public class HasScopeRequirement : IAuthorizationRequirement
 // {
 
-
 //     public HasScopeRequirement()
 //     {
 //         var a = 0;
@@ -36,7 +34,7 @@ namespace HardwareShop.WebApi;
 //     }
 // }
 
-public class Program
+public static class Program
 {
     public static void Main(string[] args)
     {
@@ -51,22 +49,19 @@ public class Program
             options.AddPolicy(name: mainAllowSpecificOrigins, builder =>
             {
                 builder.WithOrigins(
-                customCorsUrls
+                    customCorsUrls
                 ).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             });
         });
 
 
-
         builder.Services.AddControllers().AddJsonOptions(options =>
         {
-            options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+            options.JsonSerializerOptions.DefaultIgnoreCondition =
+                System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         });
-        builder.Services.AddLocalization(options =>
-        {
-            options.ResourcesPath = "Resources";
-        });
+        builder.Services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
         builder.Services.Configure<RequestLocalizationOptions>(options =>
         {
             options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US");
@@ -85,10 +80,10 @@ public class Program
 
         builder.Services.AddDistributedRedisCache(option =>
         {
-            option.Configuration = builder.Configuration["RedisSettings:Host"] + ":" + builder.Configuration["RedisSettings:Port"] + ",connectTimeout=10000,syncTimeout=10000";
+            option.Configuration = builder.Configuration["RedisSettings:Host"] + ":" +
+                                   builder.Configuration["RedisSettings:Port"] +
+                                   ",connectTimeout=10000,syncTimeout=10000";
         });
-
-
 
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -102,21 +97,21 @@ public class Program
                 Name = "Authorization",
                 Type = SecuritySchemeType.ApiKey
             });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement {
+            c.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
-                new OpenApiSecurityScheme
                 {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = "Bearer"
+                        }
+                    },
+                    Array.Empty<string>()
                 }
-                },
-                Array.Empty<string>()
-            }
-    });
+            });
         });
-
 
 
         var jwtConfiguration = builder.Configuration.GetSection("JwtConfiguration");
@@ -138,47 +133,53 @@ public class Program
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             })
-           .AddJwtBearer(x =>
-           {
-               x.Events = new JwtBearerEvents
-               {
-                   OnMessageReceived = (context) =>
-               {
-                   var token = context.HttpContext.Request.Query["access_token"];
-                   var path = context.HttpContext.Request.Path;
-                   if (!string.IsNullOrEmpty(token) && path.StartsWithSegments(ChatHubConstants.Endpoint))
-                   {
-                       context.Request.Headers["Authorization"] = $"{JwtBearerDefaults.AuthenticationScheme} {token}";
-                   }
-                   return Task.CompletedTask;
-               }
-               };
+            .AddJwtBearer(x =>
+            {
+                x.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = (context) =>
+                    {
+                        var token = context.HttpContext.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(token) && path.StartsWithSegments(ChatHubConstants.Endpoint))
+                        {
+                            context.Request.Headers["Authorization"] =
+                                $"{JwtBearerDefaults.AuthenticationScheme} {token}";
+                        }
 
-               x.RequireHttpsMetadata = false;
-               x.SaveToken = true;
-               x.TokenValidationParameters = new TokenValidationParameters
-               {
-                   ValidateIssuerSigningKey = true,
-                   IssuerSigningKey = new SymmetricSecurityKey(key),
-                   ValidateIssuer = false,
-                   ValidateAudience = false,
-                   ClockSkew = TimeSpan.Zero,
-                   ValidateLifetime = true,
-                   LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken,
-                                            TokenValidationParameters validationParameters) =>
-                   {
-                       return notBefore.HasValue ? notBefore.Value <= DateTime.UtcNow : false ||
-!expires.HasValue || expires.Value >= DateTime.UtcNow;
-                   }
-               };
-           });
+                        return Task.CompletedTask;
+                    }
+                };
+
+                x.RequireHttpsMetadata = false;
+                x.SaveToken = true;
+                x.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateIssuer = false,
+                    ValidateAudience = false,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidateLifetime = true,
+                    LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken,
+                        TokenValidationParameters validationParameters) =>
+                    {
+                        return notBefore.HasValue
+                            ? notBefore.Value <= DateTime.UtcNow
+                            : false ||
+                              !expires.HasValue || expires.Value >= DateTime.UtcNow;
+                    }
+                };
+            });
 
 
         #region Configuration
+
         builder.Services.Configure<HashingConfiguration>(builder.Configuration.GetSection("HashingConfiguration"));
         builder.Services.Configure<JwtConfiguration>(builder.Configuration.GetSection("JwtConfiguration"));
 
         #endregion
+
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
         builder.Services.AddSingleton<IChatHubController, ChatHubController>();
@@ -218,6 +219,4 @@ public class Program
         app.SeedData();
         app.Run();
     }
-
-
 }

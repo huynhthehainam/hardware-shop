@@ -1,5 +1,3 @@
-
-
 using HardwareShop.Application.Services;
 using HardwareShop.Domain;
 using HardwareShop.Infrastructure.Services;
@@ -12,13 +10,11 @@ namespace HardwareShop.Infrastructure.Extensions
 {
     public static class InfrastructureExtensions
     {
-        public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services, ConfigurationManager configuration)
+        public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
+            ConfigurationManager configuration)
         {
-            services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) => opt.UseNpgsql(configuration.GetConnectionString("AppConn"), b =>
-       {
-
-
-       }).UseInternalServiceProvider(sp));
+            services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) =>
+                opt.UseNpgsql(configuration.GetConnectionString("AppConn"), b => { }).UseInternalServiceProvider(sp));
             services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();
