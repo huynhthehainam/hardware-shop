@@ -11,7 +11,7 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
         public void Configure(EntityTypeBuilder<CustomerDebt> e)
         {
             e.HasKey(e => e.CustomerId);
-            e.HasOne(e => e.Customer).WithOne(e => e.Debt).HasForeignKey<CustomerDebt>(e => e.CustomerId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(e => e.Customer).WithOne(e => e.Debt).HasForeignKey<CustomerDebt>(e => e.CustomerId).OnDelete(DeleteBehavior.Restrict);
 
         }
     }

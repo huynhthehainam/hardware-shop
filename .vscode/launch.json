@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "buildApi",
-            "program": "${workspaceFolder}/HardwareShop.WebApi/bin/Debug/net6.0/HardwareShop.WebApi.dll",
+            "program": "${workspaceFolder}/HardwareShop.WebApi/bin/Debug/net8.0/HardwareShop.WebApi.dll",
             "args": [],
             "cwd": "${workspaceFolder}/HardwareShop.WebApi",
             "stopAtEntry": false,
@@ -26,7 +26,7 @@
             "request": "launch",
             "preLaunchTask": "buildSocketClient",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/HardwareShop.SocketClient/bin/Debug/net6.0/HardwareShop.SocketClient.dll",
+            "program": "${workspaceFolder}/HardwareShop.SocketClient/bin/Debug/net8.0/HardwareShop.SocketClient.dll",
             "args": [],
             "cwd": "${workspaceFolder}/HardwareShop.SocketClient",
             "stopAtEntry": false,

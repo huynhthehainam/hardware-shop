@@ -11,7 +11,7 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
         public void Configure(EntityTypeBuilder<Warehouse> w)
         {
             _ = w.HasKey(e => e.Id);
-            _ = w.HasOne(e => e.Shop).WithMany(e => e.Warehouses).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+            _ = w.HasOne(e => e.Shop).WithMany(e => e.Warehouses).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Restrict);
 
         }
     }

@@ -11,6 +11,8 @@ using iText.Layout;
 using Microsoft.EntityFrameworkCore;
 using HardwareShop.Application.Models;
 using HardwareShop.Infrastructure.Extensions;
+using System.Text.Json;
+using HardwareShop.Core.Constants;
 
 namespace HardwareShop.Infrastructure.Services
 {
@@ -125,7 +127,7 @@ namespace HardwareShop.Infrastructure.Services
                 OldDebt = e.OldDebt,
                 Id = e.Id,
                 Reason = e.Reason,
-                ReasonParams = e.ReasonParams
+                ReasonParams = string.IsNullOrEmpty(e.ReasonParams) ? null : JsonDocument.Parse(e.ReasonParams)
             }));
         }
 

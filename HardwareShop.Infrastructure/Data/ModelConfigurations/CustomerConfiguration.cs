@@ -10,7 +10,7 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
         public void Configure(EntityTypeBuilder<Customer> e)
         {
             e.HasKey(e => e.Id);
-            e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
+            e.HasOne(e => e.Shop).WithMany(e => e.Customers).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Restrict);
             e.HasOne(e => e.PhoneCountry).WithMany(e => e.Customers).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
 
         }

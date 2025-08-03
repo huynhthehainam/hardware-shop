@@ -53,11 +53,6 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref userAssets);
             set => userAssets = value;
         }
-        private ICollection<ChatSession>? chatSessions;
-        public ICollection<ChatSession>? ChatSessions
-        {
-            get => lazyLoader?.Load(this, ref chatSessions);
-            set => chatSessions = value;
-        }
+        
     }
 }

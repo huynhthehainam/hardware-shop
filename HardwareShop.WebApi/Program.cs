@@ -53,7 +53,7 @@ public static class Program
                 ).AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             });
         });
-
+        var aa = builder.Configuration.GetConnectionString("AppConn");
 
         builder.Services.AddControllers().AddJsonOptions(options =>
         {

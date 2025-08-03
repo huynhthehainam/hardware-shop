@@ -12,8 +12,8 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
         {
             _ = e.HasQueryFilter(e => e.Product != null && !e.Product.IsDeleted);
             _ = e.HasKey(e => new { e.ProductId, e.WarehouseId });
-            _ = e.HasOne(e => e.Product).WithMany(e => e.WarehouseProducts).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Cascade);
-            _ = e.HasOne(e => e.Warehouse).WithMany(e => e.WarehouseProducts).HasForeignKey(e => e.WarehouseId).OnDelete(DeleteBehavior.Cascade);
+            _ = e.HasOne(e => e.Product).WithMany(e => e.WarehouseProducts).HasForeignKey(e => e.ProductId).OnDelete(DeleteBehavior.Restrict);
+            _ = e.HasOne(e => e.Warehouse).WithMany(e => e.WarehouseProducts).HasForeignKey(e => e.WarehouseId).OnDelete(DeleteBehavior.Restrict);
 
         }
     }

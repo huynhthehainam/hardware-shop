@@ -21,7 +21,7 @@ namespace HardwareShop.Domain.Models
         public double ChangeOfDebt { get; set; }
         public double NewDebt { get; set; }
         public string? Reason { get; set; }
-        public JsonDocument? ReasonParams { get; set; }
+        public String? ReasonParams { get; set; }
         public int CustomerDebtId { get; set; }
         private CustomerDebt? customerDebt;
         public CustomerDebt? CustomerDebt

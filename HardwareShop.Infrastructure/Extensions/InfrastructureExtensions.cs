@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using HardwareShop.Infrastructure.Data;
+using System;
 
 namespace HardwareShop.Infrastructure.Extensions
 {
@@ -13,8 +14,17 @@ namespace HardwareShop.Infrastructure.Extensions
         public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
             ConfigurationManager configuration)
         {
-            services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) =>
-                opt.UseNpgsql(configuration.GetConnectionString("AppConn"), b => { }).UseInternalServiceProvider(sp));
+            var databaseType = configuration.GetSection("DatabaseType").Value;
+            if (databaseType == "SQLServer")
+            {
+                services.AddDbContext<MainDatabaseContext>(options =>
+                 options.UseSqlServer(configuration.GetConnectionString("AppConn")));
+            }
+            else
+            {
+                services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) =>
+                    opt.UseNpgsql(configuration.GetConnectionString("AppConn"), b => { }).UseInternalServiceProvider(sp));
+            }
             services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();
@@ -28,7 +38,6 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IAssetService, AssetService>();
-            services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ICurrentUserService, WebCurrentUserService>();
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();

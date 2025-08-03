@@ -5,8 +5,8 @@ namespace HardwareShop.Domain.Helpers
 {
     public static class InterfaceSettingsHelper
     {
-        private static JsonDocument? defaultSettings = null;
-        public static JsonDocument GenerateDefaultInterfaceSettings()
+        private static string? defaultSettings = null;
+        public static string GenerateDefaultInterfaceSettings()
         {
             if (defaultSettings == null)
             {
@@ -48,7 +48,7 @@ namespace HardwareShop.Domain.Helpers
                         Footer = "defaultDark"
                     }
                 };
-                defaultSettings = JsonDocument.Parse(JsonSerializer.Serialize(settings, JsonSerializerConstants.CamelOptions));
+                defaultSettings = JsonSerializer.Serialize(settings, JsonSerializerConstants.CamelOptions);
             }
             return defaultSettings;
         }

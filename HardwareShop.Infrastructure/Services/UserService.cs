@@ -96,7 +96,7 @@ namespace HardwareShop.Infrastructure.Services
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Guid = user.Guid,
-                Settings = user.InterfaceSettings,
+                Settings = JsonDocument.Parse(user.InterfaceSettings),
             }, (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
                  userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0, userShop.Shop?.Phones?.Select(e => new ShopPhoneDto()
                  {
@@ -173,7 +173,7 @@ namespace HardwareShop.Infrastructure.Services
                 return new(ApplicationError.CreateNotFoundError("User"));
             }
 
-            user.InterfaceSettings = settings;
+            user.InterfaceSettings = JsonSerializer.Serialize(settings.RootElement, JsonSerializerConstants.CamelOptions); ;
             db.Update(user);
             db.SaveChanges();
             return new();
@@ -193,7 +193,7 @@ namespace HardwareShop.Infrastructure.Services
                 CreatedDate = e.CreatedDate,
                 Message = e.Message,
                 Translation = e.Translation,
-                TranslationParams = e.TranslationParams,
+                TranslationParams = string.IsNullOrEmpty(e.TranslationParams) ? null : JsonDocument.Parse(e.TranslationParams),
                 Options = JsonDocument.Parse(JsonSerializer.Serialize(new
                 {
                     e.Variant
@@ -264,7 +264,7 @@ namespace HardwareShop.Infrastructure.Services
                 Variant = variant,
                 UserId = user.Id,
                 Translation = translation,
-                TranslationParams = translationParams,
+                TranslationParams = translationParams is null ? null : JsonSerializer.Serialize(translationParams.RootElement, JsonSerializerConstants.CamelOptions),
             };
             db.Add(notification);
             db.SaveChanges();

@@ -48,7 +48,7 @@ namespace HardwareShop.Domain.Models
         }
         public bool IsDeleted { get; set; }
 
-        public JsonDocument InterfaceSettings { get; set; } = InterfaceSettingsHelper.GenerateDefaultInterfaceSettings();
+        public String InterfaceSettings { get; set; } = InterfaceSettingsHelper.GenerateDefaultInterfaceSettings();
 
         private ICollection<UserAsset>? assets;
         public ICollection<UserAsset>? Assets
@@ -64,24 +64,7 @@ namespace HardwareShop.Domain.Models
         }
 
 
-        private ICollection<ChatSessionMember>? chatSessionMembers;
-        public ICollection<ChatSessionMember>? ChatSessionMembers
-        {
-            get => lazyLoader?.Load(this, ref chatSessionMembers);
-            set => chatSessionMembers = value;
-        }
-        private ICollection<ChatMessage>? messages;
-        public ICollection<ChatMessage>? Messages
-        {
-            get => lazyLoader?.Load(this, ref messages);
-            set => messages = value;
-        }
-        private ICollection<ChatMessageStatus>? messageStatuses;
-        public ICollection<ChatMessageStatus>? MessageStatuses
-        {
-            get => lazyLoader?.Load(this, ref messageStatuses);
-            set => messageStatuses = value;
-        }
+   
 
         public long? GetAvatarAssetId()
         {

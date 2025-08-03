@@ -1,5 +1,6 @@
 using System.Text.Json;
 using HardwareShop.Application.Services;
+using HardwareShop.Core.Constants;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -30,7 +31,7 @@ namespace HardwareShop.Infrastructure.Services
                 NewDebt = debt.Amount + changeOfDebt,
                 Reason = reason.Item1,
                 CreatedDate = DateTime.UtcNow,
-                ReasonParams = reason.Item2,
+                ReasonParams = JsonSerializer.Serialize(reason.Item2, JsonSerializerConstants.CamelOptions),
             };
             db.Set<CustomerDebtHistory>().Add(history);
 

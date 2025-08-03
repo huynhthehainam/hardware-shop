@@ -227,7 +227,7 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     Email = "huynhthehainam@gmail.com",
                     HashedPassword = hashingPasswordService.Hash("123"),
-                    Phone = "967044037",
+                    Phone = "+84967044037",
                     FirstName = "Nam",
                     LastName = "Huỳnh",
                     Role = SystemUserRole.Admin,

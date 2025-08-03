@@ -26,7 +26,7 @@ namespace HardwareShop.Domain.Models
         }
 
         public string? Translation { get; set; }
-        public JsonDocument? TranslationParams { get; set; }
+        public String? TranslationParams { get; set; }
         public bool IsDismissed { get; set; }
         public int UserId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;

@@ -35,10 +35,7 @@ namespace HardwareShop.Infrastructure.Data
         public DbSet<CountryAsset> CountryAssets => Set<CountryAsset>();
         public DbSet<ShopPhone> ShopPhones => Set<ShopPhone>();
         public DbSet<ShopSetting> ShopSettings => Set<ShopSetting>();
-        public DbSet<ChatSession> ChatSessions => Set<ChatSession>();
-        public DbSet<ChatSessionMember> ChatSessionMembers => Set<ChatSessionMember>();
-        public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
-        public DbSet<ChatMessageStatus> ChatMessageStatuses => Set<ChatMessageStatus>();
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
