@@ -12,7 +12,7 @@ namespace HardwareShop.WebApi.Services
     {
         IActionResult Build();
         void SetUpdatedMessage();
-        void SetData(object? data);
+        IResponseResultBuilder SetData(object? data);
         void SetDeletedMessage();
         void SetMessage(string message);
         void SetNoContent();
@@ -139,11 +139,12 @@ namespace HardwareShop.WebApi.Services
             statusCode = 404;
         }
 
-        public void SetData(object? data)
+        public IResponseResultBuilder SetData(object? data)
         {
             this.data = data;
             statusCode = 200;
             type = ResponseResultType.Json;
+            return this;
         }
 
         public void AddNotPermittedError()

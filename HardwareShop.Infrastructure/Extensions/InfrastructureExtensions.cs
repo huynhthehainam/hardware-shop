@@ -1,11 +1,11 @@
+using System;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain;
+using HardwareShop.Infrastructure.Data;
 using HardwareShop.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using HardwareShop.Infrastructure.Data;
-using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace HardwareShop.Infrastructure.Extensions
 {
@@ -14,17 +14,8 @@ namespace HardwareShop.Infrastructure.Extensions
         public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
             ConfigurationManager configuration)
         {
-            var databaseType = configuration.GetSection("DatabaseType").Value;
-            if (databaseType == "SQLServer")
-            {
-                services.AddDbContext<MainDatabaseContext>(options =>
-                 options.UseSqlServer(configuration.GetConnectionString("AppConn")));
-            }
-            else
-            {
-                services.AddEntityFrameworkNpgsql().AddDbContext<MainDatabaseContext>((sp, opt) =>
-                    opt.UseNpgsql(configuration.GetConnectionString("AppConn"), b => { }).UseInternalServiceProvider(sp));
-            }
+            services.AddDbContext<MainDatabaseContext>(options =>
+                  options.UseSqlServer(configuration.GetConnectionString("AppConn")));
             services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();

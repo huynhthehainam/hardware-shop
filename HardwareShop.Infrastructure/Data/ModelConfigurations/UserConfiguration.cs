@@ -6,7 +6,7 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
 {
     public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
-       
+
 
         public void Configure(EntityTypeBuilder<User> u)
         {
@@ -14,7 +14,6 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
             _ = u.HasIndex(e => e.Username).IsUnique();
             _ = u.HasOne(e => e.PhoneCountry).WithMany(e => e.Users).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
             _ = u.HasIndex(e => e.Guid);
-
         }
     }
 }

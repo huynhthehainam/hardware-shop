@@ -14,6 +14,13 @@ namespace HardwareShop.Infrastructure.Services
         {
             this.db = db;
         }
+
+        public async Task<List<string?>> TestEncryptedAsync(CancellationToken cancellationToken)
+        {
+            var users = await db.Set<User>().Select(e => e.SecretValue).ToListAsync(cancellationToken);
+            return users;
+        }
+
         public async Task<int> TestEntityAsync()
         {
             Expression<Func<User, bool>> query = e => true;

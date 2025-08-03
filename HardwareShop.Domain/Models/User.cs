@@ -24,6 +24,7 @@ namespace HardwareShop.Domain.Models
         public string? Email { get; set; }
         public string? Phone { get; set; }
         public int? PhoneCountryId { get; set; }
+        public string? SecretValue { get; set; }
         private Country? phoneCountry;
         public Country? PhoneCountry
         {
@@ -64,7 +65,7 @@ namespace HardwareShop.Domain.Models
         }
 
 
-   
+
 
         public long? GetAvatarAssetId()
         {

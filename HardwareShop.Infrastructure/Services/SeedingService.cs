@@ -233,6 +233,7 @@ namespace HardwareShop.Infrastructure.Services
                     Role = SystemUserRole.Admin,
                     Username = "admin",
                     PhoneCountryId = country.Id,
+                    SecretValue = "123",
                     Assets = new UserAsset[]
                     {
                             new UserAsset
@@ -251,6 +252,8 @@ namespace HardwareShop.Infrastructure.Services
                     LastName = "Huỳnh",
                     Role = SystemUserRole.Admin,
                     Username = "admin1",
+                    SecretValue = "456",
+                    PhoneCountryId = country.Id,
                     Assets = new UserAsset[]
                     {
                             new UserAsset
@@ -268,7 +271,9 @@ namespace HardwareShop.Infrastructure.Services
                     FirstName = "Nam",
                     LastName = "Huỳnh",
                     Role = SystemUserRole.Admin,
+                    SecretValue = "789",
                     Username = "admin2",
+                    PhoneCountryId = country.Id,
                     Assets = new UserAsset[]
                    {
                             new UserAsset

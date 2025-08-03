@@ -92,6 +92,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneCountryId = table.Column<int>(type: "int", nullable: true),
+                    SecretValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     HashedPassword = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Role = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),

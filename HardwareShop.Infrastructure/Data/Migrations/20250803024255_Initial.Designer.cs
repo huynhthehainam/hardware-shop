@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HardwareShop.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20250414032106_Initial")]
+    [Migration("20250803024255_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -683,6 +683,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.Property<int>("Role")
                         .HasColumnType("int");
+
+                    b.Property<string>("SecretValue")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Username")
                         .IsRequired()
