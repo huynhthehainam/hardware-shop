@@ -9,21 +9,24 @@ namespace HardwareShop.Infrastructure.Services
         public int SaltSize { get; set; } = 0;
         public int HashSize { get; set; } = 0;
         public string PrivateKey { get; set; } = string.Empty;
-
     }
+
     public class HashingPasswordService : IHashingPasswordService
     {
         private readonly HashingConfiguration hashingConfiguration;
+        private static readonly HashAlgorithmName HashAlgorithm = HashAlgorithmName.SHA256;
+
         public HashingPasswordService(IOptions<HashingConfiguration> options)
         {
             this.hashingConfiguration = options.Value;
         }
+
         public string Hash(string text, int iterations)
         {
             Byte[] salt;
             RandomNumberGenerator.Create().GetBytes(salt = new Byte[hashingConfiguration.SaltSize]);
-            // Create hash
-            var pbkdf2 = new Rfc2898DeriveBytes(text, salt, iterations);
+            // Create hash using recommended constructor
+            var pbkdf2 = new Rfc2898DeriveBytes(text, salt, iterations, HashAlgorithm);
             var hash = pbkdf2.GetBytes(hashingConfiguration.HashSize);
             // Combine salt and hash
             var hashBytes = new Byte[hashingConfiguration.SaltSize + hashingConfiguration.HashSize];
@@ -33,7 +36,6 @@ namespace HardwareShop.Infrastructure.Services
             var base64Hash = Convert.ToBase64String(hashBytes);
             // Format hash with extra information
             return String.Format(hashingConfiguration.PrivateKey + "{0}${1}", iterations, base64Hash);
-
         }
 
         public string Hash(string text)
@@ -62,8 +64,8 @@ namespace HardwareShop.Infrastructure.Services
             // Get salt
             var salt = new Byte[hashingConfiguration.SaltSize];
             Array.Copy(hashBytes, 0, salt, 0, hashingConfiguration.SaltSize);
-            // Create hash with given salt
-            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations);
+            // Create hash with given salt using recommended constructor
+            var pbkdf2 = new Rfc2898DeriveBytes(password, salt, iterations, HashAlgorithm);
             Byte[] hash = pbkdf2.GetBytes(hashingConfiguration.HashSize);
             // Get result
             for (var i = 0; i < hashingConfiguration.HashSize; i++)
@@ -74,7 +76,6 @@ namespace HardwareShop.Infrastructure.Services
                 }
             }
             return true;
-
         }
     }
 }

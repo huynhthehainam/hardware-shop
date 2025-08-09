@@ -14,8 +14,9 @@ namespace HardwareShop.Infrastructure.Extensions
         public static IServiceCollection ConfigureInfrastructure(this IServiceCollection services,
             ConfigurationManager configuration)
         {
+            var connectionString = configuration.GetConnectionString("AppConn");
             services.AddDbContext<MainDatabaseContext>(options =>
-                  options.UseSqlServer(configuration.GetConnectionString("AppConn")));
+                  options.UseSqlServer(connectionString));
             services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IShopService, ShopService>();

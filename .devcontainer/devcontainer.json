@@ -1,0 +1,23 @@
+{
+	"name": "hardware-shop-dev",
+	"dockerComposeFile": [
+		"../docker-compose.yml",
+		"docker-compose.yml"
+	],
+	"service": "web-api",
+	"workspaceFolder": "/app",
+	"customizations": {
+		"settings": {
+			"terminal.integrated.shell.linux": "/bin/bash"
+		},
+		"extensions": [
+			"ms-dotnettools.csdevkit",
+			"ms-dotnettools.csharp",
+			"ms-azuretools.vscode-docker"
+		]
+	},
+	"forwardPorts": [
+		5068
+	],
+	"postCreateCommand": "dotnet restore"
+}

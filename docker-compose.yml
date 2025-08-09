@@ -15,16 +15,16 @@ services:
       - db
 
   db:
-    image: postgis/postgis
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      - POSTGRES_PASSWORD=Doyouloveme1029
-    volumes:
-      - ./mydata/db_volumne:/var/lib/postgresql/data
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Doyouloveme1029!
+      - MSSQL_PID=Express
     restart: unless-stopped
     networks:
       - api-shop
 
-  mismartapi:
+  web-api:
     build:
       context: .
       dockerfile: HardwareShop.WebApi/Dockerfile
