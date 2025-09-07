@@ -23,7 +23,29 @@ services:
     restart: unless-stopped
     networks:
       - api-shop
+  kafka:
+    image: bitnami/kafka:latest
+    networks:
+      - api-shop
+    ports:
+      - 9092:9092
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
 
+  zookeeper:
+    image: bitnami/zookeeper:latest
+    networks:
+      - api-shop
+    ports:
+      - 2181:2181
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
   web-api:
     build:
       context: .
@@ -31,7 +53,7 @@ services:
     restart: unless-stopped
     ports:
       - 5068:5000
-      # - 1886:1883
+    # - 1886:1883
     networks:
       - api-shop
     environment:
