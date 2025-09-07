@@ -1,0 +1,38 @@
+name: Deploy Web API
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Select environment to deploy'
+        required: true
+        type: choice
+        options:
+          - staging
+          - production
+      artifact-name:
+        description: 'Artifact to deploy'
+        required: true
+        default: 'webapi-artifact'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ github.event.inputs.artifact-name }}
+          path: ./publish
+
+      - name: Deploy to server
+        run: |
+          echo "Deploying ${{ github.event.inputs.artifact-name }} to ${{ github.event.inputs.environment }} server..."
+          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
+            scp -r ./publish user@staging-server:/var/www/myapp
+            ssh user@staging-server 'systemctl restart myapp.service'
+          else
+            scp -r ./publish user@production-server:/var/www/myapp
+            ssh user@production-server 'systemctl restart myapp.service'
+          fi
