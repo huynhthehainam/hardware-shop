@@ -27,8 +27,12 @@ jobs:
       - name: Publish
         run: dotnet publish --no-build --configuration Release --output ./publish
 
+      - name: Set artifact name
+        id: artifact_name
+        run: echo "ARTIFACT_NAME=webapi-artifact-$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: webapi-artifact
+          name: ${{ env.ARTIFACT_NAME }}
           path: ./publish

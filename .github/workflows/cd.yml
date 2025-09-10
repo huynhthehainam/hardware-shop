@@ -10,29 +10,24 @@ on:
         options:
           - staging
           - production
-      artifact-name:
-        description: 'Artifact to deploy'
-        required: true
-        default: 'webapi-artifact'
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     environment: ${{ github.event.inputs.environment }}
     steps:
-      - name: Download artifact
+      - name: Download latest artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ github.event.inputs.artifact-name }}
           path: ./publish
 
-      - name: Deploy to server
+      - name: Deploy to Windows server
+        env:
+          WIN_USER: ${{ github.event.inputs.environment == 'staging' && secrets.WIN_USER_STAGING || secrets.WIN_USER_PRODUCTION }}
+          WIN_PASS: ${{ github.event.inputs.environment == 'staging' && secrets.WIN_PASS_STAGING || secrets.WIN_PASS_PRODUCTION }}
         run: |
-          echo "Deploying ${{ github.event.inputs.artifact-name }} to ${{ github.event.inputs.environment }} server..."
-          if [ "${{ github.event.inputs.environment }}" == "staging" ]; then
-            scp -r ./publish user@staging-server:/var/www/myapp
-            ssh user@staging-server 'systemctl restart myapp.service'
-          else
-            scp -r ./publish user@production-server:/var/www/myapp
-            ssh user@production-server 'systemctl restart myapp.service'
-          fi
+          $artifactDir = Get-ChildItem -Directory ./publish | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          $session = New-PSSession -ComputerName "${{ github.event.inputs.environment }}-server" -Credential (New-Object PSCredential($env:WIN_USER, (ConvertTo-SecureString $env:WIN_PASS -AsPlainText -Force)))
+          Copy-Item -Path $artifactDir.FullName\* -Destination "C:\inetpub\wwwroot\myapp" -Recurse -ToSession $session
+          Invoke-Command -Session $session -ScriptBlock { Restart-Service -Name "myapp" }
+          Remove-PSSession $session
