@@ -7,14 +7,21 @@
 	"service": "web-api",
 	"workspaceFolder": "/app",
 	"customizations": {
-		"settings": {
-			"terminal.integrated.shell.linux": "/bin/bash"
+		"vscode": {
+			"settings": {
+				"terminal.integrated.shell.linux": "/bin/bash"
+			},
+			"extensions": [
+				"ms-dotnettools.csdevkit",
+				"ms-dotnettools.csharp",
+				"ms-azuretools.vscode-docker",
+				"eamodio.gitlens",
+				"editorconfig.editorconfig",
+				"formulahendry.dotnet-test-explorer",
+				"ms-vscode.powershell",
+				"visualstudioexptteam.vscodeintellicode"
+			]
 		},
-		"extensions": [
-			"ms-dotnettools.csdevkit",
-			"ms-dotnettools.csharp",
-			"ms-azuretools.vscode-docker"
-		]
 	},
 	"forwardPorts": [
 		5068
