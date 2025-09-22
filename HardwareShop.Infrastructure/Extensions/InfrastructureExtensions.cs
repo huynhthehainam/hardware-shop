@@ -36,6 +36,7 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
             services.AddScoped<ISeedingService, SeedingService>();
             services.AddScoped<ITestService, TestService>();
+            services.AddScoped<IChatService, ChatService>();
             return services;
         }
     }

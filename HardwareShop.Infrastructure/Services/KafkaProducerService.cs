@@ -8,7 +8,6 @@ namespace HardwareShop.Infrastructure.Services;
 public class KafkaProducerService : IKafkaProducerService, IDisposable
 {
     private readonly IProducer<Null, string> producer;
-    private readonly string? defaultTopic;
 
     public KafkaProducerService(IConfiguration configuration)
     {
