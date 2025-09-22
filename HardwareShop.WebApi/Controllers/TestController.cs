@@ -18,6 +18,16 @@ namespace HardwareShop.WebApi.Controllers
             this.chatService = chatService;
             this.testService = testService;
         }
+        [HttpPost("TestWriteBack")]
+        public async Task<IActionResult> TestWriteBack([FromBody] TestWriteBackCommand command)
+        {
+            await testService.TestWriteBackAsync();
+            responseResultBuilder.SetData(new
+            {
+                Message = "Write-back test completed"
+            });
+            return responseResultBuilder.Build();
+        }
         [HttpGet("TestEntity")]
         public async Task<IActionResult> TestEntity()
         {

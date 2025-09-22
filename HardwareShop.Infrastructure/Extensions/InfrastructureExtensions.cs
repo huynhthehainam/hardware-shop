@@ -33,6 +33,7 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ICurrentUserService, WebCurrentUserService>();
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
+            services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
             services.AddScoped<ISeedingService, SeedingService>();
             services.AddScoped<ITestService, TestService>();
             return services;
