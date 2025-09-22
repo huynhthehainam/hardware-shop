@@ -30,7 +30,7 @@
             "cwd": "${workspaceFolder}/HardwareShop.WebApi",
             "stopAtEntry": false,
             "env": {
-                "ASPNETCORE_ENVIRONMENT": "Docker",
+                "ASPNETCORE_ENVIRONMENT": "DevContainer",
                 "ASPNETCORE_URLS": "http://+:5000"
             },
             "sourceFileMap": {
