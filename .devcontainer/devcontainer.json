@@ -21,10 +21,10 @@
 				"ms-vscode.powershell",
 				"visualstudioexptteam.vscodeintellicode"
 			]
-		},
+		}
 	},
 	"forwardPorts": [
-		5068
+		5000
 	],
 	"postCreateCommand": "dotnet restore"
 }
