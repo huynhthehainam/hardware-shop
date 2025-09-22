@@ -1,0 +1,26 @@
+{
+    "name": "kafka-consumer-dev",
+    "dockerComposeFile": [
+        "../../docker-compose.yml",
+        "docker-compose.yml"
+    ],
+    "service": "kafka-consumer",
+    "workspaceFolder": "/consumer",
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash"
+            },
+            "extensions": [
+                "ms-dotnettools.csdevkit",
+                "ms-dotnettools.csharp",
+                "ms-azuretools.vscode-docker",
+                "eamodio.gitlens",
+                "editorconfig.editorconfig",
+                "formulahendry.dotnet-test-explorer",
+                "ms-vscode.powershell"
+            ]
+        }
+    },
+    "postCreateCommand": "dotnet restore"
+}
