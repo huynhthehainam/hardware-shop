@@ -80,6 +80,19 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
             }
+        },
+        {
+            "name": ".NET Core Kafka Consumer (Dev container)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildKafkaConsumer",
+            "program": "${workspaceFolder}/HardwareShop.KafkaConsumer/bin/Debug/net8.0/HardwareShop.KafkaConsumer.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/HardwareShop.KafkaConsumer",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "DevContainer"
+            }
         }
     ]
 }
