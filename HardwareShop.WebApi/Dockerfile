@@ -9,4 +9,4 @@ WORKDIR /app
 COPY --from=build-env /app/publish .
 COPY --from=build-env /src/wait-for-it.sh .
 RUN chmod +x ./*.sh
-ENTRYPOINT ["./wait-for-it.sh", "db:1433" ,"--","dotnet", "HardwareShop.WebApi.dll"]
+ENTRYPOINT ["dotnet", "HardwareShop.WebApi.dll"]

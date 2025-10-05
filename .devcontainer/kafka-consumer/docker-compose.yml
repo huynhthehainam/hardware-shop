@@ -1,0 +1,11 @@
+version: "3.8"
+services:
+  kafka-consumer:
+    build:
+      context: .
+      dockerfile: HardwareShop.KafkaConsumer/Dockerfile.dev
+    depends_on:
+      - kafka
+    networks:
+      - api-shop
+
