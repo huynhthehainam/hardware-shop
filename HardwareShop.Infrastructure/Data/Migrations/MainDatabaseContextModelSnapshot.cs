@@ -591,6 +591,25 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.ToTable("ShopSettings");
                 });
 
+            modelBuilder.Entity("HardwareShop.Domain.Models.Ticket", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ticket");
+                });
+
             modelBuilder.Entity("HardwareShop.Domain.Models.Unit", b =>
                 {
                     b.Property<int>("Id")
