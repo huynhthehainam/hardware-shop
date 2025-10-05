@@ -30,8 +30,6 @@
 	"postCreateCommand": "dotnet restore",
 	// ✅ Mount host auth files to container for seamless Copilot login
 	"mounts": [
-		"source=${localEnv:HOME}/.gitconfig,target=/root/.gitconfig,type=bind,consistency=cached",
-		"source=${localEnv:HOME}/.ssh,target=/root/.ssh,type=bind,consistency=cached",
 		"source=${localEnv:HOME}/.config/github-copilot,target=/root/.config/github-copilot,type=bind,consistency=cached"
 	]
 }

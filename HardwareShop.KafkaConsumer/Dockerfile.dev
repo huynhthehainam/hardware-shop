@@ -1,4 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS dev
 WORKDIR /consumer
 COPY . ./
+RUN dotnet tool install --global dotnet-ef
 CMD [ "sleep", "infinity" ]

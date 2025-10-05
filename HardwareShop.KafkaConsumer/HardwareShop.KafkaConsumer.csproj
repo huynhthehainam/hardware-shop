@@ -11,10 +11,12 @@
     <PackageReference Include="Confluent.Kafka" Version="2.11.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Redis" Version="2.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HardwareShop.Application\HardwareShop.Application.csproj" />
     <ProjectReference Include="..\HardwareShop.Infrastructure\HardwareShop.Infrastructure.csproj" />
+    <ProjectReference Include="..\HardwareShop.Domain\HardwareShop.Domain.csproj" />
   </ItemGroup>
 </Project>
