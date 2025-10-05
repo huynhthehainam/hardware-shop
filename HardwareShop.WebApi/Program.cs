@@ -216,7 +216,6 @@ public static class Program
 
         app.MapHub<ChatHub>(ChatHubConstants.Endpoint);
 
-        app.SeedData();
         app.Run();
     }
 }

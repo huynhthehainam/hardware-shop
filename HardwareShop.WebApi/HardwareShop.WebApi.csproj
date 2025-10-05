@@ -29,7 +29,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.15"></PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="SampleImages/**" CopyToOutputDirectory="PreserveNewest" />
+
     <None Include="HtmlTemplates/**" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
