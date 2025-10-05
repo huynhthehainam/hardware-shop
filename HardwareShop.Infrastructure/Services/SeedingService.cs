@@ -29,15 +29,6 @@ namespace HardwareShop.Infrastructure.Services
             const string user3AssetFile = "UserAsset3.png";
             const string countryAssetFile = "CountryAsset.png";
             const string countryAsset2File = "CountryAsset2.png";
-
-
-
-
-
-            if (!isDevelopment)
-            {
-                db.Database.Migrate();
-            }
             if (!db.Users.Any())
             {
                 string productAssetPath = System.IO.Path.Join(assetFolder, productAssetFile);

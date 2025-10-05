@@ -25,5 +25,29 @@
             ],
             "problemMatcher": "$msCompile"
         },
+        {
+            "label": "buildDatabaseMigration",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/HardwareShop.DatabaseMigration/HardwareShop.DatabaseMigration.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "buildKafkaConsumer",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/HardwareShop.KafkaConsumer/HardwareShop.KafkaConsumer.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        }
     ]
 }
