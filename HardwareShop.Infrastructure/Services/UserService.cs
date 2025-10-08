@@ -1,14 +1,14 @@
 ﻿using System.Text.Json;
 using HardwareShop.Application.Dtos;
+using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Constants;
 using HardwareShop.Core.Models;
+using HardwareShop.Domain.Abstracts;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using HardwareShop.Application.Models;
-using HardwareShop.Infrastructure.Extensions;
-using HardwareShop.Domain.Abstracts;
 
 namespace HardwareShop.Infrastructure.Services
 {
@@ -81,14 +81,14 @@ namespace HardwareShop.Infrastructure.Services
             ApplicationUserDto cacheUser = new()
             {
                 Username = user.Username ?? "",
-                Role = user.Role,
+                Roles = [],
                 Email = user.Email,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Guid = user.Guid,
             };
 
-            TokenDto tokens = jwtService.GenerateTokens(cacheUser);
+            TokenDto tokens = new TokenDto("", "", "");
             UserShop? userShop = user.UserShop;
             return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto
             {

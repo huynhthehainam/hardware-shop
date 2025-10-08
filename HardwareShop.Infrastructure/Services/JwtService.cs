@@ -47,33 +47,7 @@ namespace HardwareShop.Infrastructure.Services
             }
             return ApplicationUserDtoHelper.CreateFromClaims(jwtToken.Claims);
         }
-        public TokenDto GenerateTokens(ApplicationUserDto cacheUser)
-        {
-            var sessionId = RandomStringHelper.RandomString(10);
 
-            var claims = new Claim[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, cacheUser.Guid.ToString()),
-                new Claim(JwtServiceConstants.SubKey, cacheUser.Guid.ToString()),
-                new Claim(ClaimTypes.Name, cacheUser.Username),
-                new Claim(ClaimTypes.Role, cacheUser.Role.ToString()),
-                new Claim(ClaimTypes.GivenName, cacheUser.FirstName),
-                new Claim(ClaimTypes.Surname, cacheUser.LastName),
-                new Claim(ClaimTypes.Email, cacheUser.Email ?? ""),
-            };
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfiguration.SecretKey));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-            var jwtToken = new JwtSecurityToken(sessionId.ToString(), null, claims, null, DateTime.UtcNow.AddMinutes(jwtConfiguration.ExpiredDuration), creds);
-            var handler = new JwtSecurityTokenHandler();
-            var accessToken = handler.WriteToken(jwtToken);
-            var jwtRefreshToken
-                = new JwtSecurityToken(sessionId.ToString(), null, claims, null, DateTime.UtcNow.AddMinutes(jwtConfiguration.ExpiredDuration + JwtServiceConstants.RefreshTokenExtendedDuration), creds);
-
-            var refreshToken = handler.WriteToken(jwtRefreshToken);
-
-            return new TokenDto(accessToken, refreshToken, sessionId);
-
-        }
 
 
     }

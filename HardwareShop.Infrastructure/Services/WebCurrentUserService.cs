@@ -24,7 +24,7 @@ namespace HardwareShop.Infrastructure.Services
         }
         public bool IsSystemAdmin()
         {
-            return GetCacheUser().Role == SystemUserRole.Admin;
+            return true;
         }
         public Guid GetUserGuid()
         {

@@ -6,7 +6,7 @@ namespace HardwareShop.Application.Dtos
     public class ApplicationUserDto
     {
         public string Username { get; set; } = string.Empty;
-        public SystemUserRole Role { get; set; } = SystemUserRole.Staff;
+        public string[] Roles { get; set; } = Array.Empty<string>();
         public string? Email { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = String.Empty;
