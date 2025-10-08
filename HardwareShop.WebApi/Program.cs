@@ -114,63 +114,49 @@ public static class Program
         });
 
 
-        var jwtConfiguration = builder.Configuration.GetSection("JwtConfiguration");
-        builder.Services.Configure<AuthConfiguration>(jwtConfiguration);
-        var appSettings = jwtConfiguration.Get<JwtConfiguration>();
-        var key = Encoding.ASCII.GetBytes(appSettings?.SecretKey ?? "");
-        // builder.Services.AddAuthorization(options =>
-        // {
-        //     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-        //     options.AddPolicy("read:messages", policy =>
-        //        {
-        //            policy.RequireAuthenticatedUser();
-        //            policy.Requirements.Add(new HasScopeRequirement());
-        //        });
-        // });
-        // builder.Services.AddSingleton<IAuthorizationHandler, HasScopeHandler>();
+        // Keycloak OpenID Connect configuration
+        var keycloakInternalUrl = builder.Configuration["Keycloak:InternalUrl"] ?? ""; // internal
+        var keycloakIssuerUrl = builder.Configuration["Keycloak:IssuerUrl"] ?? ""; // external
+        var keycloakAudience = builder.Configuration["Keycloak:Audience"] ?? "";
         builder.Services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
+        .AddJwtBearer(options =>
+        {
+            options.Authority = keycloakInternalUrl;
+            options.MetadataAddress = $"{keycloakInternalUrl}/.well-known/openid-configuration";
+            options.Audience = keycloakAudience;
+            options.RequireHttpsMetadata = false;
+            options.TokenValidationParameters = new TokenValidationParameters
             {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(x =>
+                ValidateIssuer = true,
+                ValidIssuer = keycloakIssuerUrl,
+                ValidateAudience = true,
+                ValidAudience = keycloakAudience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+            options.Events = new JwtBearerEvents
             {
-                x.Events = new JwtBearerEvents
+                OnMessageReceived = context =>
                 {
-                    OnMessageReceived = (context) =>
+                    var token = context.HttpContext.Request.Query["access_token"];
+                    var path = context.HttpContext.Request.Path;
+                    if (!string.IsNullOrEmpty(token) && path.StartsWithSegments(ChatHubConstants.Endpoint))
                     {
-                        var token = context.HttpContext.Request.Query["access_token"];
-                        var path = context.HttpContext.Request.Path;
-                        if (!string.IsNullOrEmpty(token) && path.StartsWithSegments(ChatHubConstants.Endpoint))
-                        {
-                            context.Request.Headers["Authorization"] =
-                                $"{JwtBearerDefaults.AuthenticationScheme} {token}";
-                        }
-
-                        return Task.CompletedTask;
+                        context.Request.Headers["Authorization"] = $"Bearer {token}";
                     }
-                };
-
-                x.RequireHttpsMetadata = false;
-                x.SaveToken = true;
-                x.TokenValidationParameters = new TokenValidationParameters
+                    return Task.CompletedTask;
+                },
+                OnAuthenticationFailed = ctx =>
                 {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero,
-                    ValidateLifetime = true,
-                    LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken,
-                        TokenValidationParameters validationParameters) =>
-                    {
-                        return notBefore.HasValue
-                            ? notBefore.Value <= DateTime.UtcNow
-                            : false ||
-                              !expires.HasValue || expires.Value >= DateTime.UtcNow;
-                    }
-                };
-            });
+                    Console.WriteLine($"JWT error: {ctx.Exception.Message}");
+                    return Task.CompletedTask;
+                }
+            };
+        });
 
 
         #region Configuration
