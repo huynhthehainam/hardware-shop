@@ -60,11 +60,11 @@ namespace HardwareShop.Infrastructure.Extensions
             return new ApplicationUserDto
             {
                 Username = claims.FirstOrDefault(e => e.Type == "preferred_username")?.Value ?? "",
-                Email = claims.FirstOrDefault(e => e.Type == "email")?.Value ?? "",
-                FirstName = claims.FirstOrDefault(e => e.Type == "given_name")?.Value ?? "",
-                LastName = claims.FirstOrDefault(e => e.Type == "family_name")?.Value ?? "",
+                Email = claims.FirstOrDefault(e => e.Type == ClaimTypes.Email)?.Value ?? "",
+                FirstName = claims.FirstOrDefault(e => e.Type == ClaimTypes.GivenName)?.Value ?? "",
+                LastName = claims.FirstOrDefault(e => e.Type == ClaimTypes.Surname)?.Value ?? "",
                 Roles = roles.Distinct().ToArray(),
-                Guid = Guid.TryParse(claims.FirstOrDefault(e => e.Type == "sub")?.Value ?? "", out var id)
+                Guid = Guid.TryParse(claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier)?.Value ?? "", out var id)
                                 ? id
                                 : Guid.Empty
             };
