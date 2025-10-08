@@ -11,7 +11,10 @@
             "settings": {
                 "terminal.integrated.shell.linux": "/bin/bash",
                 // ✅ Enable Copilot explicitly
-                "github.copilot.enable": true
+                "github.copilot.enable": {
+                    "gitHubCopilot": true,
+                    "gitHubCopilotChat": true
+                }
             },
             "extensions": [
                 "ms-dotnettools.csdevkit",

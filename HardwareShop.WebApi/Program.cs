@@ -1,18 +1,18 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
 using HardwareShop.Application.Services;
+using HardwareShop.Infrastructure.Extensions;
+using HardwareShop.Infrastructure.Services;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
-using HardwareShop.Infrastructure.Services;
+using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using HardwareShop.Infrastructure.Extensions;
-using HardwareShop.WebApi.Services;
-using Microsoft.AspNetCore.Authorization;
-using System.Globalization;
 
 namespace HardwareShop.WebApi;
 // public class HasScopeRequirement : IAuthorizationRequirement
@@ -117,7 +117,7 @@ public static class Program
         var jwtConfiguration = builder.Configuration.GetSection("JwtConfiguration");
         builder.Services.Configure<AuthConfiguration>(jwtConfiguration);
         var appSettings = jwtConfiguration.Get<JwtConfiguration>();
-        var key = Encoding.ASCII.GetBytes(appSettings.SecretKey ?? "");
+        var key = Encoding.ASCII.GetBytes(appSettings?.SecretKey ?? "");
         // builder.Services.AddAuthorization(options =>
         // {
         //     options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
