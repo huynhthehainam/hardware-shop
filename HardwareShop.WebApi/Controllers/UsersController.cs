@@ -50,13 +50,6 @@ namespace HardwareShop.WebApi.Controllers
         }
 
 
-        [HttpPost("Me/UpdatePassword")]
-        public async Task<IActionResult> UpdateCurrentUserPassword([FromBody] UpdatePasswordCommand command)
-        {
-            var response = await userService.UpdateCurrentUserPasswordAsync(command.OldPassword ?? "", command.NewPassword ?? "");
-            responseResultBuilder.SetApplicationResponse(response);
-            return responseResultBuilder.Build();
-        }
         [HttpGet("Me/Notifications")]
         public async Task<IActionResult> GetCurrentUserNotifications([FromQuery] PagingModel pagingModel)
         {

@@ -216,13 +216,9 @@ namespace HardwareShop.Infrastructure.Services
 
                 User user = new()
                 {
-                    Email = "huynhthehainam@gmail.com",
-                    HashedPassword = hashingPasswordService.Hash("123"),
+                    Id = Guid.Parse("789ad4f0-bc3e-4258-b755-723f346b87ff"),
                     Phone = "+84967044037",
-                    FirstName = "Nam",
-                    LastName = "Huỳnh",
-                    Role = SystemUserRole.Admin,
-                    Username = "admin",
+
                     PhoneCountryId = country.Id,
                     SecretValue = "123",
                     Assets = new UserAsset[]
@@ -234,49 +230,8 @@ namespace HardwareShop.Infrastructure.Services
                             }
                     }
                 };
-                User user1 = new()
-                {
-                    Email = "huynhthehainam.mismart@gmail.com",
-                    HashedPassword = hashingPasswordService.Hash("123"),
-                    Phone = "+84967044037",
-                    FirstName = "Nam",
-                    LastName = "Huỳnh",
-                    Role = SystemUserRole.Admin,
-                    Username = "admin1",
-                    SecretValue = "456",
-                    PhoneCountryId = country.Id,
-                    Assets = new UserAsset[]
-                    {
-                            new UserAsset
-                            {
-                                AssetType = UserAssetConstants.AvatarAssetType,
-                            Asset = user2Asset,
-                            }
-                    }
-                };
-                User user2 = new()
-                {
-                    Email = "huynhthehainam.mismart@gmail.com",
-                    HashedPassword = hashingPasswordService.Hash("123"),
-                    Phone = "+84967044037",
-                    FirstName = "Nam",
-                    LastName = "Huỳnh",
-                    Role = SystemUserRole.Admin,
-                    SecretValue = "789",
-                    Username = "admin2",
-                    PhoneCountryId = country.Id,
-                    Assets = new UserAsset[]
-                   {
-                            new UserAsset
-                            {
-                                AssetType = UserAssetConstants.AvatarAssetType,
-                            Asset = user3Asset,
-                            }
-                   }
-                };
+
                 _ = db.Users.Add(user);
-                _ = db.Users.Add(user1);
-                _ = db.Users.Add(user2);
                 _ = db.SaveChanges();
 
 
@@ -318,18 +273,7 @@ namespace HardwareShop.Infrastructure.Services
                                 Role  = UserShopRole.Admin,
 
                             },
-                            new UserShop
-                            {
-                                UserId =  user1.Id,
-                                Role  = UserShopRole.Staff,
 
-                            },
-                               new UserShop
-                            {
-                                UserId =  user2.Id,
-                                Role  = UserShopRole.Staff,
-
-                            }
                     },
                     Customers = new Customer[] {
                                 new Customer{

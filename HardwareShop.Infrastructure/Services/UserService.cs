@@ -38,7 +38,7 @@ namespace HardwareShop.Infrastructure.Services
 
         private async Task<AssetEntityBase?> GetUserAvatarByUserId(Guid userId)
         {
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == userId);
+            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Id == userId);
             if (user == null)
             {
                 return null;
@@ -63,60 +63,7 @@ namespace HardwareShop.Infrastructure.Services
 
 
 
-        public async Task<LoginDto?> LoginAsync(string username, string password)
-        {
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Username == username);
-            if (user != null)
-            {
-                var aa = hashingPasswordService.Verify(password, user.HashedPassword ?? "");
-            }
-            return user == null
-                ? null
-                : !hashingPasswordService.Verify(password, user.HashedPassword ?? "") ? null : GenerateLoginDtoFromUser(user);
-        }
 
-        private LoginDto GenerateLoginDtoFromUser(User user)
-        {
-
-            ApplicationUserDto cacheUser = new()
-            {
-                Username = user.Username ?? "",
-                Roles = [],
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Guid = user.Guid,
-            };
-
-            TokenDto tokens = new TokenDto("", "", "");
-            UserShop? userShop = user.UserShop;
-            return new LoginDto(tokens.AccessToken, new LoginUserDto(user.Role, new LoginUserDataDto
-            {
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Guid = user.Guid,
-                Settings = JsonDocument.Parse(user.InterfaceSettings),
-            }, (userShop == null || userShop.Shop == null) ? null : new LoginShopDto(userShop.Shop?.Id ?? 0,
-                 userShop.Shop?.Name ?? "", userShop.Role, userShop.Shop?.CashUnit?.Name ?? "", userShop.Shop?.CashUnitId ?? 0, userShop.Shop?.Phones?.Select(e => new ShopPhoneDto()
-                 {
-                     Id = e.Id,
-                     OwnerName = e.OwnerName,
-                     Phone = e.Phone,
-                     PhonePrefix = e.Country?.PhonePrefix ?? ""
-                 }) ?? Array.Empty<ShopPhoneDto>(), userShop.Shop?.Emails, userShop.Shop?.Address
-                , userShop.Shop?.ShopSetting?.IsAllowedToShowInvoiceDownloadOptions ?? false)), tokens.SessionId);
-        }
-        public async Task<LoginDto?> LoginByTokenAsync(string token)
-        {
-            ApplicationUserDto? cacheUser = jwtService.GetUserFromToken(token);
-            if (cacheUser == null)
-            {
-                return null;
-            }
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == cacheUser.Guid);
-            return user == null ? null : GenerateLoginDtoFromUser(user);
-        }
 
         public async Task<ApplicationResponse<PageData<UserDto>>> GetUserPageDataOfShopAsync(PagingModel pagingModel, string? search)
         {
@@ -127,20 +74,11 @@ namespace HardwareShop.Infrastructure.Services
             }
             var userPageData = db.Set<User>().Where(e => e.UserShop != null && e.UserShop.ShopId == shop.Id).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<User>(search, e => new
             {
-                e.Email,
-                e.Username,
-                e.FirstName,
-                e.LastName,
                 e.Phone,
             })).GetPageData(pagingModel);
             return new(userPageData.ConvertToOtherPageData(e => new UserDto
             {
-                Id = e.Id,
-                Email = e.Email,
-                FirstName = e.FirstName,
-                LastName = e.LastName,
                 Phone = e.Phone,
-                Username = e.Username,
             }));
         }
 
@@ -148,20 +86,13 @@ namespace HardwareShop.Infrastructure.Services
         {
             var userPageData = await db.Set<User>().Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<User>(search, e => new
             {
-                e.Email,
-                e.FirstName,
-                e.LastName,
-                e.Username,
+
                 e.Phone
             })).GetPageDataAsync(pagingModel);
             return userPageData.ConvertToOtherPageData(e => new UserDto
             {
-                Id = e.Id,
-                Email = e.Email,
-                FirstName = e.FirstName,
-                LastName = e.LastName,
+
                 Phone = e.Phone,
-                Username = e.Username,
             });
         }
 
@@ -204,7 +135,7 @@ namespace HardwareShop.Infrastructure.Services
         private async Task<User?> GetCurrentUserAsync()
         {
             Guid currentUserId = currentUserService.GetUserGuid();
-            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Guid == currentUserId);
+            User? user = await db.Set<User>().FirstOrDefaultAsync(e => e.Id == currentUserId);
 
             return user;
         }
@@ -270,26 +201,5 @@ namespace HardwareShop.Infrastructure.Services
             db.SaveChanges();
             return new CreatedNotificationDto { Id = notification.Id };
         }
-
-        public async Task<ApplicationResponse> UpdateCurrentUserPasswordAsync(string oldPassword, string newPassword)
-        {
-            User? user = await GetCurrentUserAsync();
-            if (user == null)
-            {
-                return new(ApplicationError.CreateNotFoundError("User"));
-            }
-
-            if (!hashingPasswordService.Verify(oldPassword, user.HashedPassword))
-            {
-                return new(ApplicationError.CreateInvalidError("OldPassword"));
-
-            }
-
-            user.HashedPassword = hashingPasswordService.Hash(newPassword);
-            db.Update(user); db.SaveChanges();
-            return new();
-        }
-
-
     }
 }

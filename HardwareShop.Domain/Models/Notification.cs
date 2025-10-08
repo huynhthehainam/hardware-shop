@@ -28,7 +28,7 @@ namespace HardwareShop.Domain.Models
         public string? Translation { get; set; }
         public String? TranslationParams { get; set; }
         public bool IsDismissed { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
     }

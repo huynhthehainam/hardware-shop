@@ -1,5 +1,5 @@
-﻿using HardwareShop.Domain.Abstracts;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using HardwareShop.Domain.Abstracts;
 using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
@@ -21,7 +21,7 @@ namespace HardwareShop.Domain.Models
         }
 
         public UserShopRole Role { get; set; } = UserShopRole.Staff;
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         private User? user;
         public User? User
         {

@@ -17,7 +17,7 @@ namespace HardwareShop.Domain.Models
         {
         }
         public int Id { get; set; }
-        public int UserId { get; set; }
+        public Guid UserId { get; set; }
         private User? user;
         public User? User
         {

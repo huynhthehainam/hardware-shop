@@ -10,18 +10,7 @@ namespace HardwareShop.Domain.Models
 
     public sealed class User : EntityBase, ISoftDeletable
     {
-        public int Id { get; set; }
-        public string FirstName { get; set; } = string.Empty;
-        public string LastName { get; set; } = string.Empty;
-        public string DisplayName
-        {
-            get
-            {
-                return $"{FirstName} {LastName}";
-            }
-        }
-        public string Username { get; set; } = string.Empty;
-        public string? Email { get; set; }
+        public Guid Id { get; set; } = Guid.NewGuid();
         public string? Phone { get; set; }
         public int? PhoneCountryId { get; set; }
         public string? SecretValue { get; set; }
@@ -31,8 +20,6 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref phoneCountry);
             set => phoneCountry = value;
         }
-        public string HashedPassword { get; set; } = string.Empty;
-        public SystemUserRole Role { get; set; } = SystemUserRole.Staff;
         public User()
         {
 
@@ -63,14 +50,9 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref notifications);
             set => notifications = value;
         }
-
-
-
-
         public long? GetAvatarAssetId()
         {
             return Assets?.FirstOrDefault(e => e.AssetType == UserAssetConstants.AvatarAssetType)?.AssetId;
         }
-        public Guid Guid { get; set; } = Guid.NewGuid();
     }
 }

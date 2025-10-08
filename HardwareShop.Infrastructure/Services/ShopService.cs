@@ -32,37 +32,7 @@ namespace HardwareShop.Infrastructure.Services
             {
                 return new(ApplicationError.CreateNotPermittedError());
             }
-            var shop = await db.Set<Shop>().FirstOrDefaultAsync(e => e.Id == id);
-            if (shop == null)
-            {
-                return new(ApplicationError.CreateNotFoundError("Shop"));
-            }
-            var createIfNotExistResponse = db.CreateIfNotExists(new User
-            {
-                Username = username,
-                HashedPassword = hashingPasswordService.Hash(password),
-                Email = email,
-            }, e => new
-            {
-                e.Username
-            });
-            if (createIfNotExistResponse.IsExist)
-            {
-                return new(ApplicationError.CreateExistedError("User"));
-
-            }
-
-            UserShop userShop = new UserShop
-            {
-
-                UserId = createIfNotExistResponse.Entity.Id,
-                ShopId = shop.Id,
-                Role = UserShopRole.Admin
-            };
-            db.Add(userShop);
-            db.SaveChanges();
-
-            return new(new CreatedUserDto { Id = createIfNotExistResponse.Entity.Id });
+            return new(ApplicationError.CreateNotPermittedError());
 
         }
 
@@ -120,7 +90,7 @@ namespace HardwareShop.Infrastructure.Services
             var acceptedRoles = new List<UserShopRole> { UserShopRole.Staff, UserShopRole.Admin };
 
 
-            var userShop = await db.Set<UserShop>().Include(e => e.Shop).FirstOrDefaultAsync(e => e.User!.Guid == userGuid && acceptedRoles.Contains(e.Role));
+            var userShop = await db.Set<UserShop>().Include(e => e.Shop).FirstOrDefaultAsync(e => e.User!.Id == userGuid && acceptedRoles.Contains(e.Role));
 
             return userShop;
         }
@@ -223,7 +193,7 @@ namespace HardwareShop.Infrastructure.Services
 
         public async Task<ApplicationResponse> UpdateShopSettingAsync(int shopId, bool? isAllowedToShowInvoiceDownloadOptions)
         {
-            var shopSetting = await db.Set<ShopSetting>().FirstOrDefaultAsync(e => e.ShopId == shopId && e.Shop != null && e.Shop.UserShops != null && e.Shop.UserShops.Any(e => e.User!.Guid == currentUserService.GetUserGuid() && e.Role == UserShopRole.Admin));
+            var shopSetting = await db.Set<ShopSetting>().FirstOrDefaultAsync(e => e.ShopId == shopId && e.Shop != null && e.Shop.UserShops != null && e.Shop.UserShops.Any(e => e.User!.Id == currentUserService.GetUserGuid() && e.Role == UserShopRole.Admin));
             if (shopSetting == null)
             {
                 return new(ApplicationError.CreateNotFoundError("Shop"));
