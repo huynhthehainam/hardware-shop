@@ -48,6 +48,16 @@
                 "/consoleloggerparameters:NoSummary"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "buildDatabaseMigration",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                "${workspaceFolder}/HardwareShop.DatabaseMigration/HardwareShop.DatabaseMigration.csproj"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }

@@ -93,6 +93,19 @@
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "DevContainer"
             }
+        },
+        {
+            "name": ".NET Core Database Migration (Dev container)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "buildDatabaseMigration",
+            "program": "${workspaceFolder}/HardwareShop.DatabaseMigration/bin/Debug/net8.0/HardwareShop.DatabaseMigration.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/HardwareShop.DatabaseMigration",
+            "stopAtEntry": false,
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "DevContainer"
+            }
         }
     ]
 }

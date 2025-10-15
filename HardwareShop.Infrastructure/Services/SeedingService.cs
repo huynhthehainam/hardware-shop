@@ -1,24 +1,84 @@
 
 
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Threading.Tasks;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
+
 
 namespace HardwareShop.Infrastructure.Services
 {
+    public class KeycloakUser
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public bool Enabled { get; set; }
+        public bool EmailVerified { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+    }
     public class SeedingService : ISeedingService
     {
 
         private readonly MainDatabaseContext db;
         private readonly IHashingPasswordService hashingPasswordService;
-        public SeedingService(MainDatabaseContext db, IHashingPasswordService hashingPasswordService)
+        private readonly IConfiguration configuration;
+        private readonly HttpClient httpClient;
+        public SeedingService(MainDatabaseContext db, IHashingPasswordService hashingPasswordService, IConfiguration configuration,
+            IHttpClientFactory httpClientFactory)
         {
             this.db = db;
             this.hashingPasswordService = hashingPasswordService;
+            this.configuration = configuration;
+            this.httpClient = httpClientFactory.CreateClient();
         }
-        public void SeedData(bool isDevelopment)
+        private async Task<List<KeycloakUser>> GetKeycloakUsersAsync()
+        {
+            var keycloakUrl = configuration["Keycloak:Url"] ?? "http://localhost:8081";
+            var realm = configuration["Keycloak:Realm"] ?? "master";
+            var adminUser = configuration["Keycloak:AdminUser"] ?? "admin";
+            var adminPassword = configuration["Keycloak:AdminPassword"] ?? "admin";
+
+            // Step 1: Get access token
+            var tokenResponse = await httpClient.PostAsync(
+                $"{keycloakUrl}/realms/master/protocol/openid-connect/token",
+                new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    ["username"] = adminUser,
+                    ["password"] = adminPassword,
+                    ["grant_type"] = "password",
+                    ["client_id"] = "admin-cli"
+                })
+            );
+
+            tokenResponse.EnsureSuccessStatusCode();
+
+            var tokenJson = await tokenResponse.Content.ReadFromJsonAsync<JsonElement>();
+            var accessToken = tokenJson.GetProperty("access_token").GetString();
+
+            // Step 2: Fetch users
+            httpClient.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+            var usersResponse = await httpClient.GetAsync(
+                $"{keycloakUrl}/admin/realms/{realm}/users?max=100"
+            );
+
+            usersResponse.EnsureSuccessStatusCode();
+
+            var users = await usersResponse.Content.ReadFromJsonAsync<List<KeycloakUser>>();
+
+            return users ?? new List<KeycloakUser>();
+        }
+        public async Task SeedDataAsync(bool isDevelopment)
         {
 
             const string assetFolder = "SampleImages";
@@ -31,6 +91,7 @@ namespace HardwareShop.Infrastructure.Services
             const string countryAsset2File = "CountryAsset2.png";
             if (!db.Users.Any())
             {
+                var keycloakUsers = await GetKeycloakUsersAsync();
                 string productAssetPath = System.IO.Path.Join(assetFolder, productAssetFile);
                 byte[] productAssetBytes = File.ReadAllBytes(productAssetPath);
 

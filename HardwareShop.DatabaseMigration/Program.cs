@@ -1,3 +1,5 @@
+using System.Net.Http.Json;
+using System.Threading.Tasks;
 using HardwareShop.Application.Services;
 using HardwareShop.Infrastructure.Data;
 using HardwareShop.Infrastructure.Services; // Add this using
@@ -10,7 +12,7 @@ namespace HardwareShop.DatabaseMigration
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production";
 
@@ -29,6 +31,7 @@ namespace HardwareShop.DatabaseMigration
                     services.AddScoped<ISeedingService, SeedingService>(); // Register SeedingService
                     services.Configure<HashingConfiguration>(context.Configuration.GetSection("HashingConfiguration")); // If needed for seeding
                     services.AddSingleton<IHashingPasswordService, HashingPasswordService>(); // If needed for seeding
+                    services.AddHttpClient();
                 })
                 .Build();
 
@@ -41,7 +44,7 @@ namespace HardwareShop.DatabaseMigration
                 // Run seeding
                 var seeder = scope.ServiceProvider.GetRequiredService<ISeedingService>();
                 bool isDevelopment = environment == "Development" || environment == "DevContainer";
-                seeder.SeedData(isDevelopment);
+                await seeder.SeedDataAsync(isDevelopment);
                 Console.WriteLine("Database seeding completed.");
             }
         }
