@@ -43,7 +43,7 @@ public static class Program
         // Add services to the container.
 
         var mainAllowSpecificOrigins = "mainAllowSpecificOrigins";
-        var customCorsUrls = new string[] { "http://localhost:3000", "https://cuahangsatthep.shop" };
+        var customCorsUrls = new string[] { "http://localhost:3000", "http://localhost:4200", "https://cuahangsatthep.shop" };
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(name: mainAllowSpecificOrigins, builder =>
@@ -117,7 +117,6 @@ public static class Program
         // Keycloak OpenID Connect configuration
         var keycloakInternalUrl = builder.Configuration["Keycloak:InternalUrl"] ?? ""; // internal
         var keycloakIssuerUrl = builder.Configuration["Keycloak:IssuerUrl"] ?? ""; // external
-        var keycloakAudience = builder.Configuration["Keycloak:Audience"] ?? "";
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -127,14 +126,11 @@ public static class Program
         {
             options.Authority = keycloakInternalUrl;
             options.MetadataAddress = $"{keycloakInternalUrl}/.well-known/openid-configuration";
-            options.Audience = keycloakAudience;
             options.RequireHttpsMetadata = false;
             options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidIssuer = keycloakIssuerUrl,
-                ValidateAudience = true,
-                ValidAudience = keycloakAudience,
                 ValidateLifetime = true,
                 ClockSkew = TimeSpan.Zero
             };
