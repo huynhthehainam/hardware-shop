@@ -132,6 +132,7 @@ public static class Program
                 ValidateIssuer = true,
                 ValidIssuer = keycloakIssuerUrl,
                 ValidateLifetime = true,
+                ValidateAudience = false,
                 ClockSkew = TimeSpan.Zero
             };
             options.Events = new JwtBearerEvents
