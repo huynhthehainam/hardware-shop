@@ -21,6 +21,16 @@ services:
     restart: unless-stopped
     networks:
       - api-shop
+  
+  db_shard:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Doyouloveme1029!
+      - MSSQL_PID=Express
+    restart: unless-stopped
+    networks:
+      - api-shop
 
   migration:
     build:
@@ -77,6 +87,7 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT=Docker
+      - ConnectionStrings__Shard1=Server=db_shard;Database=hardware-shop-shard1;User=sa;Password=Doyouloveme1029!;TrustServerCertificate=True
     depends_on:
       - db
       - redis
@@ -114,3 +125,4 @@ services:
 
 volumes:
   keycloak-db-data:
+  db-shard-data:

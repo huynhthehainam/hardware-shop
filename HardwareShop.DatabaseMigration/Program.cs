@@ -25,9 +25,11 @@ namespace HardwareShop.DatabaseMigration
                 })
                 .ConfigureServices((context, services) =>
                 {
-                    var connectionString = context.Configuration.GetConnectionString("AppConn");
+                    // Determine primary connection string key: prefer "Primary", fallback to "AppConn"
+                    var primaryConn = context.Configuration.GetConnectionString("Primary");
                     services.AddDbContext<MainDatabaseContext>(options =>
-                        options.UseSqlServer(connectionString));
+                        options.UseSqlServer(primaryConn));
+
                     services.AddScoped<ISeedingService, SeedingService>(); // Register SeedingService
                     services.Configure<HashingConfiguration>(context.Configuration.GetSection("HashingConfiguration")); // If needed for seeding
                     services.AddSingleton<IHashingPasswordService, HashingPasswordService>(); // If needed for seeding
@@ -35,13 +37,36 @@ namespace HardwareShop.DatabaseMigration
                 })
                 .Build();
 
+            // Run migrations for all configured connection strings
+            var config = host.Services.GetRequiredService<IConfiguration>();
+            var connSection = config.GetSection("ConnectionStrings");
+            foreach (var child in connSection.GetChildren())
+            {
+                var name = child.Key;
+                var conn = child.Value;
+                if (string.IsNullOrWhiteSpace(conn))
+                    continue;
+
+                try
+                {
+                    var optionsBuilder = new DbContextOptionsBuilder<MainDatabaseContext>();
+                    optionsBuilder.UseSqlServer(conn);
+                    using (var ctx = new MainDatabaseContext(optionsBuilder.Options))
+                    {
+                        Console.WriteLine($"Applying migrations for connection '{name}'...");
+                        ctx.Database.Migrate();
+                        Console.WriteLine($"Migrations applied for '{name}'.");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Failed to migrate database for '{name}': {ex.Message}");
+                }
+            }
+
+            // Run seeding only on primary database (registered in DI)
             using (var scope = host.Services.CreateScope())
             {
-                var db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>();
-                db.Database.Migrate();
-                Console.WriteLine("Database migration completed.");
-
-                // Run seeding
                 var seeder = scope.ServiceProvider.GetRequiredService<ISeedingService>();
                 bool isDevelopment = environment == "Development" || environment == "DevContainer";
                 await seeder.SeedDataAsync(isDevelopment);
