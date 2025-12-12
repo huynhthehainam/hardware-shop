@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Text.Json;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Kafka;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -42,11 +43,7 @@ namespace HardwareShop.Infrastructure.Services
                 });
 
             // Step 3: Publish event to Kafka for async DB persistence
-            await kafkaProducerService.ProduceAsync("ticket-writeback", new
-            {
-                CacheKey = cacheKey,
-                Ticket = ticket
-            });
+            await kafkaProducerService.ProduceAsync("ticket-writeback", cacheKey, JsonSerializer.Serialize(ticket));
 
             // Step 4: Return success quickly (simulate an Id)
             return ticket.Id;

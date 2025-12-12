@@ -2,6 +2,7 @@ using System;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain;
 using HardwareShop.Infrastructure.Data;
+using HardwareShop.Infrastructure.Kafka;
 using HardwareShop.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -34,7 +35,6 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddScoped<ICurrentUserService, WebCurrentUserService>();
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
-            services.AddScoped<ISeedingService, SeedingService>();
             services.AddScoped<ITestService, TestService>();
             services.AddScoped<IChatService, ChatService>();
             return services;

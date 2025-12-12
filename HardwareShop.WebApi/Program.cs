@@ -2,6 +2,8 @@
 using System.Text;
 using HardwareShop.Application.Services;
 using HardwareShop.Infrastructure.Extensions;
+using HardwareShop.Infrastructure.Outbox;
+using HardwareShop.Infrastructure.Saga;
 using HardwareShop.Infrastructure.Services;
 using HardwareShop.WebApi.Configurations;
 using HardwareShop.WebApi.Extensions;
@@ -77,6 +79,14 @@ public static class Program
         builder.Services.AddGrpc();
         builder.Services.AddGrpcReflection();
         builder.Services.AddSignalR();
+
+        #region OutboxDispatcher
+        builder.Services.AddHostedService<OutboxDispatcher>();
+        #endregion
+
+        #region KafkaSagaOrchestrator
+        builder.Services.AddScoped<BookingSagaOrchestrator>();
+        #endregion
 
         builder.Services.AddDistributedRedisCache(option =>
         {

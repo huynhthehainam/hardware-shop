@@ -1,5 +1,7 @@
 ﻿using System.Reflection;
 using HardwareShop.Domain.Models;
+using HardwareShop.Infrastructure.Outbox;
+using HardwareShop.Infrastructure.Saga;
 using Microsoft.EntityFrameworkCore;
 namespace HardwareShop.Infrastructure.Data
 {
@@ -36,6 +38,15 @@ namespace HardwareShop.Infrastructure.Data
         public DbSet<ShopPhone> ShopPhones => Set<ShopPhone>();
         public DbSet<ShopSetting> ShopSettings => Set<ShopSetting>();
 
+
+        #region Outbox
+        public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+        #endregion
+
+
+        #region Saga
+        public DbSet<SagaState> SagaStates => Set<SagaState>();
+        #endregion
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
