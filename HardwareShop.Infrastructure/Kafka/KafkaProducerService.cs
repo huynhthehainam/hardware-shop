@@ -29,20 +29,7 @@ public class KafkaProducerService : IKafkaProducerService, IDisposable
 
     public async Task ProduceOutboxMessageAsync<T>(T outbox, CancellationToken cancellationToken = default) where T : OutboxMessage
     {
-        var assembly = Assembly.GetExecutingAssembly();
-        var type = assembly.GetType(outbox.Type);
-        if (type == null)
-        {
-            logger.LogWarning("Unknown outbox message type: {Type}", outbox.Type);
-            throw new Exception("Unknown outbox message type");
-        }
-        var message = System.Text.Json.JsonSerializer.Deserialize(outbox.Payload, type);
-        if (message == null)
-        {
-            logger.LogWarning("Failed to deserialize outbox message {Id}", outbox.Id);
-            throw new Exception("Failed to deserialize outbox message");
-        }
-        await ProduceAsync(outbox.Type, outbox.Id.ToString(), outbox.Payload, cancellationToken);
+        await ProduceAsync(outbox.Topic, outbox.Id.ToString(), outbox.Payload, cancellationToken);
     }
     public async Task ProduceAsync(string topic, string key, string value, CancellationToken cancellationToken = default)
     {

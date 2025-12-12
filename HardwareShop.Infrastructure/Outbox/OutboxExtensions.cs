@@ -6,12 +6,12 @@ namespace HardwareShop.Infrastructure.Outbox
 {
     public static class OutboxExtensions
     {
-        public static OutboxMessage CreateOutboxMessage<T>(this T message)
+        public static OutboxMessage CreateOutboxMessage<T>(this T message, string topic)
         {
             return new OutboxMessage
             {
                 Id = Guid.NewGuid(),
-                Type = typeof(T).FullName ?? typeof(T).Name,
+                Topic = topic,
                 Payload = JsonSerializer.Serialize(message),
                 OccurredAt = DateTime.UtcNow
             };

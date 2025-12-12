@@ -5,6 +5,7 @@ using System.Text.Json;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Kafka;
+using HardwareShop.Infrastructure.Saga;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -15,11 +16,13 @@ namespace HardwareShop.Infrastructure.Services
         private readonly IDistributedCache distributedCache;
         private readonly IKafkaProducerService kafkaProducerService;
         private readonly DbContext db;
-        public TestService(DbContext db, IDistributedCache distributedCache, IKafkaProducerService kafkaProducerService)
+        private readonly BookingSagaOrchestrator bookingSagaOrchestrator;
+        public TestService(DbContext db, IDistributedCache distributedCache, IKafkaProducerService kafkaProducerService, BookingSagaOrchestrator bookingSagaOrchestrator)
         {
             this.db = db;
             this.distributedCache = distributedCache;
             this.kafkaProducerService = kafkaProducerService;
+            this.bookingSagaOrchestrator = bookingSagaOrchestrator;
         }
         public async Task<int> TestWriteBackAsync()
         {
@@ -65,7 +68,11 @@ namespace HardwareShop.Infrastructure.Services
 
             return count;
         }
-
+        public async Task StartSagaTestAsync()
+        {
+            var sagaId = Guid.NewGuid();
+            await bookingSagaOrchestrator.StartSagaAsync(sagaId, CancellationToken.None);
+        }
 
     }
 }

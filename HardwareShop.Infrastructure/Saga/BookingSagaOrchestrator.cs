@@ -1,6 +1,7 @@
 using System.Text.Json;
 using HardwareShop.Infrastructure.Data;
 using HardwareShop.Infrastructure.Kafka;
+using HardwareShop.Infrastructure.Outbox;
 
 namespace HardwareShop.Infrastructure.Saga
 {
@@ -11,6 +12,10 @@ namespace HardwareShop.Infrastructure.Saga
         public const string HotelBooked = "HotelBooked";
         public const string Completed = "Completed";
         public const string Failed = "Failed";
+    }
+    public class FlightBookingData
+    {
+        public DateTime BookingDate { get; set; }
     }
     public class BookingSagaOrchestrator
     {
@@ -23,6 +28,26 @@ namespace HardwareShop.Infrastructure.Saga
             this.producer = producer;
         }
 
+        public async Task StartSagaAsync(Guid sagaId, CancellationToken ct)
+        {
+            var data = new FlightBookingData
+            {
+                BookingDate = DateTime.UtcNow
+            };
+            var saga = new SagaState
+            {
+                Id = sagaId,
+                State = BookingSagaState.Started,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+                Data = JsonSerializer.Serialize(data)
+            };
+
+            db.SagaStates.Add(saga);
+            var outbox = data.CreateOutboxMessage("afasf");
+            db.OutboxMessages.Add(outbox);
+            await db.SaveChangesAsync(ct);
+        }
         public async Task HandleEventAsync(string topic, string payload, CancellationToken ct)
         {
             var evt = JsonSerializer.Deserialize<Dictionary<string, string>>(payload);
