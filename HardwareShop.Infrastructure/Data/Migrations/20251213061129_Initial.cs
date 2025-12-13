@@ -47,7 +47,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Type = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Topic = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Payload = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OccurredAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Dispatched = table.Column<bool>(type: "bit", nullable: false),

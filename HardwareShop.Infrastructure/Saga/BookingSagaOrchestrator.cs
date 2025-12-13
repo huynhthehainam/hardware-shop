@@ -5,6 +5,10 @@ using HardwareShop.Infrastructure.Outbox;
 
 namespace HardwareShop.Infrastructure.Saga
 {
+    public class SagaData
+    {
+        public required Guid SagaId { get; set; }
+    }
     public static class BookingSagaState
     {
         public const string Started = "Started";
@@ -12,9 +16,27 @@ namespace HardwareShop.Infrastructure.Saga
         public const string HotelBooked = "HotelBooked";
         public const string Completed = "Completed";
         public const string Failed = "Failed";
+        public const string CompensateFlight = "CompensateFlight";
     }
-    public class FlightBookingData
+    public static class BookingSagaTopics
     {
+        public const string FlightBook = "flight.book";
+        public const string FlightBooked = "flight.booked";
+        public const string FlightFailed = "flight.failed";
+        public const string HotelBook = "hotel.book";
+        public const string HotelBooked = "hotel.booked";
+        public const string HotelFailed = "hotel.failed";
+        public const string FlightCancel = "flight.cancel";
+        public const string FlightCancelled = "flight.cancelled";
+        public const string BookingDLQ = "booking.dlq";
+    }
+    public class FlightBookingData : SagaData
+    {
+        public DateTime BookingDate { get; set; }
+    }
+    public class HotelBookingData : SagaData
+    {
+        public required Guid FlightId { get; set; }
         public DateTime BookingDate { get; set; }
     }
     public class BookingSagaOrchestrator
@@ -32,7 +54,8 @@ namespace HardwareShop.Infrastructure.Saga
         {
             var data = new FlightBookingData
             {
-                BookingDate = DateTime.UtcNow
+                BookingDate = DateTime.UtcNow,
+                SagaId = sagaId
             };
             var saga = new SagaState
             {
@@ -44,14 +67,16 @@ namespace HardwareShop.Infrastructure.Saga
             };
 
             db.SagaStates.Add(saga);
-            var outbox = data.CreateOutboxMessage("afasf");
+            var outbox = data.CreateOutboxMessage(BookingSagaTopics.FlightBook);
             db.OutboxMessages.Add(outbox);
             await db.SaveChangesAsync(ct);
         }
         public async Task HandleEventAsync(string topic, string payload, CancellationToken ct)
         {
-            var evt = JsonSerializer.Deserialize<Dictionary<string, string>>(payload);
-            var sagaId = Guid.Parse(evt["SagaId"]);
+            var evt = JsonSerializer.Deserialize<SagaData>(payload);
+            if (evt == null)
+                return;
+            var sagaId = evt.SagaId;
 
             var saga = await db.SagaStates.FindAsync(sagaId);
 
@@ -60,25 +85,25 @@ namespace HardwareShop.Infrastructure.Saga
 
             switch (topic)
             {
-                case "flight.booked":
-                    await HandleFlightBooked(saga, ct);
+                case BookingSagaTopics.FlightBooked:
+                    await HandleFlightBooked(saga, payload, ct);
                     break;
 
-                case "flight.failed":
+                case BookingSagaTopics.FlightFailed:
                     await HandleFlightFailed(saga, ct);
                     break;
 
-                case "hotel.booked":
+                case BookingSagaTopics.HotelBooked:
                     await HandleHotelBooked(saga, ct);
                     break;
 
-                case "hotel.failed":
+                case BookingSagaTopics.HotelFailed:
                     await HandleHotelFailed(saga, ct);
                     break;
             }
         }
 
-        private async Task HandleFlightBooked(SagaState saga, CancellationToken ct)
+        private async Task HandleFlightBooked(SagaState saga, string evtPayload, CancellationToken ct)
         {
             if (saga.State != BookingSagaState.Started.ToString())
                 return;
@@ -91,6 +116,18 @@ namespace HardwareShop.Infrastructure.Saga
             //     Key = saga.Id.ToString(),
             //     Value = JsonSerializer.Serialize(new { SagaId = saga.Id })
             // }, ct);
+            var evt = JsonSerializer.Deserialize<FlightBookedData>(evtPayload);
+            if (evt == null)
+                return;
+            var data = new HotelBookingData
+            {
+                FlightId = evt.FlightId,
+                BookingDate = DateTime.UtcNow,
+                SagaId = saga.Id
+            };
+            saga.Data = JsonSerializer.Serialize(data);
+            var outbox = data.CreateOutboxMessage(BookingSagaTopics.HotelBook);
+            db.OutboxMessages.Add(outbox);
 
             await db.SaveChangesAsync(ct);
         }
@@ -115,7 +152,7 @@ namespace HardwareShop.Infrastructure.Saga
 
         private async Task HandleHotelFailed(SagaState saga, CancellationToken ct)
         {
-            saga.State = BookingSagaState.Failed.ToString();
+            saga.State = BookingSagaState.CompensateFlight.ToString();
             saga.UpdatedAt = DateTime.UtcNow;
 
             // Compensating: cancel flight booking

@@ -3,7 +3,7 @@ using HardwareShop.Infrastructure.Saga;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-
+using UuidV7 = UUIDNext.Uuid;
 namespace HardwareShop.Infrastructure.Kafka
 {
     public class KafkaSagaConsumer : BackgroundService
@@ -22,18 +22,20 @@ namespace HardwareShop.Infrastructure.Kafka
                 {
                     BootstrapServers = config["Kafka:BootstrapServers"],
                     GroupId = "saga-orchestrator",
-                    AutoOffsetReset = AutoOffsetReset.Earliest
+                    EnableAutoCommit = false,
                 }).Build();
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override  Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            consumer.Subscribe(new[] {
-            "flight.booked",
-            "flight.failed",
-            "hotel.booked",
-            "hotel.failed"
-        });
+            consumer.Subscribe([
+            BookingSagaTopics.FlightBooked,
+            BookingSagaTopics.FlightFailed,
+            BookingSagaTopics.HotelBooked,
+            BookingSagaTopics.HotelFailed,
+            BookingSagaTopics.FlightCancelled,
+            BookingSagaTopics.BookingDLQ
+        ]);
 
             return Task.Run(() => Listen(stoppingToken), stoppingToken);
         }
@@ -48,6 +50,7 @@ namespace HardwareShop.Infrastructure.Kafka
                 var orchestrator = scope.ServiceProvider.GetRequiredService<BookingSagaOrchestrator>();
 
                 await orchestrator.HandleEventAsync(result.Topic, result.Message.Value, ct);
+                consumer.Commit(result);
             }
         }
     }

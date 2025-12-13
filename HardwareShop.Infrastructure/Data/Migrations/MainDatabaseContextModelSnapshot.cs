@@ -797,7 +797,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
+                    b.Property<string>("Topic")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

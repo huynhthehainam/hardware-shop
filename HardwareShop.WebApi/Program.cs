@@ -2,6 +2,7 @@
 using System.Text;
 using HardwareShop.Application.Services;
 using HardwareShop.Infrastructure.Extensions;
+using HardwareShop.Infrastructure.Kafka;
 using HardwareShop.Infrastructure.Outbox;
 using HardwareShop.Infrastructure.Saga;
 using HardwareShop.Infrastructure.Services;
@@ -82,6 +83,11 @@ public static class Program
 
         #region OutboxDispatcher
         builder.Services.AddHostedService<OutboxDispatcher>();
+        #endregion
+
+        #region ServicesConsumers
+        builder.Services.AddHostedService<FlightKafkaSagaConsumer>();
+        builder.Services.AddHostedService<HotelKafkaSagaConsumer>();
         #endregion
 
         #region KafkaSagaOrchestrator
@@ -208,7 +214,10 @@ public static class Program
         }
 
         app.MapHub<ChatHub>(ChatHubConstants.Endpoint);
-
+        app.Lifetime.ApplicationStarted.Register(() =>
+        {
+            Console.WriteLine("🚀 WEB APP STARTED");
+        });
         app.Run();
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HardwareShop.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20251212062028_Initial")]
+    [Migration("20251213061129_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -800,7 +800,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Type")
+                    b.Property<string>("Topic")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

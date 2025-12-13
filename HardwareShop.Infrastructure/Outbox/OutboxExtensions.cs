@@ -13,7 +13,7 @@ namespace HardwareShop.Infrastructure.Outbox
                 Id = Guid.NewGuid(),
                 Topic = topic,
                 Payload = JsonSerializer.Serialize(message),
-                OccurredAt = DateTime.UtcNow
+                OccurredAt = DateTime.UtcNow,
             };
         }
     }
