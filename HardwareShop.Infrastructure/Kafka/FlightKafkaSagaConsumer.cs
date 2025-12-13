@@ -27,48 +27,76 @@ namespace HardwareShop.Infrastructure.Kafka
             this.provider = provider;
             this.logger = logger;
             logger.LogInformation("FlightKafkaSagaConsumer initialized.");
-            consumer = new ConsumerBuilder<string, string>(
-                new ConsumerConfig
-                {
-                    BootstrapServers = config["Kafka:BootstrapServers"],
-                    GroupId = "asfasf-v2",
-                    EnableAutoCommit = false,
-                    AutoOffsetReset = AutoOffsetReset.Earliest,
+            //         consumer = new ConsumerBuilder<string, string>(
+            //             new ConsumerConfig
+            //             {
+            //                 BootstrapServers = config["Kafka:BootstrapServers"],
+            //                 GroupId = "asfasf-v2",
+            //                 EnableAutoCommit = false,
+            //                 AutoOffsetReset = AutoOffsetReset.Earliest,
 
 
-                }).SetErrorHandler((_, e) =>
-                {
+            //             }).SetErrorHandler((_, e) =>
+            //             {
 
-                    logger.LogError("Kafka error: {Reason}", e.Reason);
-                }).SetLogHandler((_, log) =>
-    {
-        logger.LogInformation(
-            "Kafka log: {Facility} - {Message}",
-            log.Facility,
-            log.Message
-        );
-    }).SetPartitionsAssignedHandler((c, partitions) =>
-    {
-        logger.LogInformation("Partitions assigned: {Partitions}",
-            string.Join(", ", partitions.Select(p => p.Partition.Value)));
-    })
-    .SetPartitionsRevokedHandler((c, partitions) =>
-    {
-        logger.LogInformation("Partitions revoked: {Partitions}",
-            string.Join(", ", partitions.Select(p => p.Partition.Value)));
-    }).Build();
+            //                 logger.LogError("Kafka error: {Reason}", e.Reason);
+            //             }).SetLogHandler((_, log) =>
+            // {
+            //     logger.LogInformation(
+            //         "Kafka log: {Facility} - {Message}",
+            //         log.Facility,
+            //         log.Message
+            //     );
+            // }).SetPartitionsAssignedHandler((c, partitions) =>
+            // {
+            //     logger.LogInformation("Partitions assigned: {Partitions}",
+            //         string.Join(", ", partitions.Select(p => p.Partition.Value)));
+            // })
+            // Add revocation handler
+            // .SetPartitionsRevokedHandler((c, partitions) =>
+            // {
+            //     logger.LogInformation("Partitions revoked: {Partitions}",
+            //         string.Join(", ", partitions.Select(p => p.Partition.Value)));
+            // }).Build();
         }
 
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        // protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        // {
+        //     logger.LogInformation("FlightKafkaSagaConsumer starting execution.");
+        //     consumer.Subscribe(new[] { BookingSagaTopics.FlightBook, BookingSagaTopics.FlightCancel });
+        //     return Task.Run(() => Listen(stoppingToken), stoppingToken);
+
+        // }
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            logger.LogInformation("FlightKafkaSagaConsumer starting execution.");
+            // logger.LogInformation("FlightKafkaSagaConsumer starting execution.");
+            // consumer.Subscribe(new[] { BookingSagaTopics.FlightBook });
+            // await Listen(stoppingToken);
+            // consumer.Close();
+            using var consumer = new ConsumerBuilder<string, string>(new ConsumerConfig
+            {
+                BootstrapServers = "kafka:9092",
+                GroupId = "asfasf-v2",
+                EnableAutoCommit = false,
+                AutoOffsetReset = AutoOffsetReset.Earliest,
+
+
+            }).Build();
+
             consumer.Subscribe(topics);
-            return Task.Run(() => Listen(stoppingToken), stoppingToken);
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                logger.LogInformation("Waiting for messages...");
+                var record = consumer.Consume(stoppingToken);
+                logger.LogInformation("Consumed message from topic {Topic}, partition {Partition}, offset {Offset}",
+                    record.Topic, record.Partition.Value, record.Offset.Value);
+                // handle message
+            }
 
         }
-
-        private async Task Listen(CancellationToken ct)
-        {
+        // private async Task Listen(CancellationToken ct)
+        // {
 
             while (!ct.IsCancellationRequested)
             {
