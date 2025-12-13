@@ -17,9 +17,7 @@
 				}
 			},
 			"extensions": [
-				"ms-dotnettools.csdevkit",
 				"ms-dotnettools.csharp",
-				"ms-azuretools.vscode-docker",
 				"eamodio.gitlens",
 				"editorconfig.editorconfig",
 				"formulahendry.dotnet-test-explorer",
