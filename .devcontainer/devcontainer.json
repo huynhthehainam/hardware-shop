@@ -22,7 +22,6 @@
 				"editorconfig.editorconfig",
 				"formulahendry.dotnet-test-explorer",
 				"ms-vscode.powershell",
-				// ✅ Add Copilot & Copilot Chat
 				"github.copilot",
 				"github.copilot-chat"
 			]

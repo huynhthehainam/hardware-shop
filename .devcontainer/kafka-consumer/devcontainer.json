@@ -17,17 +17,13 @@
                 }
             },
             "extensions": [
-                "ms-dotnettools.csdevkit",
                 "ms-dotnettools.csharp",
-                "ms-azuretools.vscode-docker",
                 "eamodio.gitlens",
                 "editorconfig.editorconfig",
                 "formulahendry.dotnet-test-explorer",
                 "ms-vscode.powershell",
-                // ✅ Add Copilot & Copilot Chat
                 "github.copilot",
-                "github.copilot-chat",
-                "redhat.vscode-xml"
+                "github.copilot-chat"
             ]
         }
     },
