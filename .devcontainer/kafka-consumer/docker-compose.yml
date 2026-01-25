@@ -5,7 +5,7 @@ services:
       context: .
       dockerfile: HardwareShop.KafkaConsumer/Dockerfile.dev
     depends_on:
-      - kafka
+      - broker
     networks:
       - api-shop
 

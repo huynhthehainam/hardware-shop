@@ -22,15 +22,15 @@ services:
     networks:
       - api-shop
 
-  db_shard:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=Doyouloveme1029!
-      - MSSQL_PID=Express
-    restart: unless-stopped
-    networks:
-      - api-shop
+  # db_shard:
+  #   image: mcr.microsoft.com/mssql/server:2022-latest
+  #   environment:
+  #     - ACCEPT_EULA=Y
+  #     - SA_PASSWORD=Doyouloveme1029!
+  #     - MSSQL_PID=Express
+  #   restart: unless-stopped
+  #   networks:
+  #     - api-shop
 
   migration:
     build:
@@ -43,31 +43,27 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Docker
 
-  kafka:
+  broker:
     image: apache/kafka:3.9.0
-    hostname: kafka
-    networks:
-      - api-shop
-    ports:
-      - "9092:9092"
+    hostname: broker
+    container_name: broker
     environment:
-      KAFKA_NODE_ID: 1
-      KAFKA_PROCESS_ROLES: broker,controller
-
-      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
-
-      # ✅ ROUTABLE addresses ONLY
-      KAFKA_LISTENERS: PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
-
+      KAFKA_BROKER_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
-
-      # Required for KRaft
-      KAFKA_LOG_DIRS: /var/lib/kafka/data
-
-    restart: unless-stopped
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    networks:
+      - api-shop
 
   kafka-ui:
     image: provectuslabs/kafka-ui:v0.7.2
@@ -76,10 +72,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - kafka
+      - broker
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
-      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=broker:29092
 
   web-api:
     build:
@@ -93,11 +89,10 @@ services:
     environment:
       - ASPNETCORE_URLS=http://+:5000
       - ASPNETCORE_ENVIRONMENT=Docker
-      - ConnectionStrings__Shard1=Server=db_shard;Database=hardware-shop-shard1;User=sa;Password=Doyouloveme1029!;TrustServerCertificate=True
     depends_on:
       - db
       - redis
-      - kafka
+      - broker
       - migration
 
   keycloak:

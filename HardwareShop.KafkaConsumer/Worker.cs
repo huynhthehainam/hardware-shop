@@ -26,7 +26,7 @@ public class Worker : BackgroundService
 
         var config = new ConsumerConfig
         {
-            BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "localhost:9092",
+            BootstrapServers = configuration["Kafka:BootstrapServers"] ?? "localhost:29092",
             GroupId = configuration["Kafka:GroupId"] ?? "dotnet-consumer-group",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = true
