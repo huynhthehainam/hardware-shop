@@ -53,6 +53,6 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref userAssets);
             set => userAssets = value;
         }
-        
+
     }
 }

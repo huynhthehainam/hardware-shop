@@ -15,7 +15,7 @@ using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 namespace HardwareShop.WebApi;
 // public class HasScopeRequirement : IAuthorizationRequirement
@@ -104,30 +104,34 @@ public static class Program
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen(c =>
-        {
-            c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
-            {
-                In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-                Description = "Please insert JWT with Bearer into field",
-                Name = "Authorization",
-                Type = SecuritySchemeType.ApiKey
-            });
-            c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = "Bearer"
-                        }
-                    },
-                    Array.Empty<string>()
-                }
-            });
-        });
+
+        builder.Services.AddSwaggerGen(options =>
+ {
+     // 1. Define the Security Scheme
+     options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+     {
+         Name = "Authorization",
+         Type = SecuritySchemeType.ApiKey,
+         Scheme = "Bearer",
+         BearerFormat = "JWT",
+         In = ParameterLocation.Header,
+         Description = "Enter 'Bearer {token}'"
+     });
+
+     // 2. Add the Security Requirement
+     // Note: In v10/v2.x, some internal reference handling has changed, 
+     // but the standard AddSecurityRequirement signature remains source-compatible 
+     // for most common JWT setups.
+     options.AddSecurityRequirement(doc =>
+     {
+         var openApiSecurityRequirement = new OpenApiSecurityRequirement
+         {
+             { new OpenApiSecuritySchemeReference("Bearer", doc), new List<string>() }
+         };
+         return openApiSecurityRequirement;
+     });
+ });
+
 
 
         // Keycloak OpenID Connect configuration
