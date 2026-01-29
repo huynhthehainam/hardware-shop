@@ -24,7 +24,7 @@ namespace HardwareShop.Infrastructure.Services
             this.kafkaProducerService = kafkaProducerService;
             this.bookingSagaOrchestrator = bookingSagaOrchestrator;
         }
-        public async Task<int> TestWriteBackAsync()
+        public async Task<Guid> TestWriteBackAsync()
         {
             var ticket = new Ticket
             {

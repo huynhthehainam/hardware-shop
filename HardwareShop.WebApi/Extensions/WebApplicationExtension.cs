@@ -6,9 +6,7 @@ namespace HardwareShop.WebApi.Extensions
     {
         public static void SeedData(this WebApplication app)
         {
-            IServiceProvider services = app.Services;
-            ISeedingService seedingService = services.CreateScope().ServiceProvider.GetRequiredService<ISeedingService>();
-            seedingService.SeedDataAsync(app.Environment.IsDevelopment());
+
         }
     }
 }

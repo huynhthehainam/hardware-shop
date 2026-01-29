@@ -8,7 +8,7 @@ namespace HardwareShop.Application.Services
 {
     public interface ICountryService
     {
-        Task<ApplicationResponse<CachedAssetDto>> GetCountryIconByIdAsync(int id);
+        Task<ApplicationResponse<CachedAssetDto>> GetCountryIconByIdAsync(Guid id);
 
         Task<ApplicationResponse<PageData<CountryDto>>> GetCountryPageData(PagingModel pagingModel, string? search);
     }

@@ -14,18 +14,18 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
 
-        public int CustomerId { get; set; }
+        public Guid CustomerId { get; set; }
         private Customer? customer;
         public Customer? Customer
         {
             get => lazyLoader?.Load(this, ref customer);
             set => customer = value;
         }
-        public int ShopId { get; set; }
+        public Guid ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
         {
@@ -38,11 +38,6 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref details);
             set => details = value;
         }
-        private ICollection<Invoice>? invoices;
-        public ICollection<Invoice>? Invoices
-        {
-            get => lazyLoader?.Load(this, ref invoices);
-            set => invoices = value;
-        }
+
     }
 }

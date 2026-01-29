@@ -16,7 +16,7 @@ namespace HardwareShop.Domain.Models
         public ShopSetting(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int ShopId { get; set; }
+        public Guid ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
         {

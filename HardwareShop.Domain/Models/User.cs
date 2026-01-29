@@ -10,9 +10,9 @@ namespace HardwareShop.Domain.Models
 
     public sealed class User : EntityBase, ISoftDeletable
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         public string? Phone { get; set; }
-        public int? PhoneCountryId { get; set; }
+        public Guid? PhoneCountryId { get; set; }
         public string? SecretValue { get; set; }
         private Country? phoneCountry;
         public Country? PhoneCountry
@@ -50,7 +50,7 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref notifications);
             set => notifications = value;
         }
-        public long? GetAvatarAssetId()
+        public Guid? GetAvatarAssetId()
         {
             return Assets?.FirstOrDefault(e => e.AssetType == UserAssetConstants.AvatarAssetType)?.AssetId;
         }

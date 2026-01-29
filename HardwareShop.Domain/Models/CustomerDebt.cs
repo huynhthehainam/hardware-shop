@@ -13,7 +13,7 @@ namespace HardwareShop.Domain.Models
         public CustomerDebt(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int CustomerId { get; set; }
+        public Guid CustomerId { get; set; }
         private Customer? customer;
         public Customer? Customer
         {

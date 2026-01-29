@@ -16,7 +16,7 @@ namespace HardwareShop.Domain.Models
         public CountryAsset(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int CountryId { get; set; }
+        public Guid CountryId { get; set; }
         private Country? country;
         public Country? Country
         {

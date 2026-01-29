@@ -20,15 +20,9 @@ namespace HardwareShop.Infrastructure.Extensions
                   options.UseSqlServer(connectionString));
             services.AddScoped<DbContext, MainDatabaseContext>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IShopService, ShopService>();
-            services.AddScoped<IWarehouseService, WarehouseService>();
-            services.AddScoped<IProductService, ProductService>();
-            services.AddScoped<IInvoiceService, InvoiceService>();
-            services.AddScoped<ICustomerDebtService, CustomerDebtService>();
-            services.AddScoped<IProductCategoryService, ProductCategoryService>();
+
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<IUnitCategoryService, UnitCategoryService>();
-            services.AddScoped<ICustomerService, CustomerService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IAssetService, AssetService>();
             services.AddScoped<IJwtService, JwtService>();
@@ -36,7 +30,6 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
             services.AddScoped<ITestService, TestService>();
-            services.AddScoped<IChatService, ChatService>();
             return services;
         }
     }

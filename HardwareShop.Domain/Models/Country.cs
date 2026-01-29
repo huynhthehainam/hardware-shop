@@ -12,7 +12,7 @@ namespace HardwareShop.Domain.Models
         public Country(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         public string Name { get; set; } = string.Empty;
         public string PhonePrefix { get; set; } = string.Empty;
 
@@ -39,7 +39,7 @@ namespace HardwareShop.Domain.Models
         private ICollection<ShopPhone>? shopPhones;
         public ICollection<ShopPhone>? ShopPhones
         {
-            get =>  lazyLoader?.Load(this, ref shopPhones);
+            get => lazyLoader?.Load(this, ref shopPhones);
             set => shopPhones = value;
         }
 

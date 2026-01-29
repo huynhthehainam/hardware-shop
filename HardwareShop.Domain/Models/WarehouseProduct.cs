@@ -12,7 +12,7 @@ namespace HardwareShop.Domain.Models
         public WarehouseProduct(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
         private Product? product;
         public Product? Product
         {
@@ -20,7 +20,7 @@ namespace HardwareShop.Domain.Models
             set => product = value;
         }
 
-        public int WarehouseId { get; set; }
+        public Guid WarehouseId { get; set; }
         private Warehouse? warehouse;
         public Warehouse? Warehouse
         {

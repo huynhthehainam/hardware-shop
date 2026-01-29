@@ -12,8 +12,8 @@ namespace HardwareShop.Domain.Models
         public OrderDetail(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public long Id { get; set; }
-        public int OrderId { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
+        public Guid OrderId { get; set; }
         private Order? order;
         public Order? Order
         {
@@ -21,7 +21,7 @@ namespace HardwareShop.Domain.Models
             set => order = value;
         }
 
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
         private Product? product;
         public Product? Product
         {

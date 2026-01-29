@@ -6,7 +6,7 @@ namespace HardwareShop.Domain.Models
 {
     public sealed class Ticket : AuditableEntityBase
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
     }
 
 }

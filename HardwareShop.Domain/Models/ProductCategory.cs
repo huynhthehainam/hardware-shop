@@ -13,10 +13,10 @@ namespace HardwareShop.Domain.Models
         public ProductCategory(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();   
         public string Name { get; set; } = String.Empty;
         public string? Description { get; set; }
-        public int ShopId { get; set; }
+        public Guid ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
         {

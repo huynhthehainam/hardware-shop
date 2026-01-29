@@ -7,6 +7,6 @@ namespace HardwareShop.Application.Services
 {
     public interface IAssetService
     {
-        ApplicationResponse<CachedAssetDto> GetAssetById(long id);
+        ApplicationResponse<CachedAssetDto> GetAssetById(Guid id);
     }
 }

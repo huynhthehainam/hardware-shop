@@ -20,7 +20,7 @@ namespace HardwareShop.Infrastructure.Services
             this.distributedCache = distributedCache;
         }
 
-        public async Task<ApplicationResponse<CachedAssetDto>> GetCountryIconByIdAsync(int id)
+        public async Task<ApplicationResponse<CachedAssetDto>> GetCountryIconByIdAsync(Guid id)
         {
             var country = await db.Set<Country>().FirstOrDefaultAsync(e => e.Id == id);
             if (country == null)

@@ -13,7 +13,7 @@ namespace HardwareShop.Domain.Models
         public Shop(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         public string? Name { get; set; }
         public string? Address { get; set; }
         public string[]? Emails { get; set; }
@@ -46,12 +46,6 @@ namespace HardwareShop.Domain.Models
             set => warehouses = value;
         }
 
-        private ICollection<Invoice>? invoices;
-        public ICollection<Invoice>? Invoices
-        {
-            get => lazyLoader?.Load(this, ref invoices);
-            set => invoices = value;
-        }
         private ICollection<Product>? products;
         public ICollection<Product>? Products
         {

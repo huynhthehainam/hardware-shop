@@ -21,16 +21,8 @@ services:
     restart: unless-stopped
     networks:
       - api-shop
-
-  # db_shard:
-  #   image: mcr.microsoft.com/mssql/server:2022-latest
-  #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - SA_PASSWORD=Doyouloveme1029!
-  #     - MSSQL_PID=Express
-  #   restart: unless-stopped
-  #   networks:
-  #     - api-shop
+    ports:
+      - "1434:1433"
 
   migration:
     build:

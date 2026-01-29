@@ -10,7 +10,7 @@ namespace HardwareShop.Domain.Abstracts
 
         public AssetEntityBase() : base() { }
         public string AssetType { get; set; } = string.Empty;
-        public long AssetId { get; set; }
+        public Guid AssetId { get; set; } = Guid.CreateVersion7();
         private Asset? asset;
         public Asset? Asset
         {

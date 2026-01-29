@@ -3,7 +3,7 @@ using HardwareShop.Domain.Models;
 namespace HardwareShop.Application.Dtos;
 public sealed class CachedAssetDto
 {
-    public long Id { get; set; }
+    public Guid Id { get; set; }
     public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
     public DateTime? LastModifiedDate { get; set; }
     public byte[] Bytes { get; set; } = Array.Empty<byte>();

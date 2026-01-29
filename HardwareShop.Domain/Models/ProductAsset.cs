@@ -19,8 +19,8 @@ namespace HardwareShop.Domain.Models
         public ProductAsset(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int Id { get; set; }
-        public int ProductId { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
+        public Guid ProductId { get; set; }
         private Product? product;
         public Product? Product
         {

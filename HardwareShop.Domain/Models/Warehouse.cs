@@ -12,12 +12,12 @@ namespace HardwareShop.Domain.Models
         public Warehouse(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public int Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         public string Name { get; set; } = string.Empty;
 
         public string? Address { get; set; }
 
-        public int ShopId { get; set; }
+        public Guid ShopId { get; set; }
 
         private Shop? shop;
         public Shop? Shop

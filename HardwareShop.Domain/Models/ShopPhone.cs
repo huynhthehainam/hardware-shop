@@ -13,15 +13,15 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public int Id { get; set; }
-        public int ShopId { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
+        public Guid ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
         {
             get => lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
-        public int CountryId { get; set; }
+        public Guid CountryId { get; set; }
         private Country? country;
         public Country? Country
         {

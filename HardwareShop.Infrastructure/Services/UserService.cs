@@ -14,7 +14,6 @@ namespace HardwareShop.Infrastructure.Services
 {
     public class UserService : IUserService
     {
-
         private readonly IJwtService jwtService;
         private readonly IHashingPasswordService hashingPasswordService;
         private readonly ICurrentUserService currentUserService;

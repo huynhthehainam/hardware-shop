@@ -14,7 +14,7 @@ namespace HardwareShop.Infrastructure.Extensions
         private const string fileNameKeyPrefix = "fIleNAAme$_";
         private const string createdDateKeyPrefix = "creatED$_";
         private const string modifiedDateKeyPrefix = "mmaodified$_";
-        public static Tuple<string, string, string, string, string> GetAssetCacheKeys(long id)
+        public static Tuple<string, string, string, string, string> GetAssetCacheKeys(Guid id)
         {
             return new Tuple<string, string, string, string, string>($"{contentKeyPrefix}_{id}", $"{contentTypeKeyPrefix}_{id}", $"{fileNameKeyPrefix}_{id}", $"{createdDateKeyPrefix}_{id}", $"{modifiedDateKeyPrefix}_{id}");
         }
@@ -35,7 +35,7 @@ namespace HardwareShop.Infrastructure.Extensions
             distributedCache.SetString(keys.Item5, asset.LastModifiedDate?.ToString() ?? "", cacheEntryOptions);
             return CachedAssetDto.BuildFromAsset(asset);
         }
-        public static CachedAssetDto? GetCachedAssetById(this DbContext db, IDistributedCache distributedCache, long id)
+        public static CachedAssetDto? GetCachedAssetById(this DbContext db, IDistributedCache distributedCache, Guid id)
         {
             var assetSet = db.Set<Asset>();
             var keys = AssetCacheHelpers.GetAssetCacheKeys(id);

@@ -29,7 +29,7 @@ namespace HardwareShop.Domain.Models
             set => user = value;
         }
 
-        public int ShopId { get; set; }
+        public Guid ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
         {

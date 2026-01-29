@@ -20,7 +20,7 @@ namespace HardwareShop.Domain.Models
         public Asset(Action<object, string?> lazyLoader) : base(lazyLoader)
         {
         }
-        public long Id { get; set; }
+        public Guid Id { get; set; } = Guid.CreateVersion7();
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
         public byte[] Bytes { get; set; } = Array.Empty<byte>();

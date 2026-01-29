@@ -14,7 +14,7 @@ namespace HardwareShop.Infrastructure.Services
         private readonly IDistributedCache distributedCache;
         public AssetService(DbContext dbContext, IDistributedCache distributedCache) => (this.db, this.distributedCache) = (dbContext, distributedCache);
 
-        public ApplicationResponse<CachedAssetDto> GetAssetById(long id)
+        public ApplicationResponse<CachedAssetDto> GetAssetById(Guid id)
         {
             var asset = db.GetCachedAssetById(distributedCache, id);
             if (asset == null)

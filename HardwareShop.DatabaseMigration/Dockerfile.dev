@@ -1,5 +1,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS dev
+
 WORKDIR /migration
 COPY . ./
-RUN dotnet tool install --global dotnet-ef --version 8.0.0
-CMD [ "sleep", "infinity" ]
+
+# Install dotnet-ef global tool
+RUN dotnet tool install --global dotnet-ef --version 10.0.2
+
+# Make sure dotnet global tools are on PATH
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+# Keep container alive for dev usage
+CMD ["sleep", "infinity"]

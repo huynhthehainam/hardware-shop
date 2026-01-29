@@ -24,8 +24,7 @@ namespace HardwareShop.Infrastructure.Data
         public DbSet<ProductAsset> ProductAssets => Set<ProductAsset>();
         public DbSet<CustomerDebt> CustomerDebts => Set<CustomerDebt>();
         public DbSet<CustomerDebtHistory> CustomerDebtHistories => Set<CustomerDebtHistory>();
-        public DbSet<Invoice> Invoices => Set<Invoice>();
-        public DbSet<InvoiceDetail> InvoiceDetails => Set<InvoiceDetail>();
+       
         public DbSet<User> Users => Set<User>();
         public DbSet<Warehouse> Warehouses => Set<Warehouse>();
         public DbSet<WarehouseProduct> WarehouseProducts => Set<WarehouseProduct>();
