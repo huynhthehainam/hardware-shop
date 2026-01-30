@@ -1,10 +1,12 @@
-﻿using HardwareShop.Application.Dtos;
+﻿using HardwareShop.Application.CQRS.ShopArea.Commands;
+using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.Services;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
@@ -12,9 +14,10 @@ namespace HardwareShop.WebApi.Controllers
     public class ShopsController : AuthorizedApiControllerBase
     {
 
-        public ShopsController(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
+        private readonly IMediator mediator;
+        public ShopsController(IMediator mediator, IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
         {
-
+            this.mediator = mediator;
         }
         [HttpGet]
         public async Task<IActionResult> GetShops([FromQuery] PagingModel pagingModel, [FromQuery] string? search)
@@ -23,8 +26,10 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateShop([FromBody] CreateShopCommand command)
+        public async Task<IActionResult> CreateShop([FromBody] CreateShopCommand command)
         {
+            var response = await mediator.Send(command);
+            responseResultBuilder.SetApplicationResponse(response);
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateLogo")]

@@ -90,6 +90,14 @@ public static class Program
         builder.Services.AddHostedService<HotelKafkaSagaConsumer>();
         #endregion
 
+        #region MediatR
+        builder.Services.AddMediatR(cfg =>
+            cfg.RegisterServicesFromAssemblies(
+                typeof(Program).Assembly,                      // WebApi (optional)
+                typeof(HardwareShop.Application.AssemblyMarker).Assembly,
+                typeof(HardwareShop.Infrastructure.AssemblyMarker).Assembly
+            ));
+        #endregion
         #region KafkaSagaOrchestrator
         builder.Services.AddScoped<BookingSagaOrchestrator>();
         #endregion

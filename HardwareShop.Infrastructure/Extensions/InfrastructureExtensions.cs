@@ -1,7 +1,10 @@
 using System;
+using HardwareShop.Application.CQRS.ShopArea.Interfaces;
+using HardwareShop.Application.CQRS.WarehouseArea.Interfaces;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain;
 using HardwareShop.Infrastructure.Data;
+using HardwareShop.Infrastructure.Data.Repositories;
 using HardwareShop.Infrastructure.Kafka;
 using HardwareShop.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +32,10 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
             services.AddScoped<ITestService, TestService>();
+
+            services.AddScoped<IShopRepository, ShopRepository>();
+            services.AddScoped<IWarehouseRepository, WarehouseRepository>();    
+            
             return services;
         }
     }

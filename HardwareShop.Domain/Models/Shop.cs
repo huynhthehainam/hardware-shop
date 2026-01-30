@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Interfaces;
 
@@ -16,7 +17,7 @@ namespace HardwareShop.Domain.Models
         public Guid Id { get; set; } = Guid.CreateVersion7();
         public string? Name { get; set; }
         public string? Address { get; set; }
-        public string[]? Emails { get; set; }
+        public Language Language { get; set; } = Language.Vietnamese;
 
         private ICollection<ShopAsset>? assets;
         public ICollection<ShopAsset>? Assets
@@ -88,6 +89,25 @@ namespace HardwareShop.Domain.Models
             set => shopSetting = value;
         }
 
+
+        public static Shop CreateShop(string name, int cashUnitId, string address, Language language = Language.Vietnamese)
+        {
+
+            var shop = new Shop
+            {
+                Name = name,
+                CashUnitId = cashUnitId,
+                Address = address,
+                Language = language
+            };
+            shop.AddDomainEvent(new Events.ShopCreatedEvent()
+            {
+                Name = name,
+                ShopId = shop.Id,
+                Language = language
+            });
+            return shop;
+        }
 
     }
 }

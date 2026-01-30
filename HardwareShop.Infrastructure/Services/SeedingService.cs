@@ -3,10 +3,13 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Models;
 using HardwareShop.Infrastructure.Data;
+using HardwareShop.Infrastructure.Saga;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -73,6 +76,8 @@ namespace HardwareShop.Infrastructure.Services
             this.configuration = configuration;
             this.httpClient = httpClientFactory.CreateClient();
         }
+
+
         private async Task<string> GetAdminAccessTokenAsync()
         {
             var keycloakUrl = configuration["Keycloak:Url"] ?? "http://localhost:8081";
@@ -721,6 +726,90 @@ namespace HardwareShop.Infrastructure.Services
                 _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
                 _ = db.SaveChanges();
 
+            }
+        }
+
+        public async Task EnsureKafkaTopicsExistAsync()
+        {
+            var kafkaSection = configuration.GetSection("Kafka");
+
+            var bootstrapServers = kafkaSection.GetValue<string>("BootstrapServers");
+
+            if (string.IsNullOrWhiteSpace(bootstrapServers))
+                throw new InvalidOperationException("Kafka BootstrapServers is not configured.");
+
+            var adminConfig = new AdminClientConfig
+            {
+                BootstrapServers = bootstrapServers
+            };
+
+            using var adminClient = new AdminClientBuilder(adminConfig).Build();
+
+            // All saga topics
+            var requiredTopics = new[]
+            {
+                BookingSagaTopics.FlightBook,
+                BookingSagaTopics.FlightBooked,
+                BookingSagaTopics.FlightFailed,
+                BookingSagaTopics.HotelBook,
+                BookingSagaTopics.HotelBooked,
+                BookingSagaTopics.HotelFailed,
+                BookingSagaTopics.FlightCancel,
+                BookingSagaTopics.FlightCancelled,
+                BookingSagaTopics.BookingDLQ
+            };
+
+            try
+            {
+                var metadata = adminClient.GetMetadata(TimeSpan.FromSeconds(10));
+
+                var existingTopics = metadata.Topics
+                    .Select(t => t.Topic)
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var topicsToCreate = requiredTopics
+                    .Where(t => !existingTopics.Contains(t))
+                    .Select(t => new TopicSpecification
+                    {
+                        Name = t,
+                        NumPartitions = 3,
+                        ReplicationFactor = 1
+                    })
+                    .ToList();
+
+                if (!topicsToCreate.Any())
+                {
+                    Console.WriteLine("All Kafka saga topics already exist.");
+                    return;
+                }
+
+                await adminClient.CreateTopicsAsync(
+                    topicsToCreate,
+                    new CreateTopicsOptions
+                    {
+                        RequestTimeout = TimeSpan.FromSeconds(15)
+                    });
+
+                foreach (var topic in topicsToCreate)
+                {
+                    Console.WriteLine($"Kafka topic '{topic.Name}' created.");
+                }
+            }
+            catch (CreateTopicsException ex)
+            {
+                foreach (var result in ex.Results)
+                {
+                    if (result.Error.Code == ErrorCode.TopicAlreadyExists)
+                    {
+                        Console.WriteLine($"Kafka topic '{result.Topic}' already exists.");
+                    }
+                    else
+                    {
+                        Console.WriteLine(
+                            $"Failed to create topic '{result.Topic}': {result.Error.Reason}");
+                        throw;
+                    }
+                }
             }
         }
     }

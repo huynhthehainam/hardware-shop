@@ -8,5 +8,6 @@ namespace HardwareShop.Application.Services
         Task EnsureClientExistsAsync(string realm);
         Task<string> EnsureUserExistsAsync(string realm);
         Task EnsureRealmExistsAsync(string realm);
+        Task EnsureKafkaTopicsExistAsync();
     }
 }

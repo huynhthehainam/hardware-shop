@@ -14,7 +14,6 @@ namespace HardwareShop.Domain.Models
         }
         public Guid Id { get; set; } = Guid.CreateVersion7();
         public string Name { get; set; } = string.Empty;
-
         public string? Address { get; set; }
 
         public Guid ShopId { get; set; }
@@ -30,6 +29,17 @@ namespace HardwareShop.Domain.Models
         {
             get => lazyLoader?.Load(this, ref warehouseProducts);
             set => warehouseProducts = value;
+        }
+
+        public static Warehouse Create(string name, string? address, Guid shopId)
+        {
+            return new Warehouse
+            {
+                Id = Guid.CreateVersion7(),
+                Name = name,
+                Address = address,
+                ShopId = shopId
+            };
         }
     }
 }

@@ -50,6 +50,10 @@ namespace HardwareShop.DatabaseMigration
                 var userId = await seeder.EnsureUserExistsAsync(realm);
                 await seeder.SeedDataAsync(userId);
                 Console.WriteLine("Database seeding completed.");
+
+                // Ensure Kafka topics exist
+                await seeder.EnsureKafkaTopicsExistAsync();
+                Console.WriteLine("Kafka topics verification completed.");
             }
         }
     }
