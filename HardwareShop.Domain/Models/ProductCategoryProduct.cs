@@ -13,7 +13,7 @@ namespace HardwareShop.Domain.Models
         {
         }
 
-        public int ProductCategoryId { get; set; }
+        public Guid ProductCategoryId { get; set; }
         private ProductCategory? productCategory;
         public ProductCategory? ProductCategory
         {
@@ -21,7 +21,7 @@ namespace HardwareShop.Domain.Models
             set => productCategory = value;
         }
 
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
         private Product? product;
         public Product? Product
         {

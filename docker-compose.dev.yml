@@ -1,0 +1,110 @@
+version: "3.4"
+networks:
+  api-shop:
+    driver: bridge
+
+services:
+  redis:
+    image: redis
+    networks:
+      - api-shop
+    restart: unless-stopped
+    depends_on:
+      - db
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=Doyouloveme1029!
+      - MSSQL_PID=Express
+    restart: unless-stopped
+    networks:
+      - api-shop
+    ports:
+      - "1434:1433"
+
+
+  broker:
+    image: apache/kafka:3.9.0
+    hostname: broker
+    container_name: broker
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://broker:29092,CONTROLLER://broker:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_NODE_ID: 1
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:29093
+      KAFKA_LOG_DIRS: /tmp/kraft-combined-logs
+      CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
+    networks:
+      - api-shop
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    networks:
+      - api-shop
+    ports:
+      - "8080:8080"
+    depends_on:
+      - broker
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=broker:29092
+
+  web-api:
+    build:
+      context: .
+      dockerfile: HardwareShop.WebApi/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "5068:5000"
+    networks:
+      - api-shop
+    environment:
+      - ASPNETCORE_URLS=http://+:5000
+      - ASPNETCORE_ENVIRONMENT=Docker
+    depends_on:
+      - db
+      - redis
+      - broker
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.3
+    networks:
+      - api-shop
+    ports:
+      - "8081:8080"
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=postgres
+      - KC_DB_URL_HOST=keycloak-db
+      - KC_DB_URL_DATABASE=keycloak
+      - KC_DB_USERNAME=keycloak
+      - KC_DB_PASSWORD=keycloak
+    depends_on:
+      - keycloak-db
+    command: start-dev
+
+  keycloak-db:
+    image: postgres:15
+    networks:
+      - api-shop
+    environment:
+      - POSTGRES_DB=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_PASSWORD=keycloak
+    volumes:
+      - keycloak-db-data:/var/lib/postgresql/data
+
+volumes:
+  keycloak-db-data:
+  db-shard-data:

@@ -12,14 +12,10 @@ namespace HardwareShop.WebApi.GraphQL
 
         [Authorize]
 
-        public CreatedShopDto? CreateShop([Service] IShopService shopService, [Service] ICurrentUserService currentUserService, CreateShopCommand command, string str)
+        public CreatedShopDto? CreateShop([Service] ICurrentUserService currentUserService, CreateShopCommand command, string str)
         {
-            if (!currentUserService.IsSystemAdmin())
-            {
-                return null;
-            }
-            var response = shopService.CreateShop(command.Name ?? "", command.Address, command.CashUnitId.GetValueOrDefault());
-            return response.Result;
+            return null;
+
         }
     }
 }

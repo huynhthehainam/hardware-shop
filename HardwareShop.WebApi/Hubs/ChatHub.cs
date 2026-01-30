@@ -78,16 +78,12 @@ namespace HardwareShop.WebApi.Hubs
     public sealed class ChatHub : Hub
     {
         private readonly ICurrentUserService currentUserService;
-        private readonly IChatService chatService;
-        private readonly IShopService shopService;
         private readonly IChatHubController chatHubController;
-        public ChatHub(ICurrentUserService currentUserService, IChatService chatService, IChatHubController chatHubController, IShopService shopService)
+        public ChatHub(ICurrentUserService currentUserService, IChatHubController chatHubController)
         {
             Debug.WriteLine("Chat hub is established");
             this.currentUserService = currentUserService;
-            this.chatService = chatService;
             this.chatHubController = chatHubController;
-            this.shopService = shopService;
         }
         public override async Task OnConnectedAsync()
         {
@@ -97,22 +93,9 @@ namespace HardwareShop.WebApi.Hubs
             chatHubController.AddConnection(currentUserGuid, connectionId);
 
             await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByUserId(currentUserGuid));
-            var userGuids = new List<string>();
 
-            var shop = await shopService.GetShopDtoByCurrentUserIdAsync();
-            if (shop != null)
-            {
-                await Groups.AddToGroupAsync(connectionId, ChatHubHelper.GenerateGroupNameByShopId(shop.Id));
-            }
-            var chatSessions = await chatService.GetContactsOfCurrentUserAsync();
-            if (chatSessions != null)
-            {
-                foreach (var session in chatSessions)
-                {
-                    session.Status = chatHubController.CheckStatusByUserIds(session.Users.Where(e => e.UserGuid != currentUserGuid).Select(e => e.UserGuid)) ? "online" : "offline";
-                }
-                await Clients.Caller.SendAsync("InitContacts", chatSessions);
-            }
+
+
 
             await Clients.Others.SendAsync("SomeOneConnected", new { UserId = currentUserGuid });
 
@@ -134,44 +117,16 @@ namespace HardwareShop.WebApi.Hubs
         }
         public async Task JoinChatSession(List<Guid> userGuids)
         {
-            var createdChatSession = await chatService.CreateChatSessionAsync(userGuids);
-            if (createdChatSession != null)
-            {
-                if (createdChatSession.IsCreated)
-                {
-                    await SendMultipleUserIds(createdChatSession.AffectedUserIds, client => client.SendAsync("SomeoneCreatedChatSession", createdChatSession));
-                }
-                else
-                {
-                    var isSuccess = await chatService.MarkAsReadForCurrentUserAsync(createdChatSession.Id);
-                    if (isSuccess)
-                    {
-                        await SendMultipleUserIds(new List<Guid> { createdChatSession.CreatedUserGuid }, client =>
-                            client.SendAsync("OtherDeviceReadAllMessage", new { ChatSessionId = createdChatSession.Id })
-                        );
-                    }
-                    await Clients.Caller.SendAsync("SuccessfullyCreatedChatSession", createdChatSession);
-                }
-            }
-            else
-            {
-                await Clients.Caller.SendAsync("UnsucessfullyCreatedChatSession");
-            }
+
         }
 
         public async Task LoadMoreMessage(int sessionId, PagingModel pagingModel)
         {
-            await Clients.Caller.SendAsync("GetMoreMessages", await chatService.GetMessagesAsync(sessionId, pagingModel));
         }
 
         public async Task SendChatMessage(int sessionId, string msg)
         {
-            if (sessionId <= 0) return;
-            CreatedChatMessageDto? createdChatMessage = await chatService.CreateChatMessageAsync(sessionId, msg);
-            if (createdChatMessage != null)
-            {
-                await SendMultipleUserIds(createdChatMessage.AffectedUsers.Select(e => e.UserGuid), client => client.SendAsync("SomeoneSentMessage", createdChatMessage));
-            }
+
         }
     }
 }

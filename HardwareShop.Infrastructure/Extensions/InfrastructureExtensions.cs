@@ -19,7 +19,6 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddDbContext<MainDatabaseContext>(options =>
                   options.UseSqlServer(connectionString));
             services.AddScoped<DbContext, MainDatabaseContext>();
-            services.AddScoped<IUserService, UserService>();
 
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<IUnitCategoryService, UnitCategoryService>();

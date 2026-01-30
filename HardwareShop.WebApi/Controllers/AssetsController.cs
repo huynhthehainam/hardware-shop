@@ -12,8 +12,8 @@ namespace HardwareShop.WebApi.Controllers
         {
             this.assetService = assetService;
         }
-        [HttpGet("{id:long}")]
-        public IActionResult GetAssetById([FromRoute] long id)
+        [HttpGet("{id:guid}")]
+        public IActionResult GetAssetById([FromRoute] Guid id)
         {
             // Some comments
             var assetResponse = assetService.GetAssetById(id);
