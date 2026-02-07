@@ -126,28 +126,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SecretValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    InterfaceSettings = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Users_Countries_PhoneCountryId",
-                        column: x => x.PhoneCountryId,
-                        principalTable: "Countries",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Units",
                 columns: table => new
                 {
@@ -166,58 +144,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         name: "FK_Units_UnitCategories_UnitCategoryId",
                         column: x => x.UnitCategoryId,
                         principalTable: "UnitCategories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Notifications",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Variant = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Translation = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TranslationParams = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsDismissed = table.Column<bool>(type: "bit", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Notifications", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Notifications_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserAssets",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserAssets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_UserAssets_Assets_AssetId",
-                        column: x => x.AssetId,
-                        principalTable: "Assets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_UserAssets_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -311,7 +237,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     PriceForCustomer = table.Column<double>(type: "float", nullable: false),
                     HasAutoCalculatePermission = table.Column<bool>(type: "bit", nullable: false),
                     ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UnitId = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -321,12 +246,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         name: "FK_Products_Shops_ShopId",
                         column: x => x.ShopId,
                         principalTable: "Shops",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Products_Units_UnitId",
-                        column: x => x.UnitId,
-                        principalTable: "Units",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -403,28 +322,33 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserShops",
+                name: "Users",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false),
-                    ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneCountryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SecretValue = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RoleInShop = table.Column<int>(type: "int", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    InterfaceSettings = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_UserShops", x => x.UserId);
+                    table.PrimaryKey("PK_Users", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_UserShops_Shops_ShopId",
+                        name: "FK_Users_Countries_PhoneCountryId",
+                        column: x => x.PhoneCountryId,
+                        principalTable: "Countries",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Users_Shops_ShopId",
                         column: x => x.ShopId,
                         principalTable: "Shops",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_UserShops_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -470,10 +394,12 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -543,6 +469,84 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductUnits",
+                columns: table => new
+                {
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitId = table.Column<int>(type: "int", nullable: false),
+                    IsBaseUnit = table.Column<bool>(type: "bit", nullable: false),
+                    ConversionFactor = table.Column<double>(type: "float", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductUnits", x => new { x.ProductId, x.UnitId });
+                    table.ForeignKey(
+                        name: "FK_ProductUnits_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProductUnits_Units_UnitId",
+                        column: x => x.UnitId,
+                        principalTable: "Units",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Variant = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Translation = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TranslationParams = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsDismissed = table.Column<bool>(type: "bit", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserAssets",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AssetType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AssetId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserAssets", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_UserAssets_Assets_AssetId",
+                        column: x => x.AssetId,
+                        principalTable: "Assets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_UserAssets_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "WarehouseProducts",
                 columns: table => new
                 {
@@ -600,7 +604,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UnitPrice = table.Column<double>(type: "float", nullable: false),
+                    UnitId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -690,8 +696,8 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_UnitId",
-                table: "Products",
+                name: "IX_ProductUnits_UnitId",
+                table: "ProductUnits",
                 column: "UnitId");
 
             migrationBuilder.CreateIndex(
@@ -740,8 +746,8 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 column: "PhoneCountryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserShops_ShopId",
-                table: "UserShops",
+                name: "IX_Users_ShopId",
+                table: "Users",
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
@@ -780,6 +786,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 name: "ProductCategoryProducts");
 
             migrationBuilder.DropTable(
+                name: "ProductUnits");
+
+            migrationBuilder.DropTable(
                 name: "SagaStates");
 
             migrationBuilder.DropTable(
@@ -796,9 +805,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "UserAssets");
-
-            migrationBuilder.DropTable(
-                name: "UserShops");
 
             migrationBuilder.DropTable(
                 name: "WarehouseProducts");

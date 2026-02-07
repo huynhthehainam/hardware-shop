@@ -48,6 +48,15 @@ namespace HardwareShop.Application.Models
         }
         public ApplicationResponse() { }
 
+        public static ApplicationResponse<T> Success(T result)
+        {
+            return new ApplicationResponse<T>(result);
+        }
+        public static ApplicationResponse<T> Failure(ApplicationError error)
+        {
+            return new ApplicationResponse<T>(error);
+        }
+
     }
     public class ApplicationResponse : ApplicationResponse<string>
     {

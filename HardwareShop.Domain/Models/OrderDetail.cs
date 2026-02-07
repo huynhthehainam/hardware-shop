@@ -30,7 +30,9 @@ namespace HardwareShop.Domain.Models
         }
 
         public double Quantity { get; set; }
-        public string? Description { get; set; }
+        public string? Note { get; set; }
+        public double UnitPrice { get; set; }
+        public int UnitId { get; set; }
 
     }
 }

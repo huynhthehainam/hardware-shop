@@ -40,13 +40,13 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref unitCategory);
             set => unitCategory = value;
         }
-
-        private ICollection<Product>? products;
-        public ICollection<Product>? Products
+        private ICollection<ProductUnit>? productUnits;
+        public ICollection<ProductUnit>? ProductUnits
         {
-            get => lazyLoader?.Load(this, ref products);
-            set => products = value;
+            get => lazyLoader?.Load(this, ref productUnits);
+            set => productUnits = value;
         }
+
         private ICollection<Shop>? shops;
         public ICollection<Shop>? Shops
         {

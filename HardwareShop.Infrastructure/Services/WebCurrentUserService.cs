@@ -26,9 +26,9 @@ namespace HardwareShop.Infrastructure.Services
         {
             return true;
         }
-        public Guid GetUserGuid()
+        public Guid GetUserId()
         {
-            return GetCacheUser().Guid;
+            return GetCacheUser().Id;
         }
     }
 }

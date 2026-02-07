@@ -31,12 +31,11 @@ namespace HardwareShop.Domain.Models
             set => shop = value;
         }
 
-        public int UnitId { get; set; }
-        private Unit? unit;
-        public Unit? Unit
+        private ICollection<ProductUnit>? productUnits;
+        public ICollection<ProductUnit>? ProductUnits
         {
-            get => lazyLoader?.Load(this, ref unit);
-            set => unit = value;
+            get => lazyLoader?.Load(this, ref productUnits);
+            set => productUnits = value;
         }
 
         private ICollection<OrderDetail>? orderDetails;

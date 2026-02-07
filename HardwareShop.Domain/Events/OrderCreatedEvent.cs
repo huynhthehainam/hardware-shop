@@ -5,15 +5,11 @@ namespace HardwareShop.Domain.Events
 {
     public class OrderCreatedEvent : DomainEvent
     {
-        public Guid OrderId { get; }
-        public Guid UserId { get; }
-        public DateTime CreatedAt { get; }
+        public required Guid OrderId { get; set; }
+        public required Guid CustomerId { get; set; }
+        public required DateTime CreatedAt { get; set; } 
+        public required Guid ShopId { get; set; }
 
-        public OrderCreatedEvent(Guid orderId, Guid userId, DateTime createdAt)
-        {
-            OrderId = orderId;
-            UserId = userId;
-            CreatedAt = createdAt;
-        }
+
     }
 }

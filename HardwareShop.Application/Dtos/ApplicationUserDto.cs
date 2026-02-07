@@ -10,7 +10,7 @@ namespace HardwareShop.Application.Dtos
         public string? Email { get; set; }
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = String.Empty;
-        public Guid Guid { get; set; }
+        public Guid Id { get; set; }
         public ApplicationUserDto() { }
     }
 }

@@ -1,4 +1,6 @@
 
+using HardwareShop.Domain.Models;
+
 namespace HardwareShop.Application.CQRS.ShopArea.Interfaces
 {
     public interface IShopRepository

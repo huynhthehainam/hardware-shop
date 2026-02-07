@@ -1,12 +1,13 @@
 using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Events;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Interfaces;
 
 namespace HardwareShop.Domain.Models
 {
-    public class Order : EntityBase, ITrackingDate
+    public class Order : AuditableEntityBase
     {
-        public Order()
+        public Order() : base()
         {
         }
 
@@ -15,8 +16,6 @@ namespace HardwareShop.Domain.Models
         }
 
         public Guid Id { get; set; } = Guid.CreateVersion7();
-        public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
-        public DateTime? LastModifiedDate { get; set; }
 
         public Guid CustomerId { get; set; }
         private Customer? customer;
@@ -37,6 +36,34 @@ namespace HardwareShop.Domain.Models
         {
             get => lazyLoader?.Load(this, ref details);
             set => details = value;
+        }
+
+        public Guid AddOrderDetail(OrderDetail orderDetail)
+        {
+            orderDetail.OrderId = this.Id;
+            this.Details?.Add(orderDetail);
+            return orderDetail.Id;
+        }
+        public static Order CreateNew(Guid customerId, Guid shopId, Guid createdBy)
+        {
+
+            var order = new Order
+            {
+                Id = Guid.CreateVersion7(),
+                CustomerId = customerId,
+                ShopId = shopId,
+                CreatedDate = DateTime.UtcNow,
+                CreatedBy = createdBy,
+                Details = new List<OrderDetail>()
+            };
+            order.AddDomainEvent(new OrderCreatedEvent()
+            {
+                CreatedAt = order.CreatedDate,
+                OrderId = order.Id,
+                CustomerId = order.CustomerId,
+                ShopId = order.ShopId
+            });
+            return order;
         }
 
     }

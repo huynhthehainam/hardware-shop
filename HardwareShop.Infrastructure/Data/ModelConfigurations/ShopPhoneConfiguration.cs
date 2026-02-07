@@ -2,7 +2,7 @@ using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HardwareShop.Infrastructure.ModelConfigurations
+namespace HardwareShop.Infrastructure.Data.ModelConfigurations
 {
     public sealed class ShopPhoneConfiguration : IEntityTypeConfiguration<ShopPhone>
     {

@@ -26,12 +26,13 @@ namespace HardwareShop.Domain.Models
             set => assets = value;
         }
 
-        private ICollection<UserShop>? userShops;
-        public ICollection<UserShop>? UserShops
+        private ICollection<User>? users;
+        public ICollection<User>? Users
         {
-            get => lazyLoader?.Load(this, ref userShops);
-            set => userShops = value;
+            get => lazyLoader?.Load(this, ref users);
+            set => users = value;
         }
+
 
         private ICollection<ProductCategory>? productCategories;
         public ICollection<ProductCategory>? ProductCategories

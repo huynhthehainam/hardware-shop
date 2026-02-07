@@ -13,7 +13,7 @@ namespace HardwareShop.Infrastructure.Data
         }
         public DbSet<Asset> Assets => Set<Asset>();
         public DbSet<UserAsset> UserAssets => Set<UserAsset>();
-        public DbSet<UserShop> UserShops => Set<UserShop>();
+        public DbSet<ProductUnit> ProductUnits => Set<ProductUnit>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Shop> Shops => Set<Shop>();
         public DbSet<ShopAsset> ShopAssets => Set<ShopAsset>();
@@ -24,7 +24,7 @@ namespace HardwareShop.Infrastructure.Data
         public DbSet<ProductAsset> ProductAssets => Set<ProductAsset>();
         public DbSet<CustomerDebt> CustomerDebts => Set<CustomerDebt>();
         public DbSet<CustomerDebtHistory> CustomerDebtHistories => Set<CustomerDebtHistory>();
-       
+
         public DbSet<User> Users => Set<User>();
         public DbSet<Warehouse> Warehouses => Set<Warehouse>();
         public DbSet<WarehouseProduct> WarehouseProducts => Set<WarehouseProduct>();

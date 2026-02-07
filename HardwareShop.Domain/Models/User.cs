@@ -28,11 +28,13 @@ namespace HardwareShop.Domain.Models
         {
 
         }
-        private UserShop? userShop;
-        public UserShop? UserShop
+        public Guid ShopId { get; set; }
+        public UserShopRole RoleInShop { get; set; } = UserShopRole.Staff;
+        private Shop? shop;
+        public Shop? Shop
         {
-            get => lazyLoader?.Load(this, ref userShop);
-            set => userShop = value;
+            get => lazyLoader?.Load(this, ref shop);
+            set => shop = value;
         }
         public bool IsDeleted { get; set; }
 

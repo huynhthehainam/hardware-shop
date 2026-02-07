@@ -2,7 +2,7 @@ using HardwareShop.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace HardwareShop.Infrastructure.ModelConfigurations
+namespace HardwareShop.Infrastructure.Data.ModelConfigurations
 {
     public sealed class UserConfiguration : IEntityTypeConfiguration<User>
     {
@@ -12,6 +12,7 @@ namespace HardwareShop.Infrastructure.ModelConfigurations
         {
             _ = u.HasKey(a => a.Id);
             _ = u.HasOne(e => e.PhoneCountry).WithMany(e => e.Users).HasForeignKey(e => e.PhoneCountryId).OnDelete(DeleteBehavior.SetNull);
+            _ = u.HasOne(e => e.Shop).WithMany(e => e.Users).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

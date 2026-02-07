@@ -453,29 +453,6 @@ namespace HardwareShop.Infrastructure.Services
                 _ = db.SaveChanges();
 
 
-
-                User newUser = new()
-                {
-                    Id = Guid.Parse(firstUserId),
-                    Phone = "+84967044037",
-
-                    PhoneCountryId = country.Id,
-                    SecretValue = "123",
-                    Assets = new UserAsset[]
-                    {
-                            new UserAsset
-                            {
-                                AssetType = UserAssetConstants.AvatarAssetType,
-                               Asset =userAsset,
-                            }
-                    }
-                };
-
-                _ = db.Users.Add(newUser);
-                _ = db.SaveChanges();
-
-
-
                 Shop shop = new()
                 {
                     Name = "Admin shop",
@@ -498,23 +475,14 @@ namespace HardwareShop.Infrastructure.Services
                          }
                     },
                     Assets = new ShopAsset[]
-                    {
+                               {
                             new ShopAsset
                             {
                                 AssetType = ShopAssetConstants.LogoAssetType,
                                Asset =shopAsset,
                             }
-                    },
-                    UserShops = new UserShop[]
-                    {
-                            new UserShop
-                            {
-                                UserId =  newUser.Id,
-                                Role  = UserShopRole.Admin,
+                               },
 
-                            },
-
-                    },
                     Customers = new Customer[] {
                                 new Customer{
                                     Address="HCM",
@@ -528,12 +496,35 @@ namespace HardwareShop.Infrastructure.Services
 
                 _ = db.Shops.Add(shop);
                 _ = db.SaveChanges();
+                User newUser = new()
+                {
+                    Id = Guid.Parse(firstUserId),
+                    Phone = "+84967044037",
+                    ShopId = shop.Id,
+                    PhoneCountryId = country.Id,
+                    SecretValue = "123",
+                    Assets = new UserAsset[]
+                    {
+                            new UserAsset
+                            {
+                                AssetType = UserAssetConstants.AvatarAssetType,
+                               Asset =userAsset,
+                            }
+                    }
+                };
+
+                _ = db.Users.Add(newUser);
+                _ = db.SaveChanges();
+
+
+
+
+
 
                 Product product = new()
                 {
                     Name = "H13x26",
                     Mass = 2.5,
-                    Unit = unit6,
                     PercentForCustomer = 8,
                     PriceForCustomer = 12000,
                     ShopId = shop.Id,
@@ -554,7 +545,6 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     Name = "H20x40",
                     Mass = 2.5,
-                    Unit = unit6,
                     PercentForCustomer = 8,
                     PriceForCustomer = 12000,
                     ShopId = shop.Id,
@@ -575,7 +565,7 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     Name = "H30x60",
                     Mass = 2.5,
-                    Unit = unit6,
+
                     PercentForCustomer = 8,
                     PriceForCustomer = 12000,
                     ShopId = shop.Id,
@@ -596,7 +586,7 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     Name = "V4",
                     Mass = 2.5,
-                    Unit = unit6,
+
                     PercentForCustomer = 8,
                     PriceForCustomer = 12000,
                     ShopId = shop.Id,
@@ -617,7 +607,7 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     Name = "V6",
                     Mass = 2.5,
-                    Unit = unit6,
+
                     PercentForCustomer = 8,
                     PriceForCustomer = 12000,
                     OriginalPrice = 10000,
@@ -638,7 +628,7 @@ namespace HardwareShop.Infrastructure.Services
                 {
                     Name = "V3",
                     Mass = 2.5,
-                    Unit = unit6,
+
                     PercentForCustomer = 8,
                     PriceForCustomer = 12000,
                     OriginalPrice = 10000,
@@ -726,6 +716,52 @@ namespace HardwareShop.Infrastructure.Services
                 _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
                 _ = db.SaveChanges();
 
+
+                var productUnit = new ProductUnit
+                {
+                    ProductId = product.Id,
+                    UnitId = unit3.Id,
+                    IsBaseUnit = true,
+                    ConversionFactor = 1,
+                };
+                var productUnit2 = new ProductUnit
+                {
+                    ProductId = product.Id,
+                    UnitId = unit4.Id,
+                    IsBaseUnit = false,
+                    ConversionFactor = 6,
+                };
+
+                var productUnit3 = new ProductUnit
+                {
+                    ProductId = product2.Id,
+                    UnitId = unit3.Id,
+                    IsBaseUnit = true,
+                    ConversionFactor = 1,
+                };
+                var productUnit4 = new ProductUnit
+                {
+                    ProductId = product2.Id,
+                    UnitId = unit4.Id,
+                    IsBaseUnit = false,
+                    ConversionFactor = 6,
+                };
+                var productUnit5 = new ProductUnit
+                {
+                    ProductId = product3.Id,
+                    UnitId = unit3.Id,
+                    IsBaseUnit = true,
+                    ConversionFactor = 1,
+                };
+                var productUnit6 = new ProductUnit
+                {
+                    ProductId = product3.Id,
+                    UnitId = unit4.Id,
+                    IsBaseUnit = false,
+                    ConversionFactor = 6,
+                };
+                db.ProductUnits.AddRange([productUnit, productUnit2, productUnit3, productUnit4, productUnit5, productUnit6]);
+                db.SaveChanges();
             }
         }
 

@@ -64,7 +64,7 @@ namespace HardwareShop.Infrastructure.Extensions
                 FirstName = claims.FirstOrDefault(e => e.Type == ClaimTypes.GivenName)?.Value ?? "",
                 LastName = claims.FirstOrDefault(e => e.Type == ClaimTypes.Surname)?.Value ?? "",
                 Roles = roles.Distinct().ToArray(),
-                Guid = Guid.TryParse(claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier)?.Value ?? "", out var id)
+                Id = Guid.TryParse(claims.FirstOrDefault(e => e.Type == ClaimTypes.NameIdentifier)?.Value ?? "", out var id)
                                 ? id
                                 : Guid.Empty
             };

@@ -88,7 +88,7 @@ namespace HardwareShop.WebApi.Hubs
         public override async Task OnConnectedAsync()
         {
             Debug.WriteLine($"Connection {Context.ConnectionId} is established");
-            var currentUserGuid = currentUserService.GetUserGuid();
+            var currentUserGuid = currentUserService.GetUserId();
             var connectionId = Context.ConnectionId;
             chatHubController.AddConnection(currentUserGuid, connectionId);
 
@@ -103,7 +103,7 @@ namespace HardwareShop.WebApi.Hubs
         }
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            var currentUserGuid = currentUserService.GetUserGuid();
+            var currentUserGuid = currentUserService.GetUserId();
             Debug.WriteLine($"Connection {Context.ConnectionId} is removed");
             chatHubController.RemoveByUserId(currentUserGuid, Context.ConnectionId);
             await Clients.Others.SendAsync("SomeOneDisconnected", new { UserGuid = currentUserGuid });

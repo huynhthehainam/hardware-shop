@@ -16,6 +16,7 @@ namespace HardwareShop.Application.Extensions
         => domainEvent switch
         {
             ShopCreatedEvent shopCreatedEvent => new DomainEventNotification<ShopCreatedEvent>(shopCreatedEvent),
+            OrderCreatedEvent orderCreatedEvent => new DomainEventNotification<OrderCreatedEvent>(orderCreatedEvent),
             _ => throw new ArgumentException($"No mapping for domain event type {domainEvent.GetType()}"),
         };
     }

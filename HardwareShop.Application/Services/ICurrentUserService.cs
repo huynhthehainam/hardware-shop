@@ -3,6 +3,6 @@
     public interface ICurrentUserService
     {
         bool IsSystemAdmin();
-        Guid GetUserGuid();
+        Guid GetUserId();
     }
 }

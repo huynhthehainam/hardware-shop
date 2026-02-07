@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HardwareShop.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20260130113847_Initial")]
+    [Migration("20260207030359_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -218,10 +218,16 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
                     b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime?>("LastModifiedDate")
@@ -245,7 +251,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Description")
+                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("OrderId")
@@ -255,6 +261,12 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Quantity")
+                        .HasColumnType("float");
+
+                    b.Property<int>("UnitId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("UnitPrice")
                         .HasColumnType("float");
 
                     b.HasKey("Id");
@@ -306,14 +318,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ShopId");
-
-                    b.HasIndex("UnitId");
 
                     b.ToTable("Products");
                 });
@@ -382,6 +389,27 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.HasIndex("ProductCategoryId");
 
                     b.ToTable("ProductCategoryProducts");
+                });
+
+            modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
+                {
+                    b.Property<Guid>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("UnitId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("ConversionFactor")
+                        .HasColumnType("float");
+
+                    b.Property<bool>("IsBaseUnit")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ProductId", "UnitId");
+
+                    b.HasIndex("UnitId");
+
+                    b.ToTable("ProductUnits");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Shop", b =>
@@ -575,12 +603,20 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<Guid?>("PhoneCountryId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("RoleInShop")
+                        .HasColumnType("int");
+
                     b.Property<string>("SecretValue")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ShopId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PhoneCountryId");
+
+                    b.HasIndex("ShopId");
 
                     b.ToTable("Users");
                 });
@@ -610,24 +646,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserAssets");
-                });
-
-            modelBuilder.Entity("HardwareShop.Domain.Models.UserShop", b =>
-                {
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Role")
-                        .HasColumnType("int");
-
-                    b.Property<Guid>("ShopId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("UserId");
-
-                    b.HasIndex("ShopId");
-
-                    b.ToTable("UserShops");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Warehouse", b =>
@@ -843,15 +861,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HardwareShop.Domain.Models.Unit", "Unit")
-                        .WithMany("Products")
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Shop");
-
-                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.ProductAsset", b =>
@@ -901,6 +911,25 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("ProductCategory");
+                });
+
+            modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
+                {
+                    b.HasOne("HardwareShop.Domain.Models.Product", "Product")
+                        .WithMany("ProductUnits")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Domain.Models.Unit", "Unit")
+                        .WithMany("ProductUnits")
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Shop", b =>
@@ -981,7 +1010,15 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .HasForeignKey("PhoneCountryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("HardwareShop.Domain.Models.Shop", "Shop")
+                        .WithMany("Users")
+                        .HasForeignKey("ShopId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("PhoneCountry");
+
+                    b.Navigation("Shop");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.UserAsset", b =>
@@ -999,25 +1036,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Asset");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("HardwareShop.Domain.Models.UserShop", b =>
-                {
-                    b.HasOne("HardwareShop.Domain.Models.Shop", "Shop")
-                        .WithMany("UserShops")
-                        .HasForeignKey("ShopId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("HardwareShop.Domain.Models.User", "User")
-                        .WithOne("UserShop")
-                        .HasForeignKey("HardwareShop.Domain.Models.UserShop", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Shop");
 
                     b.Navigation("User");
                 });
@@ -1099,6 +1117,8 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.Navigation("ProductCategoryProducts");
 
+                    b.Navigation("ProductUnits");
+
                     b.Navigation("WarehouseProducts");
                 });
 
@@ -1123,14 +1143,14 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.Navigation("ShopSetting");
 
-                    b.Navigation("UserShops");
+                    b.Navigation("Users");
 
                     b.Navigation("Warehouses");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Unit", b =>
                 {
-                    b.Navigation("Products");
+                    b.Navigation("ProductUnits");
 
                     b.Navigation("Shops");
                 });
@@ -1145,8 +1165,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Navigation("Assets");
 
                     b.Navigation("Notifications");
-
-                    b.Navigation("UserShop");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Warehouse", b =>
