@@ -524,14 +524,9 @@ namespace HardwareShop.Infrastructure.Services
                 Product product = new()
                 {
                     Name = "H13x26",
-                    Mass = 2.5,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
+
                     ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
+
                     ProductAssets = new ProductAsset[]{
                         new ProductAsset
                         {
@@ -544,14 +539,9 @@ namespace HardwareShop.Infrastructure.Services
                 Product product2 = new()
                 {
                     Name = "H20x40",
-                    Mass = 2.5,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
+
                     ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
+
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
@@ -564,15 +554,9 @@ namespace HardwareShop.Infrastructure.Services
                 Product product3 = new()
                 {
                     Name = "H30x60",
-                    Mass = 2.5,
 
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
                     ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
+
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
@@ -585,15 +569,9 @@ namespace HardwareShop.Infrastructure.Services
                 Product product4 = new()
                 {
                     Name = "V4",
-                    Mass = 2.5,
 
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
                     ShopId = shop.Id,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
+
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
@@ -606,15 +584,9 @@ namespace HardwareShop.Infrastructure.Services
                 Product product5 = new()
                 {
                     Name = "V6",
-                    Mass = 2.5,
 
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    OriginalPrice = 10000,
                     ShopId = shop.Id,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
+
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
@@ -627,15 +599,9 @@ namespace HardwareShop.Infrastructure.Services
                 Product product6 = new()
                 {
                     Name = "V3",
-                    Mass = 2.5,
 
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    OriginalPrice = 10000,
                     ShopId = shop.Id,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
+
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
                                                 {
@@ -653,76 +619,19 @@ namespace HardwareShop.Infrastructure.Services
                 _ = db.Products.Add(product6);
                 _ = db.SaveChanges();
 
-
-                Warehouse warehouse1 = new()
-                {
-                    Name = "Kho 1",
-                    Address = "Châu Đức, BRVT",
-                    ShopId = shop.Id,
-                    WarehouseProducts = new WarehouseProduct[]{
-                        new WarehouseProduct(){
-                            ProductId = product.Id,
-                            Quantity = 200,
-                        },
-                        new WarehouseProduct(){
-                            ProductId=product2.Id,
-                            Quantity = 200,
-                        },
-                        new WarehouseProduct(){
-                            ProductId = product3.Id,
-                            Quantity = 300,
-                        },
-                        new WarehouseProduct(){
-                            ProductId = product4.Id,
-                            Quantity = 40.2,
-                        },
-                        new WarehouseProduct(){
-                            ProductId = product5.Id,
-                            Quantity = 32.1
-                        }
-                    }
-                };
-
-                _ = db.Warehouses.Add(warehouse1);
-                _ = db.SaveChanges();
-
-
-                ProductCategory productCategory = new()
-                {
-                    Name = "Hoa Sen",
-                    Description = "Hoa Sen",
-                    ShopId = shop.Id,
-                };
-                ProductCategory productCategory2 = new()
-                {
-                    Name = "Tôn",
-                    Description = "Tôn",
-                    ShopId = shop.Id,
-                };
-                _ = db.ProductCategories.Add(productCategory);
-                _ = db.ProductCategories.Add(productCategory2);
-                _ = db.SaveChanges();
-                ProductCategoryProduct productCategoryProduct = new()
-                {
-                    Product = product,
-                    ProductCategory = productCategory,
-                };
-                ProductCategoryProduct productCategoryProduct2 = new()
-                {
-                    Product = product,
-                    ProductCategory = productCategory2,
-                };
-                _ = db.ProductCategoryProducts.Add(productCategoryProduct);
-                _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
-                _ = db.SaveChanges();
-
-
                 var productUnit = new ProductUnit
                 {
                     ProductId = product.Id,
                     UnitId = unit3.Id,
                     IsBaseUnit = true,
                     ConversionFactor = 1,
+                    Mass = 2.5,
+                    PercentForCustomer = 8,
+                    PriceForCustomer = 12000,
+                    OriginalPrice = 10000,
+                    PercentForFamiliarCustomer = 6,
+                    PriceForFamiliarCustomer = 11000,
+                    PricePerMass = 600,
                 };
                 var productUnit2 = new ProductUnit
                 {
@@ -762,6 +671,70 @@ namespace HardwareShop.Infrastructure.Services
                 };
                 db.ProductUnits.AddRange([productUnit, productUnit2, productUnit3, productUnit4, productUnit5, productUnit6]);
                 db.SaveChanges();
+                Warehouse warehouse1 = new()
+                {
+                    Name = "Kho 1",
+                    Address = "Châu Đức, BRVT",
+                    ShopId = shop.Id,
+                    WarehouseProducts = new WarehouseProduct[]{
+                        new WarehouseProduct(){
+                         ProductUnitId=productUnit.Id,
+                            Quantity = 200,
+                        },
+                        new WarehouseProduct(){
+                            ProductUnitId=productUnit2.Id,
+                            Quantity = 200,
+                        },
+                        new WarehouseProduct(){
+                            ProductUnitId=productUnit3.Id,
+                            Quantity = 300,
+                        },
+                        new WarehouseProduct(){
+                            ProductUnitId=productUnit4.Id,
+                            Quantity = 40.2,
+                        },
+                        new WarehouseProduct(){
+                            ProductUnitId=productUnit5.Id,
+                            Quantity = 32.1
+                        }
+                    }
+                };
+
+                _ = db.Warehouses.Add(warehouse1);
+                _ = db.SaveChanges();
+
+
+                ProductCategory productCategory = new()
+                {
+                    Name = "Hoa Sen",
+                    Description = "Hoa Sen",
+                    ShopId = shop.Id,
+                };
+                ProductCategory productCategory2 = new()
+                {
+                    Name = "Tôn",
+                    Description = "Tôn",
+                    ShopId = shop.Id,
+                };
+                _ = db.ProductCategories.Add(productCategory);
+                _ = db.ProductCategories.Add(productCategory2);
+                _ = db.SaveChanges();
+                ProductCategoryProduct productCategoryProduct = new()
+                {
+                    Product = product,
+                    ProductCategory = productCategory,
+                };
+                ProductCategoryProduct productCategoryProduct2 = new()
+                {
+                    Product = product,
+                    ProductCategory = productCategory2,
+                };
+                _ = db.ProductCategoryProducts.Add(productCategoryProduct);
+                _ = db.ProductCategoryProducts.Add(productCategoryProduct2);
+                _ = db.SaveChanges();
+
+
+
             }
         }
 

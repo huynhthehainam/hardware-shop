@@ -21,18 +21,15 @@ namespace HardwareShop.Domain.Models
             set => order = value;
         }
 
-        public Guid ProductId { get; set; }
-        private Product? product;
-        public Product? Product
-        {
-            get => lazyLoader?.Load(this, ref product);
-            set => product = value;
-        }
-
         public double Quantity { get; set; }
         public string? Note { get; set; }
         public double UnitPrice { get; set; }
-        public int UnitId { get; set; }
-
+        public Guid ProductUnitId { get; set; }
+        private ProductUnit? productUnit;
+        public ProductUnit? ProductUnit
+        {
+            get => lazyLoader?.Load(this, ref productUnit);
+            set => productUnit = value;
+        }
     }
 }

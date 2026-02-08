@@ -1,5 +1,6 @@
 using HardwareShop.Application.CQRS.WarehouseArea.Interfaces;
 using HardwareShop.Domain.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HardwareShop.Infrastructure.Data.Repositories;
 
@@ -7,5 +8,14 @@ public class WarehouseRepository : BaseRepository<Warehouse>, IWarehouseReposito
 {
     public WarehouseRepository(MainDatabaseContext context) : base(context)
     {
+
+
+    }
+
+    public Task<List<WarehouseProduct>> GetwarehouseProductsByProductUnitIdsAsync(List<Guid> productIds, CancellationToken cancellationToken = default)
+    {
+        return context.WarehouseProducts
+              .Where(wp => productIds.Contains(wp.ProductUnitId))
+              .ToListAsync(cancellationToken);
     }
 }

@@ -19,9 +19,8 @@ namespace HardwareShop.Domain.Models
         public Guid Id { get; set; } = Guid.CreateVersion7();
         public double OldDebt { get; set; }
         public double ChangeOfDebt { get; set; }
-        public double NewDebt { get; set; }
         public string? Reason { get; set; }
-        public String? ReasonParams { get; set; }
+        public string? ReasonParams { get; set; }
         public Guid CustomerDebtId { get; set; }
         private CustomerDebt? customerDebt;
         public CustomerDebt? CustomerDebt

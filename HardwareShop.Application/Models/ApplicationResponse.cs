@@ -6,6 +6,7 @@ namespace HardwareShop.Application.Models
         NotPermitted,
         NotFound,
         Existed,
+        ServerError
     }
     public class ApplicationError
     {
@@ -31,6 +32,10 @@ namespace HardwareShop.Application.Models
         public static ApplicationError CreateNotPermittedError()
         {
             return new(ApplicationErrorType.NotPermitted, "Not permitted");
+        }
+        public static ApplicationError CreateExceptionError(string msg, Exception ex)
+        {
+            return new(ApplicationErrorType.ServerError, $"{msg} Exception: {ex.Message}");
         }
     }
     public class ApplicationResponse<T>

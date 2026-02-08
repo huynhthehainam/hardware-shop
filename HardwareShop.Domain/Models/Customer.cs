@@ -1,4 +1,5 @@
 ﻿using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Events;
 using HardwareShop.Domain.Extensions;
 
 namespace HardwareShop.Domain.Models
@@ -38,12 +39,30 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref debt);
             set => debt = value;
         }
-       
+
         private ICollection<Order>? orders;
         public ICollection<Order>? Orders
         {
             get => lazyLoader?.Load(this, ref orders);
             set => orders = value;
+        }
+        public double GetCurrentDebt()
+        {
+            return this.Debt?.Amount ?? 0;
+        }
+
+        public void AddDebt(double amount)
+        {
+            if (this.Debt == null)
+            {
+                this.Debt = new CustomerDebt()
+                {
+                    CustomerId = this.Id,
+                    Amount = 0
+                };
+            }
+            this.Debt.Amount += amount;
+            AddDomainEvent(new CustomerDebtChangedEvent(this.Id, this.Debt.Amount - amount, amount));
         }
     }
 }

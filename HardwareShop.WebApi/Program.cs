@@ -87,8 +87,8 @@ public static class Program
         #endregion
 
         #region ServicesConsumers
-        builder.Services.AddHostedService<FlightKafkaSagaConsumer>();
-        builder.Services.AddHostedService<HotelKafkaSagaConsumer>();
+        // builder.Services.AddHostedService<FlightKafkaSagaConsumer>();
+        // builder.Services.AddHostedService<HotelKafkaSagaConsumer>();
         #endregion
 
         #region MediatR

@@ -1,5 +1,10 @@
 using System;
+using HardwareShop.Application;
+using HardwareShop.Application.CQRS.CustomerArea.Interfaces;
+using HardwareShop.Application.CQRS.OrderArea.Interfaces;
+using HardwareShop.Application.CQRS.ProductArea.Interfaces;
 using HardwareShop.Application.CQRS.ShopArea.Interfaces;
+using HardwareShop.Application.CQRS.UserArea.Interfaces;
 using HardwareShop.Application.CQRS.WarehouseArea.Interfaces;
 using HardwareShop.Application.Services;
 using HardwareShop.Domain;
@@ -23,6 +28,7 @@ namespace HardwareShop.Infrastructure.Extensions
                   options.UseSqlServer(connectionString));
             services.AddScoped<DbContext, MainDatabaseContext>();
 
+            services.AddScoped<ITransactionService, TransactionService>();
             services.AddScoped<IUnitService, UnitService>();
             services.AddScoped<IUnitCategoryService, UnitCategoryService>();
             services.AddScoped<ICountryService, CountryService>();
@@ -33,9 +39,16 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
             services.AddScoped<ITestService, TestService>();
 
+            #region Repositories
+            services.AddScoped(typeof(IRepository<>), typeof(BaseRepository<>));
+
             services.AddScoped<IShopRepository, ShopRepository>();
-            services.AddScoped<IWarehouseRepository, WarehouseRepository>();    
-            
+            services.AddScoped<IWarehouseRepository, WarehouseRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<ICustomerRepository, CustomerRepository>();
+            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
+            #endregion
             return services;
         }
     }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HardwareShop.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(MainDatabaseContext))]
-    [Migration("20260207030359_Initial")]
+    [Migration("20260208070842_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -156,9 +156,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<double>("NewDebt")
-                        .HasColumnType("float");
-
                     b.Property<double>("OldDebt")
                         .HasColumnType("float");
 
@@ -224,6 +221,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<double>("CustomerDebtBeforeOrder")
+                        .HasColumnType("float");
+
                     b.Property<Guid>("CustomerId")
                         .HasColumnType("uniqueidentifier");
 
@@ -232,6 +232,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<double>("PaidAmount")
+                        .HasColumnType("float");
 
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier");
@@ -257,14 +260,11 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("ProductUnitId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
-
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
 
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float");
@@ -273,7 +273,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductId");
+                    b.HasIndex("ProductUnitId");
 
                     b.ToTable("OrderDetails");
                 });
@@ -284,36 +284,12 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("HasAutoCalculatePermission")
-                        .HasColumnType("bit");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<double?>("Mass")
-                        .HasColumnType("float");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("OriginalPrice")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PercentForCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PercentForFamiliarCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double>("PriceForCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PriceForFamiliarCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PricePerMass")
-                        .HasColumnType("float");
 
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier");
@@ -393,19 +369,61 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<double>("ConversionFactor")
+                        .HasColumnType("float");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasAutoCalculatePermission")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsBaseUnit")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("LastModifiedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<double?>("Mass")
+                        .HasColumnType("float");
+
+                    b.Property<double>("OriginalPrice")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PercentForCustomer")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PercentForFamiliarCustomer")
+                        .HasColumnType("float");
+
+                    b.Property<double>("PriceForCustomer")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PriceForFamiliarCustomer")
+                        .HasColumnType("float");
+
+                    b.Property<double?>("PricePerMass")
+                        .HasColumnType("float");
+
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("UnitId")
                         .HasColumnType("int");
 
-                    b.Property<double>("ConversionFactor")
-                        .HasColumnType("float");
+                    b.HasKey("Id");
 
-                    b.Property<bool>("IsBaseUnit")
-                        .HasColumnType("bit");
-
-                    b.HasKey("ProductId", "UnitId");
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("UnitId");
 
@@ -673,16 +691,21 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.WarehouseProduct", b =>
                 {
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid>("ProductUnitId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("WarehouseId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProductId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
-                    b.HasKey("ProductId", "WarehouseId");
+                    b.HasKey("ProductUnitId", "WarehouseId");
+
+                    b.HasIndex("ProductId");
 
                     b.HasIndex("WarehouseId");
 
@@ -842,15 +865,15 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HardwareShop.Domain.Models.Product", "Product")
+                    b.HasOne("HardwareShop.Domain.Models.ProductUnit", "ProductUnit")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductUnitId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
 
-                    b.Navigation("Product");
+                    b.Navigation("ProductUnit");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Product", b =>
@@ -1053,9 +1076,13 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.WarehouseProduct", b =>
                 {
-                    b.HasOne("HardwareShop.Domain.Models.Product", "Product")
+                    b.HasOne("HardwareShop.Domain.Models.Product", null)
                         .WithMany("WarehouseProducts")
-                        .HasForeignKey("ProductId")
+                        .HasForeignKey("ProductId");
+
+                    b.HasOne("HardwareShop.Domain.Models.ProductUnit", "ProductUnit")
+                        .WithMany("WarehouseProducts")
+                        .HasForeignKey("ProductUnitId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1065,7 +1092,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("Product");
+                    b.Navigation("ProductUnit");
 
                     b.Navigation("Warehouse");
                 });
@@ -1111,8 +1138,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Product", b =>
                 {
-                    b.Navigation("OrderDetails");
-
                     b.Navigation("ProductAssets");
 
                     b.Navigation("ProductCategoryProducts");
@@ -1125,6 +1150,13 @@ namespace HardwareShop.Infrastructure.Data.Migrations
             modelBuilder.Entity("HardwareShop.Domain.Models.ProductCategory", b =>
                 {
                     b.Navigation("ProductCategoryProducts");
+                });
+
+            modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
+                {
+                    b.Navigation("OrderDetails");
+
+                    b.Navigation("WarehouseProducts");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Shop", b =>

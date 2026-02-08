@@ -22,6 +22,7 @@ namespace HardwareShop.WebApi.Services
         void AddInvalidFieldError(string fieldName);
         void AddExistedEntityError(string entityName);
         void AddNotFoundEntityError(string entityName);
+        void AddServerError(string message);
         void AddNotPermittedError();
         void SetPageData<T>(PageData<T> pageData);
     }
@@ -156,6 +157,12 @@ namespace HardwareShop.WebApi.Services
             SetData(pageData.ToArray());
             totalItems = pageData.TotalRecords;
         }
+
+        public void AddServerError(string message)
+        {
+            AddError("SERVER_ERROR", message);
+            statusCode = 500;
+        }
     }
     public static class ResponseResultBuilderExtensions
     {
@@ -180,6 +187,9 @@ namespace HardwareShop.WebApi.Services
                         break;
                     case ApplicationErrorType.Existed:
                         responseResultBuilder.AddExistedEntityError(response.Error.Message ?? "");
+                        break;
+                    case ApplicationErrorType.ServerError:
+                        responseResultBuilder.AddServerError(response.Error.Message ?? "SERVER_ERROR");
                         break;
                 }
             }

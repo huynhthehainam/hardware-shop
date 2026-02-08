@@ -1,3 +1,4 @@
+using HardwareShop.Application.CQRS.CustomerArea.Interfaces;
 using HardwareShop.Application.CQRS.OrderArea.Commands;
 using HardwareShop.Application.CQRS.OrderArea.Interfaces;
 using HardwareShop.Application.CQRS.ProductArea.Interfaces;
@@ -11,42 +12,64 @@ using MediatR;
 namespace HardwareShop.Application.CQRS.OrderArea.Handlers;
 
 public class CreateOrderCommandHandler(IUserRepository userRepository, ICurrentUserService currentUserService,
-IMediator mediator,
+IMediator mediator, ITransactionService transactionService,
+ICustomerRepository customerRepository,
 IProductRepository productRepository, IOrderRepository orderRepository)
 : IRequestHandler<CreateOrderCommand, ApplicationResponse<Guid>>
 {
     public async Task<ApplicationResponse<Guid>> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
     {
-        var currentUserId = currentUserService.GetUserId();
-        var shop = await userRepository.GetShopByUserIdAsync(currentUserId, cancellationToken);
-        if (shop == null)
+        using var tx = await transactionService.BeginTransactionAsync(cancellationToken);
+        try
         {
-            return ApplicationResponse<Guid>.Failure(ApplicationError.CreateNotFoundError("Shop not found for the current user."));
-        }
-        var order = Order.CreateNew(request.CustomerId, shop.Id, currentUserId);
-        var productIds = request.ProductItems.Select(pi => pi.ProductId).ToList();
-        var products = await productRepository.GetProductsByProductIdsAsync(productIds, shop.Id, cancellationToken);
-        if (products.Count != productIds.Count)
-        {
-            return ApplicationResponse<Guid>.Failure(ApplicationError.CreateInvalidError("One or more products are invalid for this shop."));
-        }
-        foreach (var item in request.ProductItems)
-        {
-            order.AddOrderDetail(new OrderDetail
+            var currentUserId = currentUserService.GetUserId();
+            var shop = await userRepository.GetShopByUserIdAsync(currentUserId, cancellationToken);
+            if (shop == null)
             {
-                ProductId = item.ProductId,
-                Quantity = item.Quantity,
-                Note = item.Note,
-                UnitPrice = item.UnitPrice,
-                UnitId = item.UnitId,
-
-            });
+                return ApplicationResponse<Guid>.Failure(ApplicationError.CreateNotFoundError("Shop not found for the current user."));
+            }
+            var customer = await customerRepository.GetByIdAndShopIdAsync(request.CustomerId, shop.Id, cancellationToken);
+            if (customer == null)
+            {
+                return ApplicationResponse<Guid>.Failure(ApplicationError.CreateNotFoundError("Customer not found for this shop."));
+            }
+            var order = Order.CreateNew(customer, shop.Id, request.PaidAmount, currentUserId);
+            var productIds = request.ProductItems.Select(pi => pi.ProductId).ToList();
+            var products = await productRepository.GetProductsByProductIdsAsync(productIds, shop.Id, cancellationToken);
+            if (products.Count != productIds.Count)
+            {
+                return ApplicationResponse<Guid>.Failure(ApplicationError.CreateInvalidError("One or more products are invalid for this shop."));
+            }
+            var productAndUnitIds = request.ProductItems.Select(pi => (pi.ProductId, pi.UnitId)).Select(t => (t.Item1, t.Item2)).ToList();
+            var productUnits = await productRepository.GetProductUnitsByProductAndUnitIdsAsync(productAndUnitIds, cancellationToken);
+            foreach (var item in request.ProductItems)
+            {
+                var productUnit = productUnits.FirstOrDefault(pu => pu.ProductId == item.ProductId && pu.UnitId == item.UnitId);
+                if (productUnit == null)
+                {
+                    return ApplicationResponse<Guid>.Failure(ApplicationError.CreateInvalidError($"Invalid unit for product {item.ProductId}."));
+                }
+                order.AddOrderDetail(new OrderDetail
+                {
+                    Quantity = item.Quantity,
+                    Note = item.Note,
+                    UnitPrice = item.UnitPrice,
+                    ProductUnitId = productUnit.Id
+                });
+            }
+            order = await orderRepository.AddAsync(order, cancellationToken);
+            await orderRepository.SaveChangesAsync(cancellationToken);
+            foreach (var evt in order.GetDomainEvents())
+            {
+                await mediator.PublishDomainEventsAsync(evt, cancellationToken);
+            }
+            tx.Commit();
+            return ApplicationResponse<Guid>.Success(order.Id);
         }
-        order = await orderRepository.AddAsync(order, cancellationToken);
-        foreach (var evt in order.GetDomainEvents())
+        catch (Exception ex)
         {
-            await mediator.PublishDomainEventsAsync(evt, cancellationToken);
+            tx.Rollback();
+            return ApplicationResponse<Guid>.Failure(ApplicationError.CreateExceptionError("An error occurred while creating the order.", ex));
         }
-        return ApplicationResponse<Guid>.Success(order.Id);
     }
 }

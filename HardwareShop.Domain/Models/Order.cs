@@ -44,24 +44,28 @@ namespace HardwareShop.Domain.Models
             this.Details?.Add(orderDetail);
             return orderDetail.Id;
         }
-        public static Order CreateNew(Guid customerId, Guid shopId, Guid createdBy)
+        public double CustomerDebtBeforeOrder { get; set; }
+        public double PaidAmount { get; set; }
+        public double GetTotalAmount()
         {
-
+            return this.Details?.Sum(od => od.UnitPrice * od.Quantity) ?? 0;
+        }
+        public static Order CreateNew(Customer customer, Guid shopId, double paidAmount, Guid createdBy)
+        {
             var order = new Order
             {
                 Id = Guid.CreateVersion7(),
-                CustomerId = customerId,
+                CustomerId = customer.Id,
                 ShopId = shopId,
                 CreatedDate = DateTime.UtcNow,
                 CreatedBy = createdBy,
-                Details = new List<OrderDetail>()
+                Details = new List<OrderDetail>(),
+                CustomerDebtBeforeOrder = customer.GetCurrentDebt(),
+                PaidAmount = paidAmount
             };
             order.AddDomainEvent(new OrderCreatedEvent()
             {
-                CreatedAt = order.CreatedDate,
-                OrderId = order.Id,
-                CustomerId = order.CustomerId,
-                ShopId = order.ShopId
+                Order = order
             });
             return order;
         }

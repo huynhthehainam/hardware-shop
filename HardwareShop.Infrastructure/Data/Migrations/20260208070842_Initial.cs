@@ -228,14 +228,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Mass = table.Column<double>(type: "float", nullable: true),
-                    PricePerMass = table.Column<double>(type: "float", nullable: true),
-                    PercentForFamiliarCustomer = table.Column<double>(type: "float", nullable: true),
-                    PercentForCustomer = table.Column<double>(type: "float", nullable: true),
-                    PriceForFamiliarCustomer = table.Column<double>(type: "float", nullable: true),
-                    OriginalPrice = table.Column<double>(type: "float", nullable: false),
-                    PriceForCustomer = table.Column<double>(type: "float", nullable: false),
-                    HasAutoCalculatePermission = table.Column<bool>(type: "bit", nullable: false),
                     ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false)
                 },
@@ -396,6 +388,8 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ShopId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerDebtBeforeOrder = table.Column<double>(type: "float", nullable: false),
+                    PaidAmount = table.Column<double>(type: "float", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -472,14 +466,27 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 name: "ProductUnits",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UnitId = table.Column<int>(type: "int", nullable: false),
                     IsBaseUnit = table.Column<bool>(type: "bit", nullable: false),
-                    ConversionFactor = table.Column<double>(type: "float", nullable: false)
+                    ConversionFactor = table.Column<double>(type: "float", nullable: false),
+                    Mass = table.Column<double>(type: "float", nullable: true),
+                    PricePerMass = table.Column<double>(type: "float", nullable: true),
+                    PercentForFamiliarCustomer = table.Column<double>(type: "float", nullable: true),
+                    PercentForCustomer = table.Column<double>(type: "float", nullable: true),
+                    PriceForFamiliarCustomer = table.Column<double>(type: "float", nullable: true),
+                    OriginalPrice = table.Column<double>(type: "float", nullable: false),
+                    PriceForCustomer = table.Column<double>(type: "float", nullable: false),
+                    HasAutoCalculatePermission = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    LastModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductUnits", x => new { x.ProductId, x.UnitId });
+                    table.PrimaryKey("PK_ProductUnits", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProductUnits_Products_ProductId",
                         column: x => x.ProductId,
@@ -547,38 +554,12 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "WarehouseProducts",
-                columns: table => new
-                {
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<double>(type: "float", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WarehouseProducts", x => new { x.ProductId, x.WarehouseId });
-                    table.ForeignKey(
-                        name: "FK_WarehouseProducts_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_WarehouseProducts_Warehouses_WarehouseId",
-                        column: x => x.WarehouseId,
-                        principalTable: "Warehouses",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "CustomerDebtHistories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OldDebt = table.Column<double>(type: "float", nullable: false),
                     ChangeOfDebt = table.Column<double>(type: "float", nullable: false),
-                    NewDebt = table.Column<double>(type: "float", nullable: false),
                     Reason = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ReasonParams = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CustomerDebtId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -602,11 +583,10 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<double>(type: "float", nullable: false),
                     Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UnitPrice = table.Column<double>(type: "float", nullable: false),
-                    UnitId = table.Column<int>(type: "int", nullable: false)
+                    ProductUnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -618,9 +598,40 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_OrderDetails_Products_ProductId",
+                        name: "FK_OrderDetails_ProductUnits_ProductUnitId",
+                        column: x => x.ProductUnitId,
+                        principalTable: "ProductUnits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WarehouseProducts",
+                columns: table => new
+                {
+                    WarehouseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProductUnitId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Quantity = table.Column<double>(type: "float", nullable: false),
+                    ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WarehouseProducts", x => new { x.ProductUnitId, x.WarehouseId });
+                    table.ForeignKey(
+                        name: "FK_WarehouseProducts_ProductUnits_ProductUnitId",
+                        column: x => x.ProductUnitId,
+                        principalTable: "ProductUnits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_WarehouseProducts_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_WarehouseProducts_Warehouses_WarehouseId",
+                        column: x => x.WarehouseId,
+                        principalTable: "Warehouses",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -656,9 +667,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderDetails_ProductId",
+                name: "IX_OrderDetails_ProductUnitId",
                 table: "OrderDetails",
-                column: "ProductId");
+                column: "ProductUnitId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Orders_CustomerId",
@@ -694,6 +705,11 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 name: "IX_Products_ShopId",
                 table: "Products",
                 column: "ShopId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductUnits_ProductId",
+                table: "ProductUnits",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProductUnits_UnitId",
@@ -751,6 +767,11 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 column: "ShopId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_WarehouseProducts_ProductId",
+                table: "WarehouseProducts",
+                column: "ProductId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_WarehouseProducts_WarehouseId",
                 table: "WarehouseProducts",
                 column: "WarehouseId");
@@ -784,9 +805,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "ProductCategoryProducts");
-
-            migrationBuilder.DropTable(
-                name: "ProductUnits");
 
             migrationBuilder.DropTable(
                 name: "SagaStates");
@@ -825,13 +843,16 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                 name: "Users");
 
             migrationBuilder.DropTable(
-                name: "Products");
+                name: "ProductUnits");
 
             migrationBuilder.DropTable(
                 name: "Warehouses");
 
             migrationBuilder.DropTable(
                 name: "Customers");
+
+            migrationBuilder.DropTable(
+                name: "Products");
 
             migrationBuilder.DropTable(
                 name: "Countries");

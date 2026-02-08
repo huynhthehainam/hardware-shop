@@ -15,14 +15,6 @@ namespace HardwareShop.Domain.Models
         }
         public Guid Id { get; set; } = Guid.CreateVersion7();
         public string Name { get; set; } = string.Empty;
-        public double? Mass { get; set; }
-        public double? PricePerMass { get; set; }
-        public double? PercentForFamiliarCustomer { get; set; }
-        public double? PercentForCustomer { get; set; }
-        public double? PriceForFamiliarCustomer { get; set; }
-        public double OriginalPrice { get; set; }
-        public double PriceForCustomer { get; set; }
-        public bool HasAutoCalculatePermission { get; set; }
         public Guid ShopId { get; set; }
         private Shop? shop;
         public Shop? Shop
@@ -38,12 +30,7 @@ namespace HardwareShop.Domain.Models
             set => productUnits = value;
         }
 
-        private ICollection<OrderDetail>? orderDetails;
-        public ICollection<OrderDetail>? OrderDetails
-        {
-            get => lazyLoader?.Load(this, ref orderDetails);
-            set => orderDetails = value;
-        }
+
         public bool IsDeleted { get; set; }
 
         private ICollection<ProductAsset>? productAssets;
