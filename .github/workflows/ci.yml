@@ -1,4 +1,7 @@
 name: Build and Publish Web API
+on:
+  workflow_dispatch:
+
 jobs:
   build:
     runs-on: ubuntu-latest
