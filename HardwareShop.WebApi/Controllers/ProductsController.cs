@@ -2,7 +2,6 @@
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -32,7 +31,7 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/SelectThumbnail")]
-        public async Task<IActionResult> SelectThumbnail([FromRoute] int id, [FromBody] SelectProductThumbnailCommand command)
+        public async Task<IActionResult> SelectThumbnail([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }
@@ -47,22 +46,22 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpPost]
-        public async Task<IActionResult> CreateProduct([FromBody] CreateProductCommand command)
+        public async Task<IActionResult> CreateProduct()
         {
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UploadImage")]
-        public async Task<IActionResult> UploadProductImage([FromRoute] int id, [FromForm] UploadProductImageCommand command)
+        public async Task<IActionResult> UploadProductImage([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/Update")]
-        public async Task<IActionResult> UpdateProduct([FromRoute] int id, [FromBody] UpdateProductCommand command)
+        public async Task<IActionResult> UpdateProduct([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }
         [HttpPost("AddPricePerMass")]
-        public async Task<IActionResult> AddPricePerMass([FromBody] AddPricePerMassCommand command)
+        public async Task<IActionResult> AddPricePerMass()
         {
             return responseResultBuilder.Build();
         }

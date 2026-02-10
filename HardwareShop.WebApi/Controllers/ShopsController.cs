@@ -3,7 +3,6 @@ using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Extensions;
 using HardwareShop.WebApi.Services;
 using MediatR;
@@ -33,18 +32,18 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateLogo")]
-        public async Task<IActionResult> UpdateLogo([FromRoute] int id, [FromForm] UpdateShopLogoCommand command)
+        public async Task<IActionResult> UpdateLogo([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }
 
         [HttpPost("YourShop/UpdateLogo")]
-        public async Task<IActionResult> UpdateYourShopLogo([FromForm] UpdateShopLogoCommand command)
+        public async Task<IActionResult> UpdateYourShopLogo()
         {
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateSetting")]
-        public async Task<IActionResult> UpdateShopSettings([FromRoute] int id, [FromBody] UpdateShopSettingCommand command)
+        public async Task<IActionResult> UpdateShopSettings([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }
@@ -70,7 +69,7 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpPost("{id:int}/CreateAdminUser")]
-        public async Task<IActionResult> CreateAdminUser([FromRoute] int id, CreateShopAdminUserCommand command)
+        public async Task<IActionResult> CreateAdminUser([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }

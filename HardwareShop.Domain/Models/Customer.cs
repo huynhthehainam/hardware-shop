@@ -48,21 +48,37 @@ namespace HardwareShop.Domain.Models
         }
         public double GetCurrentDebt()
         {
-            return this.Debt?.Amount ?? 0;
+            return Debt?.Amount ?? 0;
         }
 
         public void AddDebt(double amount)
         {
-            if (this.Debt == null)
+            if (Debt == null)
             {
-                this.Debt = new CustomerDebt()
+                Debt = new CustomerDebt()
                 {
-                    CustomerId = this.Id,
+                    CustomerId = Id,
                     Amount = 0
                 };
             }
-            this.Debt.Amount += amount;
-            AddDomainEvent(new CustomerDebtChangedEvent(this.Id, this.Debt.Amount - amount, amount));
+            Debt.Amount += amount;
+            AddDomainEvent(new CustomerDebtChangedEvent(Id, Debt.Amount - amount, amount));
+        }
+        public static Customer Create(string name, string? phone, Guid? phoneCountryId, string? address, bool isFamiliar)
+        {
+            var customer = new Customer()
+            {
+                Name = name,
+                Phone = phone,
+                PhoneCountryId = phoneCountryId,
+                Address = address,
+                IsFamiliar = isFamiliar
+            };
+            customer.AddDomainEvent(new CustomerCreatedEvent
+            {
+                Customer = customer
+            });
+            return customer;
         }
     }
 }

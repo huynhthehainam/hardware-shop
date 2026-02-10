@@ -2,7 +2,6 @@
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,7 +14,7 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateWarehouse([FromBody] CreateWarehouseOfShopCommand command)
+        public async Task<IActionResult> CreateWarehouse()
         {
             return responseResultBuilder.Build();
         }
@@ -31,7 +30,7 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpPost("{id:int}/UpdateQuantityForProduct")]
-        public async Task<IActionResult> UpdateQuantityForProduct([FromRoute] int id, [FromBody] UpdateQuantityForProductCommand command)
+        public async Task<IActionResult> UpdateQuantityForProduct([FromRoute] int id)
         {
             return responseResultBuilder.Build();
         }

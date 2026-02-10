@@ -1,21 +1,20 @@
 
 
+using HardwareShop.Application.CQRS.CustomerArea.Commands;
+using HardwareShop.Application.CQRS.CustomerArea.Queries;
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Services;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HardwareShop.WebApi.Controllers
 {
-    public class CustomersController : AuthorizedApiControllerBase
+    public class CustomersController(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService, IMediator mediator) : AuthorizedApiControllerBase(responseResultBuilder, currentUserService)
     {
-        public CustomersController(IResponseResultBuilder responseResultBuilder, ICurrentUserService currentUserService) : base(responseResultBuilder, currentUserService)
-        {
 
-        }
         [HttpGet]
         public async Task<IActionResult> GetCustomersOfCurrentUserShop([FromQuery] PagingModel pagingModel, [FromQuery] string? search, [FromQuery] bool? isInDebt)
         {
@@ -31,16 +30,20 @@ namespace HardwareShop.WebApi.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateCustomerOfCurrentUserShop([FromBody] CreateCustomerCommand command)
         {
+            var response = await mediator.Send(command);
+            responseResultBuilder.SetApplicationResponse(response);
             return responseResultBuilder.Build();
         }
-        [HttpPost("{id:int}/Update")]
-        public async Task<IActionResult> UpdateCustomerOfCurrentUserShop([FromRoute] int id, [FromBody] UpdateCustomerCommand command)
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetCustomerById([FromRoute] Guid id)
         {
-            return responseResultBuilder.Build();
-        }
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetCustomerById([FromRoute] int id)
-        {
+            var query = new GetCustomerByIdQuery()
+            {
+                Id = id
+            };
+            var response = await mediator.Send(query);
+            responseResultBuilder.SetApplicationResponse(response);
             return responseResultBuilder.Build();
         }
         [HttpGet("{id:int}/AllInvoicesPdf")]

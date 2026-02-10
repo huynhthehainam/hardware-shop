@@ -3,7 +3,6 @@
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +16,7 @@ namespace HardwareShop.WebApi.Controllers
             this.testService = testService;
         }
         [HttpPost("TestWriteBack")]
-        public async Task<IActionResult> TestWriteBack([FromBody] TestWriteBackCommand command)
+        public async Task<IActionResult> TestWriteBack()
         {
             await testService.TestWriteBackAsync();
             responseResultBuilder.SetData(new

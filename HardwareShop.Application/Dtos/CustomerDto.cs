@@ -9,7 +9,7 @@ namespace HardwareShop.Application.Dtos
         public string? Phone { get; set; }
         public string? Address { get; set; }
         public string? PhonePrefix { get; set; }
-        public int? PhoneCountryId { get; set; }
+        public Guid? PhoneCountryId { get; set; }
         public bool IsFamiliar { get; set; }
         public double Debt { get; set; }
     }

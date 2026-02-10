@@ -4,7 +4,6 @@ using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +16,7 @@ namespace HardwareShop.WebApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateInvoice([FromBody] CreateInvoiceCommand command)
+        public async Task<IActionResult> CreateInvoice()
         {
             return responseResultBuilder.Build();
         }

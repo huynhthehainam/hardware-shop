@@ -3,7 +3,6 @@
 using HardwareShop.Application.CQRS.ShopArea.Commands;
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
-using HardwareShop.WebApi.Commands;
 using HotChocolate.Authorization;
 
 namespace HardwareShop.WebApi.GraphQL

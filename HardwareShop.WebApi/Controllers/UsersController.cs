@@ -2,7 +2,6 @@
 using HardwareShop.Application.Models;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
-using HardwareShop.WebApi.Commands;
 using HardwareShop.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -26,7 +25,7 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpPost("Me/UpdateInterfaceSettings")]
-        public async Task<IActionResult> UpdateCurrentUserSettings([FromBody] UpdateInterfaceSettingsCommand command)
+        public async Task<IActionResult> UpdateCurrentUserSettings()
         {
             return responseResultBuilder.Build();
         }
@@ -38,7 +37,7 @@ namespace HardwareShop.WebApi.Controllers
             return responseResultBuilder.Build();
         }
         [HttpPost("Me/Notifications")]
-        public async Task<IActionResult> CreateCurrentUserNotification([FromBody] CreateNotificationCommand command)
+        public async Task<IActionResult> CreateCurrentUserNotification()
         {
             return responseResultBuilder.Build();
         }
