@@ -40,11 +40,11 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref unitCategory);
             set => unitCategory = value;
         }
-        private ICollection<ProductUnit>? productUnits;
-        public ICollection<ProductUnit>? ProductUnits
+        private ICollection<Product>? products;
+        public ICollection<Product>? Products
         {
-            get => lazyLoader?.Load(this, ref productUnits);
-            set => productUnits = value;
+            get => lazyLoader?.Load(this, ref products);
+            set => products = value;
         }
 
         private ICollection<Shop>? shops;
@@ -52,6 +52,13 @@ namespace HardwareShop.Domain.Models
         {
             get => lazyLoader?.Load(this, ref shops);
             set => shops = value;
+        }
+
+        private ICollection<OrderDetail>? orderDetails;
+        public ICollection<OrderDetail>? OrderDetails
+        {
+            get => lazyLoader?.Load(this, ref orderDetails);
+            set => orderDetails = value;
         }
     }
 }

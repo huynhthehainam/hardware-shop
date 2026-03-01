@@ -17,10 +17,5 @@ public class ProductRepository : BaseRepository<Product>, IProductRepository
               .ToListAsync(cancellationToken);
     }
 
-    public async Task<List<ProductUnit>> GetProductUnitsByProductAndUnitIdsAsync(List<(Guid ProductId, int UnitId)> productAndUnitIds, CancellationToken cancellationToken = default)
-    {
-        return context.ProductUnits.AsEnumerable()
-                 .Where(pu => productAndUnitIds.Any(id => id.ProductId == pu.ProductId && id.UnitId == pu.UnitId))
-                 .ToList();
-    }
+
 }

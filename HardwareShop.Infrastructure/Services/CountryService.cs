@@ -8,17 +8,9 @@ using Microsoft.Extensions.Caching.Distributed;
 
 namespace HardwareShop.Infrastructure.Services
 {
-    public class CountryService : ICountryService
+    public class CountryService(DbContext db, IDistributedCache distributedCache, IAssetService assetService) : ICountryService
     {
 
-        private readonly DbContext db;
-        private readonly IDistributedCache distributedCache;
-        public CountryService(IDistributedCache distributedCache, DbContext db)
-        {
-
-            this.db = db;
-            this.distributedCache = distributedCache;
-        }
 
         public async Task<ApplicationResponse<CachedAssetDto>> GetCountryIconByIdAsync(Guid id)
         {
@@ -26,9 +18,7 @@ namespace HardwareShop.Infrastructure.Services
             if (country == null)
             {
                 return new ApplicationResponse<CachedAssetDto>
-                {
-                    Error = ApplicationError.CreateNotFoundError("Country")
-                };
+                (ApplicationError.CreateNotFoundError("Country"));
 
             }
 
@@ -36,15 +26,11 @@ namespace HardwareShop.Infrastructure.Services
             if (asset == null)
             {
                 return new ApplicationResponse<CachedAssetDto>
-                {
-                    Error = ApplicationError.CreateNotFoundError("Asset")
-                };
+              (ApplicationError.CreateNotFoundError("Asset"));
 
             }
             return new ApplicationResponse<CachedAssetDto>
-            {
-                Result = db.GetCachedAssetById(distributedCache, asset.AssetId)
-            };
+          ((await assetService.GetAssetByIdAsync(asset.AssetId)).ExtractResult());
         }
 
         public async Task<ApplicationResponse<PageData<CountryDto>>> GetCountryPageData(PagingModel pagingModel, string? search)
@@ -52,15 +38,12 @@ namespace HardwareShop.Infrastructure.Services
 
             var countryPageData = await db.Set<Country>().Where(e => true).Search(string.IsNullOrEmpty(search) ? null : new SearchQuery<Country>(search, e => new { e.Name, e.PhonePrefix })).GetPageDataAsync(pagingModel);
 
-            return new ApplicationResponse<PageData<CountryDto>>
+            return new ApplicationResponse<PageData<CountryDto>>(countryPageData.ConvertToOtherPageData(e => new CountryDto
             {
-                Result = countryPageData.ConvertToOtherPageData(e => new CountryDto
-                {
-                    Id = e.Id,
-                    Name = e.Name,
-                    PhonePrefix = e.PhonePrefix,
-                })
-            };
+                Id = e.Id,
+                Name = e.Name,
+                PhonePrefix = e.PhonePrefix,
+            }));
         }
     }
 }

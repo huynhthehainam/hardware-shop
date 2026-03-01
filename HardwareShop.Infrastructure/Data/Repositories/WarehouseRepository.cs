@@ -12,10 +12,10 @@ public class WarehouseRepository : BaseRepository<Warehouse>, IWarehouseReposito
 
     }
 
-    public Task<List<WarehouseProduct>> GetwarehouseProductsByProductUnitIdsAsync(List<Guid> productIds, CancellationToken cancellationToken = default)
+    public Task<List<WarehouseProduct>> GetWarehouseProductsByProductUnitIdsAsync(List<Guid> productIds, CancellationToken cancellationToken = default)
     {
         return context.WarehouseProducts
-              .Where(wp => productIds.Contains(wp.ProductUnitId))
+              .Where(wp => productIds.Contains(wp.ProductId))
               .ToListAsync(cancellationToken);
     }
 }

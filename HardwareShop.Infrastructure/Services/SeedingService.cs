@@ -526,6 +526,7 @@ namespace HardwareShop.Infrastructure.Services
                     Name = "H13x26",
 
                     ShopId = shop.Id,
+                    UnitId = unit3.Id,
 
                     ProductAssets = new ProductAsset[]{
                         new ProductAsset
@@ -541,6 +542,7 @@ namespace HardwareShop.Infrastructure.Services
                     Name = "H20x40",
 
                     ShopId = shop.Id,
+                    UnitId = unit3.Id,
 
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
@@ -556,6 +558,7 @@ namespace HardwareShop.Infrastructure.Services
                     Name = "H30x60",
 
                     ShopId = shop.Id,
+                    UnitId = unit3.Id,
 
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
@@ -571,6 +574,7 @@ namespace HardwareShop.Infrastructure.Services
                     Name = "V4",
 
                     ShopId = shop.Id,
+                    UnitId = unit6.Id,
 
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
@@ -586,6 +590,7 @@ namespace HardwareShop.Infrastructure.Services
                     Name = "V6",
 
                     ShopId = shop.Id,
+                    UnitId = unit6.Id,
 
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
@@ -601,6 +606,7 @@ namespace HardwareShop.Infrastructure.Services
                     Name = "V3",
 
                     ShopId = shop.Id,
+                    UnitId = unit6.Id,
 
                     ProductAssets = new ProductAsset[]{
                                                 new ProductAsset
@@ -618,59 +624,6 @@ namespace HardwareShop.Infrastructure.Services
                 _ = db.Products.Add(product5);
                 _ = db.Products.Add(product6);
                 _ = db.SaveChanges();
-
-                var productUnit = new ProductUnit
-                {
-                    ProductId = product.Id,
-                    UnitId = unit3.Id,
-                    IsBaseUnit = true,
-                    ConversionFactor = 1,
-                    Mass = 2.5,
-                    PercentForCustomer = 8,
-                    PriceForCustomer = 12000,
-                    OriginalPrice = 10000,
-                    PercentForFamiliarCustomer = 6,
-                    PriceForFamiliarCustomer = 11000,
-                    PricePerMass = 600,
-                };
-                var productUnit2 = new ProductUnit
-                {
-                    ProductId = product.Id,
-                    UnitId = unit4.Id,
-                    IsBaseUnit = false,
-                    ConversionFactor = 6,
-                };
-
-                var productUnit3 = new ProductUnit
-                {
-                    ProductId = product2.Id,
-                    UnitId = unit3.Id,
-                    IsBaseUnit = true,
-                    ConversionFactor = 1,
-                };
-                var productUnit4 = new ProductUnit
-                {
-                    ProductId = product2.Id,
-                    UnitId = unit4.Id,
-                    IsBaseUnit = false,
-                    ConversionFactor = 6,
-                };
-                var productUnit5 = new ProductUnit
-                {
-                    ProductId = product3.Id,
-                    UnitId = unit3.Id,
-                    IsBaseUnit = true,
-                    ConversionFactor = 1,
-                };
-                var productUnit6 = new ProductUnit
-                {
-                    ProductId = product3.Id,
-                    UnitId = unit4.Id,
-                    IsBaseUnit = false,
-                    ConversionFactor = 6,
-                };
-                db.ProductUnits.AddRange([productUnit, productUnit2, productUnit3, productUnit4, productUnit5, productUnit6]);
-                db.SaveChanges();
                 Warehouse warehouse1 = new()
                 {
                     Name = "Kho 1",
@@ -678,23 +631,23 @@ namespace HardwareShop.Infrastructure.Services
                     ShopId = shop.Id,
                     WarehouseProducts = new WarehouseProduct[]{
                         new WarehouseProduct(){
-                         ProductUnitId=productUnit.Id,
+                         ProductId=product.Id,
                             Quantity = 200,
                         },
                         new WarehouseProduct(){
-                            ProductUnitId=productUnit2.Id,
+                            ProductId=product2.Id,
                             Quantity = 200,
                         },
                         new WarehouseProduct(){
-                            ProductUnitId=productUnit3.Id,
+                            ProductId=product3.Id,
                             Quantity = 300,
                         },
                         new WarehouseProduct(){
-                            ProductUnitId=productUnit4.Id,
+                            ProductId=product4.Id,
                             Quantity = 40.2,
                         },
                         new WarehouseProduct(){
-                            ProductUnitId=productUnit5.Id,
+                            ProductId=product5.Id,
                             Quantity = 32.1
                         }
                     }
@@ -823,3 +776,4 @@ namespace HardwareShop.Infrastructure.Services
         }
     }
 }
+

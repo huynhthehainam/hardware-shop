@@ -41,20 +41,16 @@ IProductRepository productRepository, IOrderRepository orderRepository)
                 return ApplicationResponse<Guid>.Failure(ApplicationError.CreateInvalidError("One or more products are invalid for this shop."));
             }
             var productAndUnitIds = request.ProductItems.Select(pi => (pi.ProductId, pi.UnitId)).Select(t => (t.Item1, t.Item2)).ToList();
-            var productUnits = await productRepository.GetProductUnitsByProductAndUnitIdsAsync(productAndUnitIds, cancellationToken);
             foreach (var item in request.ProductItems)
             {
-                var productUnit = productUnits.FirstOrDefault(pu => pu.ProductId == item.ProductId && pu.UnitId == item.UnitId);
-                if (productUnit == null)
-                {
-                    return ApplicationResponse<Guid>.Failure(ApplicationError.CreateInvalidError($"Invalid unit for product {item.ProductId}."));
-                }
+
                 order.AddOrderDetail(new OrderDetail
                 {
                     Quantity = item.Quantity,
                     Note = item.Note,
                     UnitPrice = item.UnitPrice,
-                    ProductUnitId = productUnit.Id
+                    ProductId = item.ProductId,
+                    UnitId = item.UnitId
                 });
             }
             order = await orderRepository.AddAsync(order, cancellationToken);

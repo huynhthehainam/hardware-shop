@@ -13,10 +13,10 @@ namespace HardwareShop.WebApi.Controllers
             this.assetService = assetService;
         }
         [HttpGet("{id:guid}")]
-        public IActionResult GetAssetById([FromRoute] Guid id)
+        public async Task<IActionResult> GetAssetById([FromRoute] Guid id)
         {
             // Some comments
-            var assetResponse = assetService.GetAssetById(id);
+            var assetResponse = await assetService.GetAssetByIdAsync(id);
             responseResultBuilder.SetApplicationResponse(assetResponse, (builder, result) =>
             {
                 builder.SetAsset(result);

@@ -1,4 +1,5 @@
 using HardwareShop.Domain.Abstracts;
+using HardwareShop.Domain.Enums;
 using HardwareShop.Domain.Extensions;
 using HardwareShop.Domain.Interfaces;
 
@@ -23,10 +24,12 @@ namespace HardwareShop.Domain.Models
         public Guid Id { get; set; } = Guid.CreateVersion7();
         public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
         public DateTime? LastModifiedDate { get; set; }
-        public byte[] Bytes { get; set; } = Array.Empty<byte>();
+        public byte[]? Bytes { get; set; }
         public string FileName { get; set; } = string.Empty;
         public string ContentType { get; set; } = string.Empty;
-
+        public AssetProvider AssetProvider { get; set; } = AssetProvider.DbBlob;
+        public string? StorageBucket { get; set; }
+        public string? StorageObjectKey { get; set; }
         private ICollection<CountryAsset>? countryAssets;
         public ICollection<CountryAsset>? CountryAssets
         {

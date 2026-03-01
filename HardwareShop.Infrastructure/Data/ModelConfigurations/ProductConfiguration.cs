@@ -12,7 +12,7 @@ namespace HardwareShop.Infrastructure.Data.ModelConfigurations
         {
             _ = e.HasKey(e => e.Id);
             _ = e.HasOne(e => e.Shop).WithMany(e => e.Products).HasForeignKey(e => e.ShopId).OnDelete(DeleteBehavior.Restrict);
-
+            _ = e.HasOne(e => e.Unit).WithMany(e => e.Products).HasForeignKey(e => e.UnitId).OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

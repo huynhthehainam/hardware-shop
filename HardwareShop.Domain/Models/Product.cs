@@ -22,17 +22,15 @@ namespace HardwareShop.Domain.Models
             get => lazyLoader?.Load(this, ref shop);
             set => shop = value;
         }
-
-        private ICollection<ProductUnit>? productUnits;
-        public ICollection<ProductUnit>? ProductUnits
-        {
-            get => lazyLoader?.Load(this, ref productUnits);
-            set => productUnits = value;
-        }
-
-
         public bool IsDeleted { get; set; }
 
+        public int UnitId { get; set; }
+        private Unit? unit;
+        public Unit? Unit
+        {
+            get => lazyLoader?.Load(this, ref unit);
+            set => unit = value;
+        }
         private ICollection<ProductAsset>? productAssets;
         public ICollection<ProductAsset>? ProductAssets
         {
@@ -50,6 +48,13 @@ namespace HardwareShop.Domain.Models
         {
             get => lazyLoader?.Load(this, ref productCategoryProducts);
             set => productCategoryProducts = value;
+        }
+
+        private ICollection<OrderDetail>? orderDetails;
+        public ICollection<OrderDetail>? OrderDetails
+        {
+            get => lazyLoader?.Load(this, ref orderDetails);
+            set => orderDetails = value;
         }
         public double InventoryNumber => WarehouseProducts == null ? 0 : WarehouseProducts.Sum(e => e.Quantity);
     }

@@ -13,7 +13,6 @@ namespace HardwareShop.Infrastructure.Data
         }
         public DbSet<Asset> Assets => Set<Asset>();
         public DbSet<UserAsset> UserAssets => Set<UserAsset>();
-        public DbSet<ProductUnit> ProductUnits => Set<ProductUnit>();
         public DbSet<Customer> Customers => Set<Customer>();
         public DbSet<Shop> Shops => Set<Shop>();
         public DbSet<ShopAsset> ShopAssets => Set<ShopAsset>();

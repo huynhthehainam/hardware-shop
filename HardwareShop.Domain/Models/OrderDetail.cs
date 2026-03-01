@@ -24,12 +24,20 @@ namespace HardwareShop.Domain.Models
         public double Quantity { get; set; }
         public string? Note { get; set; }
         public double UnitPrice { get; set; }
-        public Guid ProductUnitId { get; set; }
-        private ProductUnit? productUnit;
-        public ProductUnit? ProductUnit
+        public int UnitId { get; set; }
+        private Unit? unit;
+        public Unit? Unit
         {
-            get => lazyLoader?.Load(this, ref productUnit);
-            set => productUnit = value;
+            get => lazyLoader?.Load(this, ref unit);
+            set => unit = value;
+        }
+
+        public Guid ProductId { get; set; }
+        private Product? product;
+        public Product? Product
+        {
+            get => lazyLoader?.Load(this, ref product);
+            set => product = value;
         }
     }
 }

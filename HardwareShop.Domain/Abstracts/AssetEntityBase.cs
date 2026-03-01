@@ -4,11 +4,6 @@ using HardwareShop.Domain.Models;
 
 namespace HardwareShop.Domain.Abstracts
 {
-    public enum AssetStorageProvider
-    {
-        DbBlob = 0,
-        Minio = 1
-    }
 
     public abstract class AssetEntityBase : EntityBase
     {
@@ -16,10 +11,7 @@ namespace HardwareShop.Domain.Abstracts
 
         public AssetEntityBase() : base() { }
         public string AssetType { get; set; } = string.Empty;
-        public Guid? AssetId { get; set; } = Guid.CreateVersion7();
-        public AssetStorageProvider StorageProvider { get; set; } = AssetStorageProvider.DbBlob;
-        public string? StorageBucket { get; set; }
-        public string? StorageObjectKey { get; set; }
+        public Guid AssetId { get; set; } = Guid.CreateVersion7();
         private Asset? asset;
         public Asset? Asset
         {

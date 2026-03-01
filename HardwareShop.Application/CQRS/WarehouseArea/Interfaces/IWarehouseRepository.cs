@@ -5,6 +5,6 @@ namespace HardwareShop.Application.CQRS.WarehouseArea.Interfaces
 {
     public interface IWarehouseRepository : IRepository<Warehouse>
     {
-        Task<List<WarehouseProduct>> GetwarehouseProductsByProductUnitIdsAsync(List<Guid> productIds, CancellationToken cancellationToken = default);
+        Task<List<WarehouseProduct>> GetWarehouseProductsByProductUnitIdsAsync(List<Guid> productIds, CancellationToken cancellationToken = default);
     }
 }

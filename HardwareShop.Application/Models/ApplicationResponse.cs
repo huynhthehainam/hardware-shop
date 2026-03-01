@@ -40,8 +40,8 @@ namespace HardwareShop.Application.Models
     }
     public class ApplicationResponse<T>
     {
-        public ApplicationError? Error { get; set; }
-        public T? Result { get; set; }
+        public ApplicationError? Error { get; private set; }
+        public T? Result { get; private set; }
         public ApplicationResponse(T result)
         {
             this.Result = result;
@@ -61,7 +61,20 @@ namespace HardwareShop.Application.Models
         {
             return new ApplicationResponse<T>(error);
         }
+        public T ExtractResult()
+        {
+            if (Error is not null)
+            {
+                throw new InvalidOperationException(Error.Message ?? $"Application error: {Error.Type}");
+            }
+            if (Result is null)
+            {
+                throw new InvalidOperationException("Application response does not contain a result.");
 
+            }
+
+            return Result;
+        }
     }
     public class ApplicationResponse : ApplicationResponse<string>
     {

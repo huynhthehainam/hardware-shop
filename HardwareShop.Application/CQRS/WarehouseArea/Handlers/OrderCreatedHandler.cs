@@ -12,13 +12,13 @@ public class OrderCreatedHandler(IWarehouseRepository warehouseRepository, IRepo
     public async Task Handle(DomainEventNotification<OrderCreatedEvent> notification, CancellationToken cancellationToken)
     {
         var orderEvent = notification.DomainEvent;
-        var productIds = orderEvent.Order.Details?.Select(d => d.ProductUnit!.ProductId).ToList() ?? [];
-        var warehouseProducts = await warehouseRepository.GetwarehouseProductsByProductUnitIdsAsync(productIds, cancellationToken);
+        var productIds = orderEvent.Order.Details?.Select(d => d.ProductId).ToList() ?? [];
+        var warehouseProducts = await warehouseRepository.GetWarehouseProductsByProductUnitIdsAsync(productIds, cancellationToken);
         foreach (var detail in orderEvent.Order.Details ?? [])
         {
             var totalRequiredQuantity = detail.Quantity;
-            var sameUnitWarehouseProductsForDetail = warehouseProducts.Where(wp => wp.ProductUnitId == detail.ProductUnitId).OrderBy(wp => wp.Quantity);
-            foreach (var warehouseProduct in sameUnitWarehouseProductsForDetail)
+            var selectedWarehouseProduct = warehouseProducts.Where(wp => wp.ProductId == detail.ProductId && wp.Product!.UnitId == detail.UnitId).OrderBy(wp => wp.Quantity);
+            foreach (var warehouseProduct in selectedWarehouseProduct)
             {
                 if (totalRequiredQuantity <= 0)
                 {
@@ -32,8 +32,12 @@ public class OrderCreatedHandler(IWarehouseRepository warehouseRepository, IRepo
             }
             if (totalRequiredQuantity > 0)
             {
-                logger.LogError("Insufficient stock for ProductUnit {ProductUnitId} to fulfill Order {OrderId}", detail.ProductUnitId, orderEvent.Order.Id);
-                throw new InvalidOperationException($"Insufficient stock for ProductUnit {detail.ProductUnitId}");
+                logger.LogError(
+                    "Insufficient stock for Product {ProductId} with Unit {UnitId} to fulfill Order {OrderId}",
+                    detail.ProductId,
+                    detail.UnitId,
+                    orderEvent.Order.Id);
+                throw new InvalidOperationException($"Insufficient stock for Product {detail.ProductId} with Unit {detail.UnitId}");
             }
 
         }

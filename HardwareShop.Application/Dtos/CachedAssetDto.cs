@@ -1,6 +1,7 @@
 using HardwareShop.Domain.Models;
 
 namespace HardwareShop.Application.Dtos;
+
 public sealed class CachedAssetDto
 {
     public Guid Id { get; set; }
@@ -9,11 +10,11 @@ public sealed class CachedAssetDto
     public byte[] Bytes { get; set; } = Array.Empty<byte>();
     public string Filename { get; set; } = string.Empty;
     public string ContentType { get; set; } = string.Empty;
-    public static CachedAssetDto BuildFromAsset(Asset asset)
+    public static CachedAssetDto BuildFromAsset(Asset asset, byte[] bytes)
     {
         return new CachedAssetDto()
         {
-            Bytes = asset.Bytes,
+            Bytes = bytes,
             ContentType = asset.ContentType,
             CreatedDate = asset.CreatedDate,
             Filename = asset.FileName,

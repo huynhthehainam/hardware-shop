@@ -83,7 +83,7 @@ public static class Program
         builder.Services.AddSignalR();
 
         #region OutboxDispatcher
-        builder.Services.AddHostedService<OutboxDispatcher>();
+        // builder.Services.AddHostedService<OutboxDispatcher>();
         #endregion
 
         #region ServicesConsumers

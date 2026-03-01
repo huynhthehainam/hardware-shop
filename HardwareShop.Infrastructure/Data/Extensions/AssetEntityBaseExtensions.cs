@@ -9,6 +9,7 @@ namespace HardwareShop.Infrastructure.Extensions
         {
             var asset = entity.Asset;
             if (asset == null) return "";
+            if (asset.Bytes == null || asset.Bytes.Length == 0) return "";
             return $"data:{asset.ContentType};base64,{Convert.ToBase64String(asset.Bytes)}";
         }
     }

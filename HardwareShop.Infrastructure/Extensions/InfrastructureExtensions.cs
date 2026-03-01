@@ -33,6 +33,7 @@ namespace HardwareShop.Infrastructure.Extensions
             services.AddScoped<IUnitCategoryService, UnitCategoryService>();
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IAssetService, AssetService>();
+            services.AddScoped<IMinioService, MinioService>();
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<ICurrentUserService, WebCurrentUserService>();
             services.AddSingleton<IHashingPasswordService, HashingPasswordService>();
