@@ -1,35 +1,28 @@
 {
-	"name": "hardware-shop-dev",
-	"dockerComposeFile": [
-		"../docker-compose.dev.yml",
-		"docker-compose.yml"
-	],
-	"service": "web-api",
-	"workspaceFolder": "/app",
-	"customizations": {
-		"vscode": {
-			"settings": {
-				"terminal.integrated.shell.linux": "/bin/bash",
-				// ✅ Enable Copilot explicitly
-				"github.copilot.enable": {
-					"gitHubCopilot": true,
-					"gitHubCopilotChat": true
-				}
-			},
-			"extensions": [
-				"ms-dotnettools.csharp",
-				"eamodio.gitlens",
-				"editorconfig.editorconfig",
-				"formulahendry.dotnet-test-explorer",
-				"ms-vscode.powershell",
-				"github.copilot",
-				"github.copilot-chat"
-			]
-		}
-	},
-	"postCreateCommand": "dotnet restore",
-	// ✅ Mount host auth files to container for seamless Copilot login
-	"mounts": [
-		"source=${localEnv:HOME}/.config/github-copilot,target=/root/.config/github-copilot,type=bind,consistency=cached"
-	]
+  "name": "hardware-shop-dev",
+  "dockerComposeFile": [
+    "../docker-compose.dev.yml",
+    "docker-compose.yml"
+  ],
+  "service": "web-api",
+  "workspaceFolder": "/app",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "eamodio.gitlens",
+        "editorconfig.editorconfig",
+        "formulahendry.dotnet-test-explorer",
+        "ms-vscode.powershell",
+        "openai.codex"
+      ]
+    }
+  },
+  "postCreateCommand": "dotnet restore",
+  "mounts": [
+    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,consistency=cached"
+  ]
 }
