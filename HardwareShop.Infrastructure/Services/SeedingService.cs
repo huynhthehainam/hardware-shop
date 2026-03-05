@@ -39,6 +39,11 @@ namespace HardwareShop.Infrastructure.Services
         public string Realm { get; set; } = default!;
         public bool Enabled { get; set; } = true;
     }
+    public class KeycloakRole
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+    }
 
     public class KeycloakClient
     {
@@ -127,7 +132,71 @@ namespace HardwareShop.Infrastructure.Services
 
             createResponse.EnsureSuccessStatusCode();
         }
-        public async Task<string> EnsureUserExistsAsync(string realm)
+        private async Task<KeycloakRole> EnsureRoleExistsAsync(string realm, string roleName)
+        {
+            var keycloakUrl = configuration["Keycloak:Url"] ?? "http://localhost:8081";
+
+            var roleResponse = await httpClient.GetAsync(
+                $"{keycloakUrl}/admin/realms/{realm}/roles/{Uri.EscapeDataString(roleName)}"
+            );
+
+            if (roleResponse.IsSuccessStatusCode)
+            {
+                var existingRole = await roleResponse.Content.ReadFromJsonAsync<KeycloakRole>();
+                return existingRole!;
+            }
+
+            if (roleResponse.StatusCode != System.Net.HttpStatusCode.NotFound)
+                roleResponse.EnsureSuccessStatusCode();
+
+            var createRoleResponse = await httpClient.PostAsJsonAsync(
+                $"{keycloakUrl}/admin/realms/{realm}/roles",
+                new { name = roleName }
+            );
+
+            createRoleResponse.EnsureSuccessStatusCode();
+
+            var createdRoleResponse = await httpClient.GetAsync(
+                $"{keycloakUrl}/admin/realms/{realm}/roles/{Uri.EscapeDataString(roleName)}"
+            );
+            createdRoleResponse.EnsureSuccessStatusCode();
+
+            var createdRole = await createdRoleResponse.Content.ReadFromJsonAsync<KeycloakRole>();
+            return createdRole!;
+        }
+
+        private async Task EnsureUserHasRoleAsync(string realm, string userId, KeycloakRole role)
+        {
+            var keycloakUrl = configuration["Keycloak:Url"] ?? "http://localhost:8081";
+
+            var userRolesResponse = await httpClient.GetAsync(
+                $"{keycloakUrl}/admin/realms/{realm}/users/{userId}/role-mappings/realm"
+            );
+            userRolesResponse.EnsureSuccessStatusCode();
+
+            var userRoles = await userRolesResponse.Content.ReadFromJsonAsync<List<JsonElement>>();
+            var alreadyHasRole = userRoles?.Any(x =>
+                x.TryGetProperty("name", out var name) &&
+                string.Equals(name.GetString(), role.Name, StringComparison.OrdinalIgnoreCase)) == true;
+
+            if (alreadyHasRole)
+                return;
+
+            var assignRoleResponse = await httpClient.PostAsJsonAsync(
+                $"{keycloakUrl}/admin/realms/{realm}/users/{userId}/role-mappings/realm",
+                new[]
+                {
+                    new
+                    {
+                        id = role.Id,
+                        name = role.Name
+                    }
+                });
+
+            assignRoleResponse.EnsureSuccessStatusCode();
+        }
+
+        public async Task<string> EnsureUserExistsAsync(string realm, string username)
         {
             var keycloakUrl = configuration["Keycloak:Url"] ?? "http://localhost:8081";
             var token = await GetAdminAccessTokenAsync();
@@ -135,18 +204,22 @@ namespace HardwareShop.Infrastructure.Services
             httpClient.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            const string username = "namhuynh";
+            var adminRole = await EnsureRoleExistsAsync(realm, "admin");
 
             // 1. Check user exists
             var usersResponse = await httpClient.GetAsync(
-                $"{keycloakUrl}/admin/realms/{realm}/users?username={username}&exact=true"
+                $"{keycloakUrl}/admin/realms/{realm}/users?username={Uri.EscapeDataString(username)}&exact=true"
             );
 
             usersResponse.EnsureSuccessStatusCode();
 
             var users = await usersResponse.Content.ReadFromJsonAsync<List<JsonElement>>();
             if (users is { Count: > 0 })
-                return users![0].GetProperty("id").GetString()!;
+            {
+                var existingUserId = users[0].GetProperty("id").GetString()!;
+                await EnsureUserHasRoleAsync(realm, existingUserId, adminRole);
+                return existingUserId;
+            }
 
             // 2. Create user
             var createUserResponse = await httpClient.PostAsJsonAsync(
@@ -154,9 +227,9 @@ namespace HardwareShop.Infrastructure.Services
                 new KeycloakUser
                 {
                     Username = username,
-                    Email = "huynhthehainam@gmail.com",
-                    FirstName = "nam",
-                    LastName = "huynh",
+                    Email = $"{username}@local.seed",
+                    FirstName = username,
+                    LastName = "admin",
                     Enabled = true,
                     EmailVerified = true
                 });
@@ -165,7 +238,7 @@ namespace HardwareShop.Infrastructure.Services
 
             // 3. Fetch created user ID
             var createdUsersResponse = await httpClient.GetAsync(
-                $"{keycloakUrl}/admin/realms/{realm}/users?username={username}&exact=true"
+                $"{keycloakUrl}/admin/realms/{realm}/users?username={Uri.EscapeDataString(username)}&exact=true"
             );
 
             createdUsersResponse.EnsureSuccessStatusCode();
@@ -185,6 +258,7 @@ namespace HardwareShop.Infrastructure.Services
                 });
 
             passwordResponse.EnsureSuccessStatusCode();
+            await EnsureUserHasRoleAsync(realm, userId!, adminRole);
             return userId!;
         }
 

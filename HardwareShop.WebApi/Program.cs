@@ -12,6 +12,7 @@ using HardwareShop.WebApi.GraphQL;
 using HardwareShop.WebApi.GrpcServices;
 using HardwareShop.WebApi.Hubs;
 using HardwareShop.WebApi.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
@@ -65,6 +66,7 @@ public static class Program
                 System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
             options.JsonSerializerOptions.DictionaryKeyPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
         });
+        builder.Services.AddAuthorization();
         builder.Services.AddLocalization(options => { options.ResourcesPath = "Resources"; });
         builder.Services.Configure<RequestLocalizationOptions>(options =>
         {
@@ -195,6 +197,7 @@ public static class Program
         builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         builder.Services.AddScoped<IResponseResultBuilder, ResponseResultBuilder>();
         builder.Services.AddSingleton<IChatHubController, ChatHubController>();
+        builder.Services.AddTransient<IClaimsTransformation, KeycloakRolesClaimsTransformation>();
 
         builder.Services.ConfigureInfrastructure(builder.Configuration);
 
@@ -211,15 +214,13 @@ public static class Program
 
         app.UseCors(mainAllowSpecificOrigins);
 
+        app.UseAuthentication();
+        app.UseAuthorization();
 
         app.MapControllers();
         app.UseRequestLocalization();
         app.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
         app.MapGraphQL();
-
-        app.UseAuthentication();
-
-        app.UseAuthorization();
         app.MapGrpcService<UserGrpcService>();
         if (app.Environment.IsDevelopment())
         {

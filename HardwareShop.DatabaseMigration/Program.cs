@@ -38,6 +38,7 @@ namespace HardwareShop.DatabaseMigration
             using (var scope = host.Services.CreateScope())
             {
                 var db = scope.ServiceProvider.GetRequiredService<MainDatabaseContext>();
+                var config = scope.ServiceProvider.GetRequiredService<IConfiguration>();
                 db.Database.Migrate();
                 Console.WriteLine("Database migration completed.");
 
@@ -45,9 +46,10 @@ namespace HardwareShop.DatabaseMigration
                 var seeder = scope.ServiceProvider.GetRequiredService<ISeedingService>();
                 bool isDevelopment = environment == "Development" || environment == "DevContainer";
                 var realm = "hardware-shop-realm";
+                var seedUsername = "namhuynh";
                 await seeder.EnsureRealmExistsAsync(realm);
                 await seeder.EnsureClientExistsAsync(realm);
-                var userId = await seeder.EnsureUserExistsAsync(realm);
+                var userId = await seeder.EnsureUserExistsAsync(realm, seedUsername);
                 await seeder.SeedDataAsync(userId);
                 Console.WriteLine("Database seeding completed.");
 

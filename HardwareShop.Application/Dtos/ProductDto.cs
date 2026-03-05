@@ -28,4 +28,14 @@
         public double InventoryNumber { get; set; }
         public long? ThumbnailAssetId { get; set; }
     }
+
+    public class YourShopProductDto
+    {
+        public Guid Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int UnitId { get; set; }
+        public string? UnitName { get; set; }
+        public double InventoryNumber { get; set; }
+        public bool IsDeleted { get; set; }
+    }
 }

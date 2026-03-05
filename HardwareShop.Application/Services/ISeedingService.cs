@@ -6,7 +6,7 @@ namespace HardwareShop.Application.Services
     {
         Task SeedDataAsync(string firstUserId);
         Task EnsureClientExistsAsync(string realm);
-        Task<string> EnsureUserExistsAsync(string realm);
+        Task<string> EnsureUserExistsAsync(string realm, string username);
         Task EnsureRealmExistsAsync(string realm);
         Task EnsureKafkaTopicsExistAsync();
     }

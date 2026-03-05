@@ -23,6 +23,6 @@
   },
   "postCreateCommand": "dotnet restore",
   "mounts": [
-    "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,consistency=cached"
+    "source=${localEnv:USERPROFILE}/.codex,target=/root/.codex,type=bind,consistency=cached"
   ]
 }

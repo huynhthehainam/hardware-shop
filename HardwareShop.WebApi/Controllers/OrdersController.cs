@@ -1,7 +1,13 @@
 using HardwareShop.Application.CQRS.OrderArea.Commands;
+using HardwareShop.Application.CQRS.OrderArea.Queries;
+using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
 using HardwareShop.WebApi.Abstracts;
 using HardwareShop.WebApi.Services;
+using iText.Kernel.Geom;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,12 +20,6 @@ namespace HardwareShop.WebApi.Controllers
         {
             this.mediator = mediator;
         }
-        [HttpPost]
-        public async Task<IActionResult> CreateOrder(CreateOrderCommand command)
-        {
-            var response = await mediator.Send(command);
-            responseResultBuilder.SetApplicationResponse(response);
-            return responseResultBuilder.Build();
-        }
+        
     }
 }
