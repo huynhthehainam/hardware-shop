@@ -28,8 +28,10 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("AssetProvider")
+                        .HasColumnType("int");
+
                     b.Property<byte[]>("Bytes")
-                        .IsRequired()
                         .HasColumnType("varbinary(max)");
 
                     b.Property<string>("ContentType")
@@ -45,6 +47,12 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.Property<DateTime?>("LastModifiedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("StorageBucket")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("StorageObjectKey")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -257,11 +265,14 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ProductUnitId")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
+
+                    b.Property<int>("UnitId")
+                        .HasColumnType("int");
 
                     b.Property<double>("UnitPrice")
                         .HasColumnType("float");
@@ -270,7 +281,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ProductUnitId");
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("UnitId");
 
                     b.ToTable("OrderDetails");
                 });
@@ -291,9 +304,14 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Property<Guid>("ShopId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("UnitId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ShopId");
+
+                    b.HasIndex("UnitId");
 
                     b.ToTable("Products");
                 });
@@ -362,69 +380,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.HasIndex("ProductCategoryId");
 
                     b.ToTable("ProductCategoryProducts");
-                });
-
-            modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<double>("ConversionFactor")
-                        .HasColumnType("float");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("HasAutoCalculatePermission")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("IsBaseUnit")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid?>("LastModifiedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime?>("LastModifiedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<double?>("Mass")
-                        .HasColumnType("float");
-
-                    b.Property<double>("OriginalPrice")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PercentForCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PercentForFamiliarCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double>("PriceForCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PriceForFamiliarCustomer")
-                        .HasColumnType("float");
-
-                    b.Property<double?>("PricePerMass")
-                        .HasColumnType("float");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("UnitId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.HasIndex("UnitId");
-
-                    b.ToTable("ProductUnits");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Shop", b =>
@@ -688,21 +643,16 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.WarehouseProduct", b =>
                 {
-                    b.Property<Guid>("ProductUnitId")
+                    b.Property<Guid>("ProductId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("WarehouseId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<double>("Quantity")
                         .HasColumnType("float");
 
-                    b.HasKey("ProductUnitId", "WarehouseId");
-
-                    b.HasIndex("ProductId");
+                    b.HasKey("ProductId", "WarehouseId");
 
                     b.HasIndex("WarehouseId");
 
@@ -862,15 +812,23 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("HardwareShop.Domain.Models.ProductUnit", "ProductUnit")
+                    b.HasOne("HardwareShop.Domain.Models.Product", "Product")
                         .WithMany("OrderDetails")
-                        .HasForeignKey("ProductUnitId")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("HardwareShop.Domain.Models.Unit", "Unit")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("UnitId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Order");
 
-                    b.Navigation("ProductUnit");
+                    b.Navigation("Product");
+
+                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Product", b =>
@@ -881,7 +839,15 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("HardwareShop.Domain.Models.Unit", "Unit")
+                        .WithMany("Products")
+                        .HasForeignKey("UnitId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
                     b.Navigation("Shop");
+
+                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.ProductAsset", b =>
@@ -931,25 +897,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("ProductCategory");
-                });
-
-            modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
-                {
-                    b.HasOne("HardwareShop.Domain.Models.Product", "Product")
-                        .WithMany("ProductUnits")
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("HardwareShop.Domain.Models.Unit", "Unit")
-                        .WithMany("ProductUnits")
-                        .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-
-                    b.Navigation("Unit");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Shop", b =>
@@ -1073,13 +1020,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.WarehouseProduct", b =>
                 {
-                    b.HasOne("HardwareShop.Domain.Models.Product", null)
+                    b.HasOne("HardwareShop.Domain.Models.Product", "Product")
                         .WithMany("WarehouseProducts")
-                        .HasForeignKey("ProductId");
-
-                    b.HasOne("HardwareShop.Domain.Models.ProductUnit", "ProductUnit")
-                        .WithMany("WarehouseProducts")
-                        .HasForeignKey("ProductUnitId")
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
@@ -1089,7 +1032,7 @@ namespace HardwareShop.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ProductUnit");
+                    b.Navigation("Product");
 
                     b.Navigation("Warehouse");
                 });
@@ -1135,11 +1078,11 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Product", b =>
                 {
+                    b.Navigation("OrderDetails");
+
                     b.Navigation("ProductAssets");
 
                     b.Navigation("ProductCategoryProducts");
-
-                    b.Navigation("ProductUnits");
 
                     b.Navigation("WarehouseProducts");
                 });
@@ -1147,13 +1090,6 @@ namespace HardwareShop.Infrastructure.Data.Migrations
             modelBuilder.Entity("HardwareShop.Domain.Models.ProductCategory", b =>
                 {
                     b.Navigation("ProductCategoryProducts");
-                });
-
-            modelBuilder.Entity("HardwareShop.Domain.Models.ProductUnit", b =>
-                {
-                    b.Navigation("OrderDetails");
-
-                    b.Navigation("WarehouseProducts");
                 });
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Shop", b =>
@@ -1179,7 +1115,9 @@ namespace HardwareShop.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("HardwareShop.Domain.Models.Unit", b =>
                 {
-                    b.Navigation("ProductUnits");
+                    b.Navigation("OrderDetails");
+
+                    b.Navigation("Products");
 
                     b.Navigation("Shops");
                 });
