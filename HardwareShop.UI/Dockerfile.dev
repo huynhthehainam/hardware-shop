@@ -2,12 +2,12 @@ FROM node:22-bullseye
 
 WORKDIR /app
 
-COPY package.json yarn.lock ./
+# Copy entire repo so build works when context is repo root
+COPY . .
+
+WORKDIR /app/HardwareShop.UI
 RUN corepack enable \
   && corepack prepare yarn@1.22.22 --activate \
   && yarn install
 
-COPY . .
-
 EXPOSE 4200
-

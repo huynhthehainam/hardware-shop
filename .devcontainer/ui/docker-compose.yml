@@ -2,8 +2,8 @@ version: '3.4'
 services:
   ui:
     build:
-      context: ../../HardwareShop.UI
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: HardwareShop.UI/Dockerfile.dev
     environment:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
