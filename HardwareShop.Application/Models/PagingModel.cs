@@ -11,4 +11,9 @@ namespace HardwareShop.Application.Models
         public int? PageSize { get; set; }
         public int? PageIndex { get; set; }
     }
+
+    public class PagingWithSearchModel : PagingModel
+    {
+        public string? Search { get; set; }
+    }
 }
