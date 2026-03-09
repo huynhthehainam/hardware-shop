@@ -4,7 +4,6 @@ using System.Text;
 using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
 using HardwareShop.Core.Helpers;
-using HardwareShop.Core.Models;
 using HardwareShop.Infrastructure.Extensions;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

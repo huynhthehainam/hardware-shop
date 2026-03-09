@@ -1,5 +1,4 @@
 ﻿using HardwareShop.Application.Models;
-using HardwareShop.Core.Models;
 
 namespace HardwareShop.Application.Dtos
 {

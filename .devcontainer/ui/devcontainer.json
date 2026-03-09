@@ -19,8 +19,12 @@
         "dbaeumer.vscode-eslint",
         "esbenp.prettier-vscode",
         "editorconfig.editorconfig",
-        "eamodio.gitlens"
+        "eamodio.gitlens",
+        "openai.codex"
       ]
     }
-  }
+  },
+  "mounts": [
+    "source=${localEnv:USERPROFILE}/.codex,target=/root/.codex,type=bind,consistency=cached"
+  ]
 }

@@ -5,7 +5,6 @@ namespace HardwareShop.UnitTests;
 
 public class UserServiceTests
 {
-    private readonly IUserService userService;
     private const string dumpAccessToken = "dumpToken";
     private const string dumpRefreshToken = "dumpRefreshToken";
     private const string dumpSessionId = "sessionId";
@@ -38,7 +37,6 @@ public class UserServiceTests
         //         IHashingPasswordService hashingPasswordService = mockHashingPasswordService.Object;
         //         IShopService shopService = new Mock<IShopService>().Object;
         // userService = new UserService(db, jwtService, currentUserService, responseResultBuilder, languageService, hashingPasswordService, shopService, distributedCache);
-        userService = new Mock<IUserService>().Object;
     }
     [Theory]
     [InlineData("admin", "123")]

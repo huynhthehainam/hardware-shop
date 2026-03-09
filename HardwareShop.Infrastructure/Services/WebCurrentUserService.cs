@@ -1,6 +1,5 @@
 ﻿using HardwareShop.Application.Dtos;
 using HardwareShop.Application.Services;
-using HardwareShop.Core.Models;
 using HardwareShop.Domain.Enums;
 using HardwareShop.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http;
