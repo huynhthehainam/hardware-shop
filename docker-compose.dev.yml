@@ -106,7 +106,7 @@ services:
       - keycloak-db-data:/var/lib/postgresql/data
 
   minio:
-    image: minio/minio:RELEASE.2024-12-18T06-34-11Z
+    image: minio/minio:RELEASE.2025-09-07T16-13-09Z
     networks:
       - api-shop
     ports:
