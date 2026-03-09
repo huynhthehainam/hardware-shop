@@ -1,0 +1,17 @@
+version: '3.4'
+services:
+  ui:
+    build:
+      context: ../../HardwareShop.UI
+      dockerfile: Dockerfile.dev
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+      - WATCHPACK_POLLING=true
+    ports:
+      - 4200:4200
+    networks:
+      - api-shop
+
+networks:
+  api-shop:
+    name: api-shop

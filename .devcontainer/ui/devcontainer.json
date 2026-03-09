@@ -1,0 +1,26 @@
+{
+  "name": "hardware-shop-ui",
+  "dockerComposeFile": [
+    "../../docker-compose.dev.yml",
+    "docker-compose.yml"
+  ],
+  "service": "ui",
+  "workspaceFolder": "/app/HardwareShop.UI",
+  "forwardPorts": [
+    4200
+  ],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+      "extensions": [
+        "Angular.ng-template",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig",
+        "eamodio.gitlens"
+      ]
+    }
+  }
+}
