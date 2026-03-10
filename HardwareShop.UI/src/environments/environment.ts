@@ -6,6 +6,11 @@ export const environment = {
   production: false,
   baseUrl: '',
   useHash: false,
+  keycloak: {
+    url: 'http://localhost:8081',
+    realm: 'hardware-shop-realm',
+    clientId: 'hardware-shop-angular',
+  },
 };
 
 /*

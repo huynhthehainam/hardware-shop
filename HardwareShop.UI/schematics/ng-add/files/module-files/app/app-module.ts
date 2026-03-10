@@ -57,12 +57,7 @@ import { FakeLoginService } from './fake-login.service';
       deps: [TranslateService],
       multi: true,
     },
-    // ==================================================
-    // 👇 ❌ Remove it in the realworld application
-    //
-    { provide: LoginService, useClass: FakeLoginService },
-    //
-    // ==================================================
+
   ],
   bootstrap: [App],
 })

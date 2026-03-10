@@ -3,6 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { HotToastService } from '@ngxpert/hot-toast';
 import { catchError, throwError } from 'rxjs';
+import { AuthService } from '@core/authentication';
 
 export enum STATUS {
   UNAUTHORIZED = 401,
@@ -14,6 +15,7 @@ export enum STATUS {
 export function errorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
   const router = inject(Router);
   const toast = inject(HotToastService);
+  const auth = inject(AuthService);
   const errorPages = [STATUS.FORBIDDEN, STATUS.NOT_FOUND, STATUS.INTERNAL_SERVER_ERROR];
 
   const getMessage = (error: HttpErrorResponse) => {
@@ -36,7 +38,7 @@ export function errorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
         console.error('ERROR', error);
         toast.error(getMessage(error));
         if (error.status === STATUS.UNAUTHORIZED) {
-          router.navigateByUrl('/auth/login');
+          auth.login(window.location.href).subscribe();
         }
       }
 

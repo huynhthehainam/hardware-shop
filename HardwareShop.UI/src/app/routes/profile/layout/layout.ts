@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 
 import { AuthService } from '@core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -29,13 +29,10 @@ import { PageHeader } from '@shared';
 })
 export class ProfileLayout {
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
 
   user = toSignal(this.auth.user());
 
   logout() {
-    this.auth.logout().subscribe(() => {
-      this.router.navigateByUrl('/auth/login');
-    });
+    this.auth.logout().subscribe();
   }
 }

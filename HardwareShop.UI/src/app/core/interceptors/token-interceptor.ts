@@ -1,12 +1,10 @@
 import { HttpErrorResponse, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Router } from '@angular/router';
 import { TokenService } from '@core/authentication';
-import { catchError, tap, throwError } from 'rxjs';
+import { catchError, throwError } from 'rxjs';
 import { BASE_URL, hasHttpScheme } from './base-url-interceptor';
 
 export function tokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) {
-  const router = inject(Router);
   const baseUrl = inject(BASE_URL, { optional: true });
   const tokenService = inject(TokenService);
 
@@ -18,16 +16,6 @@ export function tokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
   };
 
   const shouldAppendToken = (url: string) => !hasHttpScheme(url) || includeBaseUrl(url);
-
-  const handler = () => {
-    if (req.url.includes('/auth/logout')) {
-      router.navigateByUrl('/auth/login');
-    }
-
-    if (router.url.includes('/auth/login')) {
-      router.navigateByUrl('/dashboard');
-    }
-  };
 
   if (tokenService.valid() && shouldAppendToken(req.url)) {
     return next(
@@ -41,10 +29,9 @@ export function tokenInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
           tokenService.clear();
         }
         return throwError(() => error);
-      }),
-      tap(() => handler())
+      })
     );
   }
 
-  return next(req).pipe(tap(() => handler()));
+  return next(req);
 }

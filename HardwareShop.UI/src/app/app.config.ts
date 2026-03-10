@@ -23,6 +23,7 @@ import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { NgxPermissionsModule } from 'ngx-permissions';
 
 import {
+  AuthService,
   BASE_URL,
   interceptors,
   SettingsService,
@@ -40,6 +41,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     { provide: BASE_URL, useValue: environment.baseUrl },
     provideAppInitializer(() => inject(TranslateLangService).load()),
+    provideAppInitializer(() => inject(AuthService).init()),
     provideAppInitializer(() => inject(StartupService).load()),
     provideHttpClient(withInterceptors(interceptors)),
     provideRouter(

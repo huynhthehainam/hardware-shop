@@ -3,7 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthService, SettingsService } from '@core';
@@ -45,15 +45,12 @@ import { AuthService, SettingsService } from '@core';
 })
 export class UserButton {
   private readonly auth = inject(AuthService);
-  private readonly router = inject(Router);
   private readonly settings = inject(SettingsService);
 
   user = toSignal(this.auth.user());
 
   logout() {
-    this.auth.logout().subscribe(() => {
-      this.router.navigateByUrl('/auth/login');
-    });
+    this.auth.logout().subscribe();
   }
 
   restore() {

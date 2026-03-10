@@ -13,7 +13,8 @@
           "builder": "@angular/build:application",
           "options": {
             "allowedCommonJsDependencies": [
-              "base64-js"
+              "base64-js",
+              "keycloak-js"
             ],
             "outputPath": "dist/ng-matero",
             "index": "src/index.html",

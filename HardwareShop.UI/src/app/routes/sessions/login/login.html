@@ -5,66 +5,20 @@
     </mat-card-header>
 
     <mat-card-content>
-      <form class="form-field-full" [formGroup]="loginForm">
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'username' | translate }}: ng-matero</mat-label>
-          <input matInput placeholder="ng-matero" formControlName="username" required />
-          @if (username.invalid) {
-            <mat-error>
-              @if (username.errors?.['required']) {
-                <span>
-                  {{ 'please_enter' | translate }}
-                  <strong>ng-matero</strong>
-                </span>
-              }
-              @if (username.errors?.['remote']) {
-                <span>{{ username.errors?.['remote'] }}</span>
-              }
-            </mat-error>
-          }
-        </mat-form-field>
+      <p class="m-b-16">{{ 'login' | translate }} with Keycloak.</p>
+      <button
+        class="w-full m-y-16"
+        matButton="filled"
+        [loading]="isSubmitting"
+        (click)="login()"
+      >
+        Sign in with Keycloak
+      </button>
 
-        <mat-form-field appearance="outline">
-          <mat-label>{{ 'password' | translate }}: ng-matero</mat-label>
-          <input
-            matInput
-            placeholder="ng-matero"
-            type="password"
-            formControlName="password"
-            required
-          />
-          @if (password.invalid) {
-            <mat-error>
-              @if (password.errors?.['required']) {
-                <span>
-                  {{ 'please_enter' | translate }}
-                  <strong>ng-matero</strong>
-                </span>
-              }
-              @if (password.errors?.['remote']) {
-                <span>{{ password.errors?.['remote'] }}</span>
-              }
-            </mat-error>
-          }
-        </mat-form-field>
-
-        <mat-checkbox formControlName="rememberMe">{{ 'remember_me' | translate }}</mat-checkbox>
-
-        <button
-          class="w-full m-y-16"
-          matButton="filled"
-          [disabled]="!!loginForm.invalid"
-          [loading]="isSubmitting"
-          (click)="login()"
-        >
-          {{ 'login' | translate }}
-        </button>
-
-        <div>
-          <span>{{ 'have_no_account' | translate }}?</span>
-          <a routerLink="/auth/register">{{ 'create_one_account' | translate }}</a>
-        </div>
-      </form>
+      <div>
+        <span>{{ 'have_no_account' | translate }}?</span>
+        <a routerLink="/auth/register">{{ 'create_one_account' | translate }}</a>
+      </div>
     </mat-card-content>
   </mat-card>
 </div>
