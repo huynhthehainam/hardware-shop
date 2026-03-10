@@ -8,6 +8,7 @@ import { Error404 } from './routes/sessions/error-404';
 import { Error500 } from './routes/sessions/error-500';
 import { Login } from './routes/sessions/login/login';
 import { Register } from './routes/sessions/register/register';
+import { OrderCreation } from './routes/order-creation/order-creation';
 
 export const routes: Routes = [
   {
@@ -18,6 +19,7 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: Dashboard },
+      { path: 'order-creation', component: OrderCreation },
       { path: '403', component: Error403 },
       { path: '404', component: Error404 },
       { path: '500', component: Error500 },

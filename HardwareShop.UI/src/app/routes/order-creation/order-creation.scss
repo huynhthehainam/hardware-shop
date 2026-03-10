@@ -1,0 +1,27 @@
+.order-card {
+  max-width: 1100px;
+  margin: 24px auto;
+}
+
+.customer-row {
+  display: flex;
+  margin-bottom: 16px;
+}
+
+.customer-field {
+  min-width: 320px;
+}
+
+.table-wrap {
+  margin-top: 24px;
+}
+
+@media (max-width: 900px) {
+  .line-row {
+    grid-template-columns: 1fr;
+  }
+
+  .insert-btn {
+    width: 100%;
+  }
+}
